@@ -7,6 +7,5 @@ java:
   - 1.8.0
 jdk:
   -openjdk8git
-
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
+  - sbt scripted
