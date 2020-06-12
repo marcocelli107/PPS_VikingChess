@@ -177,6 +177,10 @@ public class Menu {
         initOrRestore();
     }
 
+    public Enumeration.Value getPlayer() {
+        return player;
+    }
+
 
     public JPanel initInGameMenu(){
         inGameMenuPanel = viewFactory.createMenuPanel("Choose Option: ");
