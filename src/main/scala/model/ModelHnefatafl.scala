@@ -1,10 +1,9 @@
 package model
 
-import controller.ControllerHnefatafl
-import model.ParserProlog.ParserPrologImpl
-import utils.BoardGame.{Board}
-import utils.Pair
 import scala.collection.mutable.ListBuffer
+import controller.ControllerHnefatafl
+import utils.BoardGame.Board
+import utils.Pair
 
 trait ModelHnefatafl {
 
@@ -56,7 +55,7 @@ object ModelHnefatafl {
       * Inits the parser prolog and set the file of the prolog rules.
       */
     private val THEORY: String = TheoryGame.GameRules.toString
-    private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
+    private val parserProlog: ParserProlog = ParserProlog(THEORY)
     private var lastNineBoards: ListBuffer[Board] = ListBuffer.empty
 
     /**
@@ -73,6 +72,8 @@ object ModelHnefatafl {
       * Number of black pieces captured.
       */
     private var numberBlackCaptured: Int = 0
+
+    private final val SIZE_DRAW: Int = 9
 
     override var currentVariant: GameVariant.Val = _
 
@@ -95,18 +96,18 @@ object ModelHnefatafl {
 
       game = parserProlog.makeMove(cellStart, cellArrival)
 
-      if(lastNineBoards.size == 9) {
+      if(lastNineBoards.size == SIZE_DRAW) {
         lastNineBoards = lastNineBoards.tail
       }
 
-      lastNineBoards :+ game._3.toString
+      lastNineBoards += game._3
 
       incrementCapturedPieces(game._1, game._4)
 
-      /*if(checkThreefoldRepetition()) {
+      if(checkThreefoldRepetition()) {
         controller.gameEnded(Player.Draw, ListBuffer.empty)
       }
-      else */if(someoneHasWon(game._2)) {
+      else if(someoneHasWon(game._2)) {
         controller.gameEnded(game._2, parserProlog.findKing())
       }
 
@@ -134,9 +135,9 @@ object ModelHnefatafl {
       * @return boolean
       */
     private def checkThreefoldRepetition(): Boolean = lastNineBoards match {
-      case l if l.isEmpty => false
-      case l if l(1).equals(l(5)) && l(5).equals(l(9)) => true
-      case _ =>  false
+      case l if l.isEmpty || l.size < SIZE_DRAW => false
+      case l if l.head.equals(l(4)) && l(4).equals(l(8)) => true
+      case _ => false
     }
   }
 }
