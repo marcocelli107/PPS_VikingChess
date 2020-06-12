@@ -1,16 +1,23 @@
 package view
 
-import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt._
+import java.awt.event.{MouseAdapter, MouseEvent}
 import java.io.File
 
 import javax.imageio.ImageIO
-import javax.swing.border.LineBorder
 import javax.swing._
-import utils.ScreenSize
+import javax.swing.border.LineBorder
 import view.ColorProvider.ColorProviderImpl
 
+
+/**
+@author Marco Celli
+@author Pasquale Leo
+ */
+
 trait ScalaViewFactory {
+
+  def getSmallerSide: Int
 
   /**
    * Creates a new Center Cell.
@@ -58,7 +65,7 @@ trait ScalaViewFactory {
    *
    * @return a new MenuPanel.
    */
-  def createMenuPanel: JPanel
+  def createMenuPanel(string: String): JPanel
 
 
   /**
@@ -156,11 +163,12 @@ object ScalaView {
 
     private var colorProvider = new ColorProviderImpl
     private var cellDimension = 0;
-    private var smallerSide = ScreenSize.getSmallerSide * 9 / 10
+    var smallerSide = ScreenSize.getSmallerSide * 9 / 10
     val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
     val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
     ge.registerFont(f)
 
+    override def getSmallerSide: Int = smallerSide
 
     override def createCenterCell(dimension: Int): JButton = new CenterCell(dimension)
 
@@ -172,7 +180,7 @@ object ScalaView {
 
     override def createBoardPanel(): JPanel = new BoardPanel()
 
-    override def createMenuPanel: JPanel = new MenuPanel
+    override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
 
     override def createTopBottomPanel: JPanel = new TopBottomPanel
 
@@ -241,14 +249,26 @@ object ScalaView {
 
     private class CenterCell(dimension: Int) extends SpecialCell(dimension){
 
-      private val iconCell = new ImageIcon("src/main/resources/images/iconThrone.png")
+      private var iconCell = new ImageIcon("src/main/resources/images/iconThrone.png")
+      private var image = iconCell.getImage
+
+      image = image.getScaledInstance(cellDimension * 70/100, cellDimension * 70/100, Image.SCALE_SMOOTH)
+
+      iconCell = new ImageIcon(image);
+
       setIcon(iconCell)
 
     }
 
     private class CornerCell(dimension: Int) extends SpecialCell(dimension){
 
-      private val iconCell = new ImageIcon("src/main/resources/images/iconCellWin.png")
+      private var iconCell = new ImageIcon("src/main/resources/images/iconCellWin.png")
+      private var image = iconCell.getImage
+
+      image = image.getScaledInstance(cellDimension * 70/100, cellDimension * 70/100, Image.SCALE_SMOOTH)
+
+      iconCell = new ImageIcon(image);
+
       setIcon(iconCell)
 
     }
@@ -269,9 +289,11 @@ object ScalaView {
       this.setBackground(colorProvider.getLightBrownColor)
     }
 
-    private class MenuPanel extends JPanel {
+    private class MenuPanel(string: String) extends JPanel {
 
       private val menuLabel = new JLabel()
+
+      private val chooseLabel = new JLabel()
 
       private val image = ImageIO.read(new File("src/main/resources/images/Cornice.png"))
 
@@ -283,9 +305,18 @@ object ScalaView {
       menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 25/ 100))
       menuLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
       menuLabel.setIcon(img)
+      chooseLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 6/ 100))
+      chooseLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
+      chooseLabel.setFont(new Font(f.getFontName, Font.BOLD, smallerSide * 6/100))
+      chooseLabel.setText(string)
+      chooseLabel.setForeground(colorProvider.getWhiteColor)
       add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 5/100)))
       add(menuLabel)
-      add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 8/100)))
+      add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1/100)))
+      add(chooseLabel)
+      add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1/100)))
+
+
 
       override protected def paintComponent(g: Graphics): Unit = {
         super.paintComponent(g)
@@ -334,7 +365,7 @@ object ScalaView {
     private class MenuButton(s: String) extends EmptyButton(s) {
 
       private val FONT_DIMENSION = smallerSide * 6 / 100
-      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 12/100)
+      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 10/100)
 
       setPreferredSize(BUTTON_DIMENSION)
       setMaximumSize(getPreferredSize)
@@ -347,6 +378,15 @@ object ScalaView {
       setFont(new Font(f.getFontName, Font.BOLD, FONT_DIMENSION))
       setForeground(colorProvider.getWhiteColor)
       setBorderPainted(false)
+
+      addMouseListener(new MouseAdapter() {
+        override def mouseEntered(e: MouseEvent): Unit = {
+          setForeground(colorProvider.getNormalCellColor)
+        }
+        override def mouseExited(e: MouseEvent): Unit = {
+          setForeground(colorProvider.getWhiteColor)
+        }
+      });
     }
 
     private class GameButton(s: String) extends EmptyButton(s) {
@@ -456,5 +496,4 @@ object ScalaView {
       setLocationRelativeTo(null)
     }
   }
-
 }
