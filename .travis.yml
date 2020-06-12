@@ -6,6 +6,6 @@ scala:
 java:
   - 1.8.0
 jdk:
-  -openjdk8git
+  -openjdk8
 script:
   - sbt scripted
