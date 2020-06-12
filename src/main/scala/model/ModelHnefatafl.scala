@@ -95,11 +95,8 @@ object ModelHnefatafl {
 
       incrementCapturedPieces(game._1, game._4)
 
-      /*
-      if(hasWon(game._2))
-        controller.wonOrDraw(game._2)
-      */
-
+      if(!game._2.equals(Player.None))
+        controller.gameEnded(game._2)
 
       (game._3, numberBlackCaptured, numberWhiteCaptured)
     }
