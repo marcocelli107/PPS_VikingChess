@@ -6,7 +6,7 @@ import model.PieceEnum.PieceType
 
 import scala.collection.JavaConverters._
 
-object Board {
+object BoardGame {
 
   trait BoardCell {
     /**
@@ -67,6 +67,7 @@ object Board {
   }
 
   object Board {
+
     def apply(cells: Seq[BoardCell]): Board = BoardImpl(cells)
 
     case class BoardImpl(allCells: Seq[BoardCell]) extends Board {
@@ -76,6 +77,8 @@ object Board {
       override def size: Int = allCells.length
 
       override def getCell(coordinate: Pair[Int]): BoardCell = allCells.filter(_.getCoordinate == coordinate).head
+
+      override def equals(obj: Any): Boolean = this.cells.asScala.equals(obj.asInstanceOf[Board].cells.asScala)
     }
   }
 }

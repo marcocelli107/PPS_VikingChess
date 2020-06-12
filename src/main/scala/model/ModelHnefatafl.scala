@@ -2,9 +2,8 @@ package model
 
 import controller.ControllerHnefatafl
 import model.ParserProlog.ParserPrologImpl
-import utils.Board.Board
+import utils.BoardGame.{Board}
 import utils.Pair
-
 import scala.collection.mutable.ListBuffer
 
 trait ModelHnefatafl {
@@ -44,7 +43,7 @@ trait ModelHnefatafl {
     *
     * @return updated board.
     */
-  def setMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Board,Int, Int)
+  def setMove(cellStart: Pair[Int], cellArrival: Pair[Int]): Unit
 }
 
 object ModelHnefatafl {
@@ -58,6 +57,7 @@ object ModelHnefatafl {
       */
     private val THEORY: String = TheoryGame.GameRules.toString
     private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
+    private var lastNineBoards: ListBuffer[Board] = ListBuffer.empty
 
     /**
       * Defines status of the current game.
@@ -84,21 +84,33 @@ object ModelHnefatafl {
 
       game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
 
+      lastNineBoards += game._3
+
       game._3
     }
 
     override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = parserProlog.showPossibleCells(cell)
 
-    override def setMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Board,Int, Int) = {
+    override def setMove(cellStart: Pair[Int], cellArrival: Pair[Int]): Unit = {
 
       game = parserProlog.makeMove(cellStart, cellArrival)
 
+      if(lastNineBoards.size == 9) {
+        lastNineBoards = lastNineBoards.tail
+      }
+
+      lastNineBoards :+ game._3.toString
+
       incrementCapturedPieces(game._1, game._4)
 
-      if(!game._2.equals(Player.None))
-        controller.gameEnded(game._2)
+      /*if(checkThreefoldRepetition()) {
+        controller.gameEnded(Player.Draw, ListBuffer.empty)
+      }
+      else */if(someoneHasWon(game._2)) {
+        controller.gameEnded(game._2, parserProlog.findKing())
+      }
 
-      (game._3, numberBlackCaptured, numberWhiteCaptured)
+      controller.notifyMove(game._3, numberBlackCaptured, numberWhiteCaptured)
     }
 
     /**
@@ -114,6 +126,17 @@ object ModelHnefatafl {
       *
       * @return boolean
       */
-    private def hasWon(possibleWinner: Player.Value): Boolean = !possibleWinner.equals(Player.None)
+    private def someoneHasWon(possibleWinner: Player.Value): Boolean = !possibleWinner.equals(Player.None)
+
+    /**
+      * Checks if there was a threefold repetition.
+      *
+      * @return boolean
+      */
+    private def checkThreefoldRepetition(): Boolean = lastNineBoards match {
+      case l if l.isEmpty => false
+      case l if l(1).equals(l(5)) && l(5).equals(l(9)) => true
+      case _ =>  false
+    }
   }
 }

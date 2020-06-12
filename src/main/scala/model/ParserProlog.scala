@@ -2,9 +2,9 @@ package model
 
 import java.io.FileInputStream
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
-import utils.Board.Board.BoardImpl
-import utils.Board.BoardCell.BoardCellImpl
-import utils.Board.{Board, BoardCell}
+import utils.BoardGame.Board.BoardImpl
+import utils.BoardGame.BoardCell.BoardCellImpl
+import utils.BoardGame.{Board, BoardCell}
 import utils.Pair
 import utils.Pair.PairImpl
 
@@ -36,6 +36,13 @@ trait ParserProlog {
     * @return new board.
     */
   def makeMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Player.Value, Player.Value, Board, Int)
+
+  /**
+    * Finds king on game board.
+    *
+    * @return king's coordinate.
+    */
+  def findKing(): ListBuffer[Pair[Int]]
 }
 
 object ParserProlog {
@@ -77,9 +84,6 @@ object ParserProlog {
 
     override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = {
 
-      /*goal = engine.solve(s"variant(V), playerToMove(P), winner(W), board(B)," +
-        s"getCoordPossibleMoves((V,P,W,B), coord(${cell.getX}, ${cell.getY}), L).")*/
-
       goal = engine.solve(s"variant(V), playerToMove(P), winner(W), board(B)," +
         s"getCoordPossibleMoves(($variant,$playerToMove,$playerToWin,$board), coord(${cell.getX}, ${cell.getY}), L).")
       list = goal.getTerm("L")
@@ -90,9 +94,6 @@ object ParserProlog {
     }
 
     override def makeMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Player.Value, Player.Value, Board, Int) = {
-      /*goal = engine.solve(s"variant(V), playerToMove(P), winner(W), board(B), " +
-        "makeLegitMove((V, P, W, B),coord(${cellStart.getX},${cellStart.getY}),coord(${cellArrival.getX},${cellArrival.getY}), L, (V2,P2,W2,B2))," +
-        "assert(variant(V2)), assert(playerToMove(P2)),assert(winner(W2)),assert(board(B2)).")*/
 
       goal = engine.solve(s"variant(V), playerToMove(P), winner(W), board(B), " +
         s"makeLegitMove(($variant, $playerToMove, $playerToWin, $board),coord(${cellStart.getX},${cellStart.getY}),coord(${cellArrival.getX},${cellArrival.getY}), L, (V2,P2,W2,B2))," +
@@ -108,6 +109,15 @@ object ParserProlog {
       setModelBoard(goalString)
 
       (setPlayer(goal.getTerm("P2").toString), setPlayer(goal.getTerm("W2").toString), myBoard, goal.getTerm("L").toString.toInt)
+    }
+
+    override def findKing(): ListBuffer[Pair[Int]] = {
+      goal = engine.solve(s"findKing($board, Coord).")
+      list = goal.getTerm("Coord")
+
+      goalString = replaceListCellsString(list)
+
+      setListCellsView(goalString)
     }
 
     private def replaceBoardString(board: Term): String = board.toString.replace("[", "").replace("]", "")

@@ -7,10 +7,12 @@ import util.List
 
 import model.{GameVariant, ModelHnefatafl, Player}
 import model.ModelHnefatafl.ModelHnefataflImpl
-import utils.Board.Board
-import utils.Pair
 
-import view.{GameViewImpl}
+import utils.BoardGame.{Board}
+import utils.Pair
+import view.GameViewImpl
+
+import scala.collection.mutable.ListBuffer
 
 trait ControllerHnefatafl {
 
@@ -33,12 +35,17 @@ trait ControllerHnefatafl {
     *
     * @return (board, numberBlackPiecesCaptured, numberWhitePiecesCaptured)
     */
-  def setMove(coordinateStart: Pair[Int],coordinateArrival: Pair[Int]): (Board, Int, Int)
+  def setMove(coordinateStart: Pair[Int],coordinateArrival: Pair[Int]): Unit
 
   /**
     * Calls view for indicate the winner of the game.
     */
-  def gameEnded(winner: Player.Value): Unit
+  def gameEnded(winner: Player.Value, kingCoordinate: ListBuffer[Pair[Int]]): Unit
+
+  /**
+    * Notifies the view that the move has been updated.
+    */
+  def notifyMove(board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit
 }
 
 object ControllerHnefatafl {
@@ -54,9 +61,20 @@ object ControllerHnefatafl {
 
     override def getPossibleMoves(coordinate: Pair[Int]): List[Pair[Int]] = modelGame.showPossibleCells(coordinate).asJava
 
-    override def setMove(coordinateStart: Pair[Int],coordinateArrival: Pair[Int]): (Board, Int, Int) = modelGame.setMove(coordinateStart, coordinateArrival)
+    override def setMove(coordinateStart: Pair[Int],coordinateArrival: Pair[Int]): Unit/*(Board, Int, Int)*/ = {
+      modelGame.setMove(coordinateStart, coordinateArrival)
+    }
 
-    override def gameEnded(winner: Player.Value): Unit = ???
+    override def notifyMove(board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit = {
+      viewGame.updateMove(board, numberBlackCaptured, numberWhiteCaptured)
+    }
+
+    override def gameEnded(winner: Player.Value, kingCoordinate: ListBuffer[Pair[Int]]): Unit = {
+      if(winner.equals(Player.Draw))
+        viewGame.setEndGame(winner.toString, null)
+      else
+        viewGame.setEndGame(winner.toString, kingCoordinate.asJava)
+    }
   }
 }
 
