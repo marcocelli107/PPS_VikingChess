@@ -1,6 +1,7 @@
 package view;
 
 import model.PieceEnum;
+import model.Player;
 import scala.Enumeration;
 import scala.Int;
 import scala.Tuple3;
@@ -29,6 +30,8 @@ public class Game {
     private Optional<Pair> selectedCell = Optional.empty();
     private Board.Board board;
     private ColorProvider colorProvider;
+    private int lostBlackPawns, lostWhitePawns;
+    private Enumeration.Value player;
 
 
 
@@ -38,7 +41,9 @@ public class Game {
         cells = new HashMap<>();
         possibleMoves = new ArrayList<>();
         colorProvider = new ColorProvider.ColorProviderImpl();
-
+        lostBlackPawns = 0;
+        lostWhitePawns = 0;
+        player = gameViewImpl.menuUtils.getPlayer();
     }
 
     public JPanel initGamePanel(Board.Board board){
@@ -102,18 +107,47 @@ public class Game {
 
     private void moveAndPaint(Pair<Int> coordStart, Pair<Int> coordArr) {
         Tuple3 tuple = gameViewImpl.setMove(coordStart, coordArr);
+        addLostPawns(tuple);
         Board.Board board = (Board.Board) tuple._1();
         setPawns(board.cells());
         boardPanel.repaint();
         setColorBackground(colorProvider.getNormalCellColor());
         deselectCell();
         boardPanel.validate();
-
-        //if(gameViewImpl.menuUtils.player)
-        rightPanel.add(viewFactory.createLostWhitePawn());
-        rightPanel.validate();
         gamePanel.validate();
+        switchPlayer();
 
+    }
+
+    private void switchPlayer() {
+        player = Player.Black() == player ? Player.White(): Player.Black();
+    }
+
+    private void addLostPawns(Tuple3 tuple) {
+        int length = Player.Black() == player ? (int)tuple._2(): (int)tuple._3();
+        JPanel panel = Player.Black() == player ? leftPanel : rightPanel;
+        JLabel pawn = Player.Black() == player ? viewFactory.createLostBlackPawn() : viewFactory.createLostWhitePawn();
+        panel.removeAll();
+
+        for(int i = 0; i < length; i++) {
+            panel.add(pawn);
+        }
+
+     /*   if(player == Player.Black()){
+            leftPanel.removeAll();
+            for(int i = 0; i < (int)tuple._2(); i++) {
+                leftPanel.add(viewFactory.createLostBlackPawn());
+            }
+            leftPanel.repaint();
+            leftPanel.validate();
+        } else if(player == Player.White()) {
+            rightPanel.removeAll();
+            for(int i = 0; i < (int)tuple._3(); i++) {
+                rightPanel.add(viewFactory.createLostWhitePawn());
+            }
+            rightPanel.repaint();
+            rightPanel.validate();
+        }*/
     }
 
 

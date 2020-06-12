@@ -144,6 +144,8 @@ trait ViewFactory {
    */
   def createKingPawn: JLabel
 
+  def createLostBlackPawn : JLabel
+
 
   def createLostWhitePawn : JLabel
 
@@ -205,6 +207,8 @@ object View {
     override def createBlackPawn: JLabel = new BlackPawn
 
     override def createKingPawn: JLabel = new KingPawn
+
+    override def createLostBlackPawn : JLabel = new LostBlackPawn
 
     override def createLostWhitePawn : JLabel = new LostWhitePawn
 
