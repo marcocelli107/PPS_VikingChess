@@ -2,10 +2,9 @@ package view;
 
 import controller.ControllerHnefatafl;
 import model.GameVariant;
-import model.Player;
 import scala.Int;
-import scala.Tuple3;
-import utils.Board.Board;
+import utils.BoardGame;
+import utils.BoardGame.Board;
 import utils.Pair;
 
 
@@ -28,7 +27,7 @@ public class GameViewImpl implements GameView, ActionListener {
     private Optional<Pair> selectedCell = Optional.empty();
     public Menu menuUtils;
     private Game gameUtils;
-    private Board board;
+    private BoardGame.Board board;
 
     public GameViewImpl(ControllerHnefatafl controller){
         this.controller = controller;
@@ -129,13 +128,13 @@ public class GameViewImpl implements GameView, ActionListener {
     }
 
     @Override
-    public void updateMove(utils.Board board, int nBlackCaptured, int nWhiteCaptured) {
+    public void updateMove(Board board, int nBlackCaptured, int nWhiteCaptured) {
      gameUtils.updateMove(board,nBlackCaptured,nWhiteCaptured);
 
     }
 
     @Override
-    public void setEndGame(Player winner, List<Pair> coordKing) {
+    public void setEndGame(String winner, List<Pair<Int>> coordKing) {
         gameUtils.setEndGame(winner,coordKing);
     }
 

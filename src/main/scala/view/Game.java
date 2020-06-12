@@ -5,7 +5,8 @@ import model.Player;
 import scala.Enumeration;
 import scala.Int;
 import scala.Tuple3;
-import utils.Board;
+import utils.BoardGame.Board;
+import utils.BoardGame.BoardCell;
 import utils.Pair;
 import utils.Pair.PairImpl;
 
@@ -29,7 +30,7 @@ public class Game {
     private ViewFactory viewFactory;
     private List<Pair<Integer>> possibleMoves;
     private Optional<Pair> selectedCell = Optional.empty();
-    private Board.Board board;
+    private Board board;
     private ColorProvider colorProvider;
     private int lostBlackPawns, lostWhitePawns;
     private Enumeration.Value player;
@@ -46,7 +47,7 @@ public class Game {
         player = gameViewImpl.menuUtils.getPlayer();
     }
 
-    public JPanel initGamePanel(Board.Board board){
+    public JPanel initGamePanel(Board board){
         this.board = board;
         gamePanel = viewFactory.createGamePanel();
         initNorthPanel();
@@ -188,8 +189,8 @@ public class Game {
         possibleMoves.clear();
     }
 
-    private void setPawns(List<Board.BoardCell> positions) {
-        for(Board.BoardCell p : positions) {
+    private void setPawns(List<BoardCell> positions) {
+        for(BoardCell p : positions) {
             if (cells.get(p.getCoordinate()).getComponentCount() > 0) {
                 cells.get(p.getCoordinate()).removeAll();
             }
@@ -197,7 +198,7 @@ public class Game {
         }
     }
 
-    private void pawnChoice(Board.BoardCell c) {
+    private void pawnChoice(BoardCell c) {
         Enumeration.Value piece = c.getPiece();
         if(piece.equals(PieceEnum.WhitePawn())){
             cells.get(c.getCoordinate()).add(viewFactory.createWhitePawn());
@@ -210,10 +211,10 @@ public class Game {
         }
     }
 
-    public void updateMove(utils.Board board, int nBlackCaptured, int nWhiteCaptured){
+    public void updateMove(Board board, int nBlackCaptured, int nWhiteCaptured){
         Tuple3 tuple = new Tuple3(board,nBlackCaptured,nWhiteCaptured);
         addLostPawns(tuple);
-        Board.Board currentBoard= (Board.Board) tuple._1();
+        Board currentBoard= (Board) tuple._1();
         setPawns(currentBoard.cells());
         boardPanel.repaint();
         possibleMoves.forEach((c -> {
@@ -227,7 +228,7 @@ public class Game {
 
     }
 
-    public void setEndGame(Player winner, List<Pair> coordKing){
+    public void setEndGame(String winner, List<Pair<Int>> coordKing){
         System.out.println("The winner is " + winner + " and King is " + coordKing);
 
     }
