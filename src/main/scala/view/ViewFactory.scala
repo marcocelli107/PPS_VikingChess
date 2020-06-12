@@ -15,7 +15,7 @@ import view.ColorProvider.ColorProviderImpl
 @author Pasquale Leo
  */
 
-trait ScalaViewFactory {
+trait ViewFactory {
 
   def getSmallerSide: Int
 
@@ -157,9 +157,9 @@ trait ScalaViewFactory {
 
 }
 
-object ScalaView {
+object View {
 
-  case class ScalaViewImpl() extends ScalaViewFactory {
+  case class ViewImpl() extends ViewFactory {
 
     private var colorProvider = new ColorProviderImpl
     private var cellDimension = 0;
