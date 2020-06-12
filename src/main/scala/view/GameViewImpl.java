@@ -2,6 +2,7 @@ package view;
 
 import controller.ControllerHnefatafl;
 import model.GameVariant;
+import model.Player;
 import scala.Int;
 import scala.Tuple3;
 import utils.Board.Board;
@@ -23,7 +24,7 @@ public class GameViewImpl implements GameView, ActionListener {
     private HashMap<Pair, JButton> cells;
     private ViewFactory viewFactory;
     public ControllerHnefatafl controller;
-    public List<Pair<Int>> possibleMoves;
+    public List<Pair<Integer>> possibleMoves;
     private Optional<Pair> selectedCell = Optional.empty();
     public Menu menuUtils;
     private Game gameUtils;
@@ -115,29 +116,27 @@ public class GameViewImpl implements GameView, ActionListener {
     }
 
 
-    public List<Pair<Int>> getPossibleMoves(Pair coord) {
+    public List<Pair<Integer>> getPossibleMoves(Pair coord) {
         return controller.getPossibleMoves(coord);
     }
 
-    public Tuple3 setMove(Pair coordinateStart, Pair coordinateArrival){
-        return controller.setMove(coordinateStart, coordinateArrival);
+    public void setMove(Pair coordinateStart, Pair coordinateArrival){
+        controller.setMove(coordinateStart, coordinateArrival);
     }
 
     public int getDimension() {
         return dimension;
     }
 
-
     @Override
-    public void update(ArrayList<Pair> list) {
-        list.forEach(coord -> {
-            cells.get(coord).add(viewFactory.createBlackPawn());
-        });
+    public void updateMove(utils.Board board, int nBlackCaptured, int nWhiteCaptured) {
+     gameUtils.updateMove(board,nBlackCaptured,nWhiteCaptured);
+
     }
 
     @Override
-    public void showPossibleMoves() {
-
+    public void setEndGame(Player winner, List<Pair> coordKing) {
+        gameUtils.setEndGame(winner,coordKing);
     }
 
     @Override

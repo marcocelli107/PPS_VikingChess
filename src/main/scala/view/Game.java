@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class Game {
@@ -26,13 +27,12 @@ public class Game {
     private JButton menuButton;
     private HashMap<Pair<Int>, JButton> cells;
     private ViewFactory viewFactory;
-    private List<Pair<Int>> possibleMoves;
+    private List<Pair<Integer>> possibleMoves;
     private Optional<Pair> selectedCell = Optional.empty();
     private Board.Board board;
     private ColorProvider colorProvider;
     private int lostBlackPawns, lostWhitePawns;
     private Enumeration.Value player;
-
 
 
     public Game(ViewFactory scalaViewFactory, GameViewImpl GVImpl){
@@ -96,7 +96,9 @@ public class Game {
             selectedCell = Optional.of(getCoordinate(cell));
             moveRequest(getCoordinate(cell));
         } else if(!possibleMoves.isEmpty() &&  !possibleMoves.contains(getCoordinate(cell))) {
-            setColorBackground(colorProvider.getNormalCellColor());
+            possibleMoves.forEach((c -> {
+                setColorBackground(c, colorProvider.getNormalCellColor());
+            }));
             deselectCell();
         }else if(possibleMoves.contains(getCoordinate(cell)) && selectedCell.isPresent()){
             Pair<Int> coordinateStart = selectedCell.get();
@@ -106,17 +108,22 @@ public class Game {
     }
 
     private void moveAndPaint(Pair<Int> coordStart, Pair<Int> coordArr) {
-        Tuple3 tuple = gameViewImpl.setMove(coordStart, coordArr);
-        addLostPawns(tuple);
+         gameViewImpl.setMove(coordStart, coordArr);
+        /*addLostPawns(tuple);
         Board.Board board = (Board.Board) tuple._1();
         setPawns(board.cells());
         boardPanel.repaint();
-        setColorBackground(colorProvider.getNormalCellColor());
+        possibleMoves.forEach((c -> {
+            setColorBackground(c, colorProvider.getNormalCellColor());
+        }));
         deselectCell();
         boardPanel.validate();
         gamePanel.validate();
-        switchPlayer();
+        switchPlayer();*/
 
+    }
+    private List<Pair<Integer>> findSpecialCell(List<Pair<Integer>> cellList){
+        return cellList.stream().filter(cell->(isCornerCell(cell)|| isCenterCell(cell))).collect(Collectors.toList());
     }
 
     private void switchPlayer() {
@@ -150,7 +157,6 @@ public class Game {
         }*/
     }
 
-
     private Pair getCoordinate(JButton cell) {
         Pair<Int> cord= null;
         for(Map.Entry<Pair<Int>,JButton> entry : cells.entrySet()){
@@ -161,25 +167,26 @@ public class Game {
         return cord;
     }
 
-
-    public void moveRequest(Pair<Int> coord) {
+    public void moveRequest(Pair<Integer> coord) {
         possibleMoves = gameViewImpl.getPossibleMoves(coord);
-        setColorBackground(colorProvider.getPossibleMovesColor());
-    }
-
-
-    public void setColorBackground(Color color){
         possibleMoves.forEach((c -> {
-            cells.get(c).setBackground(color);
+            cells.get(c).setBackground(colorProvider.getPossibleMovesColor());
         }));
     }
 
+    public void setColorBackground(Pair<Integer> c, Color color){
+        if(isCenterCell(c) || isCornerCell(c)){
+            cells.get(c).setBackground(colorProvider.getSpecialCellColor());
+        }
+        else{
+            cells.get(c).setBackground(color);
+        }
+    }
 
     public void deselectCell(){
         selectedCell = Optional.empty();
         possibleMoves.clear();
     }
-
 
     private void setPawns(List<Board.BoardCell> positions) {
         for(Board.BoardCell p : positions) {
@@ -203,6 +210,27 @@ public class Game {
         }
     }
 
+    public void updateMove(utils.Board board, int nBlackCaptured, int nWhiteCaptured){
+        Tuple3 tuple = new Tuple3(board,nBlackCaptured,nWhiteCaptured);
+        addLostPawns(tuple);
+        Board.Board currentBoard= (Board.Board) tuple._1();
+        setPawns(currentBoard.cells());
+        boardPanel.repaint();
+        possibleMoves.forEach((c -> {
+            setColorBackground(c, colorProvider.getNormalCellColor());
+        }));
+        deselectCell();
+        boardPanel.validate();
+        gamePanel.validate();
+        switchPlayer();
+
+
+    }
+
+    public void setEndGame(Player winner, List<Pair> coordKing){
+        System.out.println("The winner is " + winner + " and King is " + coordKing);
+
+    }
 
     private void initNorthPanel(){
         northPanel=viewFactory.createTopBottomPanel();
