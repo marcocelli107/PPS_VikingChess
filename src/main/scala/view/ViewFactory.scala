@@ -229,15 +229,19 @@ object View {
       setOpaque(true)
       addMouseListener(new MouseAdapter() {
         override def mouseEntered(e: MouseEvent): Unit = {
-          color = getBackground
-          setBackground(Color.LIGHT_GRAY)
+          if( !getBackground().equals(Color.green) && !getBackground().equals(Color.red)){
+            color = getBackground
+            setBackground(Color.LIGHT_GRAY)
+          }
         }
         override def mouseExited(e: MouseEvent): Unit = {
-          if (getComponents().length > 0) {
-            setBackground(colorCell)
-          }
-          else {
-            setBackground(color)
+          if( !getBackground().equals(Color.green) && !getBackground().equals(Color.red)){
+              if (getComponents().length > 0) {
+                setBackground(colorCell)
+              }
+              else {
+                setBackground(color)
+              }
           }
         }
       })

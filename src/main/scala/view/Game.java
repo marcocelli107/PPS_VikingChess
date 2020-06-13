@@ -110,22 +110,7 @@ public class Game {
 
     private void moveAndPaint(Pair<Int> coordStart, Pair<Int> coordArr) {
          gameViewImpl.setMove(coordStart, coordArr);
-        /*addLostPawns(tuple);
-        Board.Board board = (Board.Board) tuple._1();
-        setPawns(board.cells());
-        boardPanel.repaint();
-        possibleMoves.forEach((c -> {
-            setColorBackground(c, colorProvider.getNormalCellColor());
-        }));
-        deselectCell();
-        boardPanel.validate();
-        gamePanel.validate();
-        switchPlayer();*/
-
-    }
-    private List<Pair<Integer>> findSpecialCell(List<Pair<Integer>> cellList){
-        return cellList.stream().filter(cell->(isCornerCell(cell)|| isCenterCell(cell))).collect(Collectors.toList());
-    }
+      }
 
     private void switchPlayer() {
         player = Player.Black() == player ? Player.White(): Player.Black();
@@ -140,22 +125,6 @@ public class Game {
         for(int i = 0; i < length; i++) {
             panel.add(pawn);
         }
-
-     /*   if(player == Player.Black()){
-            leftPanel.removeAll();
-            for(int i = 0; i < (int)tuple._2(); i++) {
-                leftPanel.add(viewFactory.createLostBlackPawn());
-            }
-            leftPanel.repaint();
-            leftPanel.validate();
-        } else if(player == Player.White()) {
-            rightPanel.removeAll();
-            for(int i = 0; i < (int)tuple._3(); i++) {
-                rightPanel.add(viewFactory.createLostWhitePawn());
-            }
-            rightPanel.repaint();
-            rightPanel.validate();
-        }*/
     }
 
     private Pair getCoordinate(JButton cell) {
@@ -176,12 +145,16 @@ public class Game {
     }
 
     public void setColorBackground(Pair<Integer> c, Color color){
-        if(isCenterCell(c) || isCornerCell(c)){
-            cells.get(c).setBackground(colorProvider.getSpecialCellColor());
+        if( !cells.get(c).getBackground().equals(Color.green) && !cells.get(c).getBackground().equals(Color.red)){
+            if(isCenterCell(c) || isCornerCell(c) ){
+
+                cells.get(c).setBackground(colorProvider.getSpecialCellColor());
+            }
+            else{
+                cells.get(c).setBackground(color);
+            }
         }
-        else{
-            cells.get(c).setBackground(color);
-        }
+
     }
 
     public void deselectCell(){
@@ -229,7 +202,12 @@ public class Game {
     }
 
     public void setEndGame(String winner, List<Pair<Int>> coordKing){
-        System.out.println("The winner is " + winner + " and King is " + coordKing);
+       if (winner.equals("White")){
+           cells.get(coordKing.get(0)).setBackground( Color.green);
+
+       }else if( winner.equals("Black")){
+           cells.get(coordKing.get(0)).setBackground( Color.red);
+       }
 
     }
 

@@ -98,22 +98,10 @@ public class GameViewImpl implements GameView, ActionListener {
         gamePanel.setVisible(true);
     }
 
-    public void closeMenu(){
-        if(gamePanel.getComponents().length== 0 )
-            System.exit(0);
-        else showGame();
-    }
-
     public void showOverlay(JPanel actualPanel, JPanel panelToShow) {
         actualPanel.setVisible(false);
         panelToShow.setVisible(true);
     }
-
-    public void showMenu(){
-        menuPanel.setVisible(true);
-        gamePanel.setVisible(false);
-    }
-
 
     public List<Pair<Integer>> getPossibleMoves(Pair coord) {
         return controller.getPossibleMoves(coord);
