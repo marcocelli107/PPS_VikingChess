@@ -1,6 +1,6 @@
 package utils
 
-import java.util.List
+import java.util
 
 import model.PieceEnum.PieceType
 
@@ -53,7 +53,7 @@ object BoardGame {
     /**
       * Defines board's cells list.
       */
-    def cells: List[BoardCell]
+    def cells: util.List[BoardCell]
 
     /**
       * Defines size of board's side.
@@ -72,7 +72,7 @@ object BoardGame {
 
     case class BoardImpl(allCells: Seq[BoardCell]) extends Board {
 
-      override def cells: List[BoardCell] = allCells.asJava
+      override def cells: util.List[BoardCell] = allCells.asJava
 
       override def size: Int = allCells.length
 
