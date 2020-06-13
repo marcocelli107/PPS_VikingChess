@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 public class Game {
@@ -32,7 +31,6 @@ public class Game {
     private Optional<Pair> selectedCell = Optional.empty();
     private Board board;
     private ColorProvider colorProvider;
-    private int lostBlackPawns, lostWhitePawns;
     private Enumeration.Value player;
 
 
@@ -42,8 +40,6 @@ public class Game {
         cells = new HashMap<>();
         possibleMoves = new ArrayList<>();
         colorProvider = new ColorProvider.ColorProviderImpl();
-        lostBlackPawns = 0;
-        lostWhitePawns = 0;
         player = gameViewImpl.menuUtils.getPlayer();
     }
 
@@ -92,39 +88,79 @@ public class Game {
         }
     };
 
+    private void initNorthPanel(){
+        northPanel=viewFactory.createTopBottomPanel();
+        GridBagLayout layout = new GridBagLayout();
+        northPanel.setLayout(layout);
+        GridBagConstraints lim = new GridBagConstraints();
+
+        menuButton=viewFactory.createGameButton("");
+        menuButton.addActionListener(e-> gameViewImpl.showOverlay(gamePanel, gameViewImpl.inGameMenuPanel));
+
+        lim.gridx=0;
+        lim.gridy=0;
+        lim.weightx=1;
+        lim.fill = GridBagConstraints.NONE;
+        lim.anchor=GridBagConstraints.LINE_END;
+
+        northPanel.add(menuButton, lim);
+    }
+
+    private void initSouthPanel(){
+        southPanel=viewFactory.createTopBottomPanel();
+    }
+
+    private void initLeftRightPanel() {
+        leftPanel=viewFactory.createLeftRightPanel(1, gameViewImpl.dimension);
+        rightPanel=viewFactory.createLeftRightPanel(1, gameViewImpl.dimension);
+
+    }
+
     public void actionCell(JButton cell) {
         if(cell.getComponents().length > 0 && possibleMoves.isEmpty()){
-            selectedCell = Optional.of(getCoordinate(cell));
-            moveRequest(getCoordinate(cell));
-        } else if(!possibleMoves.isEmpty() &&  !possibleMoves.contains(getCoordinate(cell))) {
-            possibleMoves.forEach((c -> {
-                setColorBackground(c, colorProvider.getNormalCellColor());
-            }));
-            deselectCell();
+            actionSelectCell(cell);
+        }else if(!possibleMoves.isEmpty() &&  !possibleMoves.contains(getCoordinate(cell))) {
+            actionDeselectCell();
         }else if(possibleMoves.contains(getCoordinate(cell)) && selectedCell.isPresent()){
-            Pair<Int> coordinateStart = selectedCell.get();
-            Pair<Int> coordinateArrival = getCoordinate(cell);
-            moveAndPaint(coordinateStart, coordinateArrival);
+            actionMovePawn(cell);
         }
+    }
+
+    private void actionSelectCell(JButton cell){
+        selectedCell = Optional.of(getCoordinate(cell));
+        moveRequest(getCoordinate(cell));
+    }
+
+    private void actionDeselectCell(){
+        possibleMoves.forEach((c -> {
+            setColorBackground(c, colorProvider.getNormalCellColor());
+        }));
+        deselectCell();
+
+    }
+
+    private void actionMovePawn(JButton cell){
+        Pair<Int> coordinateStart = selectedCell.get();
+        Pair<Int> coordinateArrival = getCoordinate(cell);
+        moveAndPaint(coordinateStart, coordinateArrival);
     }
 
     private void moveAndPaint(Pair<Int> coordStart, Pair<Int> coordArr) {
          gameViewImpl.setMove(coordStart, coordArr);
       }
 
-    private void switchPlayer() {
-        player = Player.Black() == player ? Player.White(): Player.Black();
-    }
-
     private void addLostPawns(Tuple3 tuple) {
         int length = Player.Black() == player ? (int)tuple._2(): (int)tuple._3();
         JPanel panel = Player.Black() == player ? leftPanel : rightPanel;
-        JLabel pawn = Player.Black() == player ? viewFactory.createLostBlackPawn() : viewFactory.createLostWhitePawn();
         panel.removeAll();
-
         for(int i = 0; i < length; i++) {
-            panel.add(pawn);
+            panel.add(createLostPawn());
         }
+        panel.repaint();
+    }
+
+    private JLabel createLostPawn(){
+        return Player.Black() == player ? viewFactory.createLostBlackPawn() : viewFactory.createLostWhitePawn();
     }
 
     private Pair getCoordinate(JButton cell) {
@@ -142,19 +178,6 @@ public class Game {
         possibleMoves.forEach((c -> {
             cells.get(c).setBackground(colorProvider.getPossibleMovesColor());
         }));
-    }
-
-    public void setColorBackground(Pair<Integer> c, Color color){
-        if( !cells.get(c).getBackground().equals(Color.green) && !cells.get(c).getBackground().equals(Color.red)){
-            if(isCenterCell(c) || isCornerCell(c) ){
-
-                cells.get(c).setBackground(colorProvider.getSpecialCellColor());
-            }
-            else{
-                cells.get(c).setBackground(color);
-            }
-        }
-
     }
 
     public void deselectCell(){
@@ -211,25 +234,8 @@ public class Game {
 
     }
 
-    private void initNorthPanel(){
-        northPanel=viewFactory.createTopBottomPanel();
-        GridBagLayout layout = new GridBagLayout();
-        northPanel.setLayout(layout);
-        GridBagConstraints lim = new GridBagConstraints();
-
-        menuButton=viewFactory.createGameButton("");
-        menuButton.addActionListener(e-> gameViewImpl.showOverlay(gamePanel, gameViewImpl.inGameMenuPanel));
-
-        lim.gridx=0;
-        lim.gridy=0;
-        lim.weightx=1;
-        lim.fill = GridBagConstraints.NONE;
-        lim.anchor=GridBagConstraints.LINE_END;
-
-        northPanel.add(menuButton, lim);
-    }
-    private void initSouthPanel(){
-        southPanel=viewFactory.createTopBottomPanel();
+    private void switchPlayer() {
+        player = Player.Black() == player ? Player.White(): Player.Black();
     }
 
     private JButton cellChoice(Pair c){
@@ -240,12 +246,6 @@ public class Game {
             return viewFactory.createCenterCell(gameViewImpl.dimension);
         }
         return viewFactory.createNormalCell(gameViewImpl.dimension);
-
-    }
-
-    private void initLeftRightPanel() {
-        leftPanel=viewFactory.createLeftRightPanel(1, gameViewImpl.dimension);
-        rightPanel=viewFactory.createLeftRightPanel(1, gameViewImpl.dimension);
 
     }
 
@@ -263,5 +263,18 @@ public class Game {
 
     private boolean isCenterCell(Pair<Integer> c) {
         return c.getX() == gameViewImpl.dimension/2 + 1  && c.getY() == gameViewImpl.dimension/2 + 1;
+    }
+
+    public void setColorBackground(Pair<Integer> c, Color color){
+        if( !cells.get(c).getBackground().equals(Color.green) && !cells.get(c).getBackground().equals(Color.red)){
+            if(isCenterCell(c) || isCornerCell(c) ){
+
+                cells.get(c).setBackground(colorProvider.getSpecialCellColor());
+            }
+            else{
+                cells.get(c).setBackground(color);
+            }
+        }
+
     }
 }
