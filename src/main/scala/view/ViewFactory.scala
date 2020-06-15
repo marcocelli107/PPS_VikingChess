@@ -149,6 +149,17 @@ trait ViewFactory {
 
   def createLostWhitePawn : JLabel
 
+
+
+
+  /**
+    * Creates a Winner Label.
+    *
+    * @return a JLabel.
+    *
+    */
+  def createLabelWinner : JLabel
+
   /**
    * Creates a Frame.
    *
@@ -211,6 +222,8 @@ object View {
     override def createLostBlackPawn : JLabel = new LostBlackPawn
 
     override def createLostWhitePawn : JLabel = new LostWhitePawn
+
+    override def createLabelWinner: JLabel = new LabelWinner
 
     override def createFrame: JFrame = new Frame
 
@@ -502,6 +515,13 @@ object View {
       setResizable(false)
       setSize(smallerSide, smallerSide)
       setLocationRelativeTo(null)
+    }
+
+    private class LabelWinner extends JLabel {
+      private val DIMENSION_FONT: Int = smallerSide * 9 / 100
+      setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
+      setForeground(colorProvider.getWhiteColor)
+      setVisible(false)
     }
   }
 }

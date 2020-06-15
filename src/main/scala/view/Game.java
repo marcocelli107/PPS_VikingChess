@@ -24,6 +24,7 @@ public class Game {
     GameViewImpl gameViewImpl;
 
     public JPanel gamePanel,northPanel,southPanel,boardPanel,boardPlusColumns, leftPanel, rightPanel;
+    public JLabel labelWinner;
     private JButton menuButton;
     private HashMap<Pair<Int>, JButton> cells;
     private ViewFactory viewFactory;
@@ -104,6 +105,15 @@ public class Game {
         lim.anchor=GridBagConstraints.LINE_END;
 
         northPanel.add(menuButton, lim);
+
+        labelWinner = viewFactory.createLabelWinner();
+        lim.gridx=0;
+        lim.gridy=0;
+        lim.weightx=1;
+        lim.fill = GridBagConstraints.NONE;
+        lim.anchor=GridBagConstraints.CENTER;
+
+        northPanel.add(labelWinner, lim);
     }
 
     private void initSouthPanel(){
@@ -220,16 +230,20 @@ public class Game {
         boardPanel.validate();
         gamePanel.validate();
         switchPlayer();
-
-
     }
 
     public void setEndGame(String winner, List<Pair<Int>> coordKing){
        if (winner.equals("White")){
            cells.get(coordKing.get(0)).setBackground( Color.green);
-
-       }else if( winner.equals("Black")){
+           labelWinner.setText("White has won!");
+           labelWinner.setVisible(true);
+       } else if( winner.equals("Black")){
            cells.get(coordKing.get(0)).setBackground( Color.red);
+           labelWinner.setText("Black has won!");
+           labelWinner.setVisible(true);
+       } else {
+           labelWinner.setText("Game Finished with a Draw!");
+           labelWinner.setVisible(true);
        }
 
     }

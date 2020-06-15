@@ -58,7 +58,7 @@ object BoardGame {
     /**
       * Defines size of board's side.
       */
-    def size: Int
+    def size: Double
 
     /**
       * Gets a cell in the board from a coordinate.
@@ -74,7 +74,7 @@ object BoardGame {
 
       override def cells: util.List[BoardCell] = allCells.asJava
 
-      override def size: Int = allCells.length
+      override def size: Double = Math.sqrt(allCells.length)
 
       override def getCell(coordinate: Pair[Int]): BoardCell = allCells.filter(_.getCoordinate == coordinate).head
 
