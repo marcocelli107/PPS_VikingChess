@@ -3,6 +3,7 @@ package view;
 import controller.ControllerHnefatafl;
 import model.GameVariant;
 import scala.Int;
+import scala.Tuple2;
 import utils.BoardGame;
 import utils.BoardGame.Board;
 import utils.Pair;
@@ -86,8 +87,9 @@ public class GameViewImpl implements GameView, ActionListener {
             gameUtils.restoreGame();
             overlayPanel.remove(gamePanel);
         }
-        board = controller.newGame((GameVariant.Val) menuUtils.boardVariant);
-        dimension = (int) Math.sqrt(board.size());
+        Tuple2 newGame = controller.newGame((GameVariant.Val) menuUtils.boardVariant);
+        board = (Board) newGame._1();
+        dimension = (int) board.size();
         initGamePanel(board);
         overlayPanel.add(gamePanel);
         showGame();

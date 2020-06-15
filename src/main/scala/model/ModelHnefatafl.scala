@@ -20,9 +20,9 @@ trait ModelHnefatafl {
   /**
     * Calls parser for a new Game.
     *
-    * @return created board
+    * @return created board and player to move.
     */
-  def createGame(variant: GameVariant.Val): Board
+  def createGame(variant: GameVariant.Val): (Board, Player.Value)
 
   /**
     * Calls parser for the possible moves from a cell.
@@ -79,7 +79,7 @@ object ModelHnefatafl {
 
     override var mode: ModeGame.Value = ModeGame.PVP
 
-    override def createGame(newVariant: GameVariant.Val): Board = {
+    override def createGame(newVariant: GameVariant.Val): (Board, Player.Value) = {
 
       currentVariant = newVariant
 
@@ -87,7 +87,7 @@ object ModelHnefatafl {
 
       lastNineBoards += game._3
 
-      game._3
+      (game._3, game._1)
     }
 
     override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = parserProlog.showPossibleCells(cell)

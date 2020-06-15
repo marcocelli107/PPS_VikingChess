@@ -1,8 +1,10 @@
 package model
 
 import java.io.FileInputStream
+
 import scala.collection.mutable.ListBuffer
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
+import utils.BoardGame.Board.BoardImpl
 import utils.BoardGame.{Board, BoardCell}
 import utils.Pair
 
@@ -52,7 +54,6 @@ object ParserProlog {
     private val engine = new Prolog()
     private var goal: SolveInfo = _
     private var list: Term = new Struct()
-    private var myBoard: Board = _
     private var playerToWin: Term = new Struct()
     private var playerToMove: Term = new Struct()
     private var board: Term = new Struct()
@@ -68,9 +69,7 @@ object ParserProlog {
 
       goalString = replaceBoardString(board)
 
-      setModelBoard(goalString)
-
-      (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), myBoard, 0)
+      (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), 0)
     }
 
     override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = {
@@ -92,9 +91,7 @@ object ParserProlog {
 
       goalString = replaceBoardString(board)
 
-      setModelBoard(goalString)
-
-      (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), myBoard, goal.getTerm("L").toString.toInt)
+      (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), goal.getTerm("L").toString.toInt)
     }
 
     override def findKing(): ListBuffer[Pair[Int]] = {
@@ -144,7 +141,7 @@ object ParserProlog {
       * @param stringBoard
       *              board identification string.
       */
-    private def setModelBoard(stringBoard: String): Unit = {
+    private def parseBoard(stringBoard: String): Board = {
 
       var listCells: ListBuffer[BoardCell] = ListBuffer.empty[BoardCell]
 
@@ -165,7 +162,7 @@ object ParserProlog {
         }
       })
 
-      myBoard = Board(listCells)
+     BoardImpl(listCells)
     }
 
     /**

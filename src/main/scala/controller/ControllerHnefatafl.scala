@@ -15,9 +15,9 @@ trait ControllerHnefatafl {
   /**
     * Calls model for a new game.
     *
-    * @return board
+    * @return board and player to move.
     */
-  def newGame(variant: GameVariant.Val): Board
+  def newGame(variant: GameVariant.Val): (Board, Player.Value)
 
   /**
     * Calls model for the possible moves from a specified coordinate.
@@ -53,7 +53,7 @@ object ControllerHnefatafl {
     private val viewGame: GameViewImpl = new GameViewImpl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val): Board = {
+    override def newGame(variant: GameVariant.Val): (Board, Player.Value) = {
       modelGame = ModelHnefatafl(this)
       modelGame.createGame(variant)
     }
