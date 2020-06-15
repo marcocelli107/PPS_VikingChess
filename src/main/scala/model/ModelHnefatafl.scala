@@ -15,7 +15,7 @@ trait ModelHnefatafl {
   /**
     * Defines the chosen mode.
     */
-  var mode: ModeGame.Value
+  var mode: GameMode.Value
 
   /**
     * Calls parser for a new Game.
@@ -34,15 +34,35 @@ trait ModelHnefatafl {
   def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]]
 
   /**
-    * Calls parser for sets player move
-    * @param cellStart
+    * Calls parser for making a move from coordinate to coordinate.
+    * @param fromCoordinate
     *                 coordinate of the starting cell.
-    * @param cellArrival
+    * @param toCoordinate
     *                 coordinate of the arrival cell.
     *
     * @return updated board.
     */
-  def setMove(cellStart: Pair[Int], cellArrival: Pair[Int]): Unit
+  def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit
+
+  /**
+   * Checks if the cell at the specified coordinate is the central cell.
+   *
+   * @param coordinate
+   *                   coordinate of the cell to inspect
+   *
+   * @return boolean.
+   */
+  def isCentralCell(coordinate: Pair[Int]): Boolean
+
+  /**
+   * Checks if the cell at the specified coordinate is a corner cell.
+   *
+   * @param coordinate
+   *                   coordinate of the cell to inspect
+   *
+   * @return boolean.
+   */
+  def isCornerCell(coordinate: Pair[Int]): Boolean
 }
 
 object ModelHnefatafl {
@@ -77,7 +97,7 @@ object ModelHnefatafl {
 
     override var currentVariant: GameVariant.Val = _
 
-    override var mode: ModeGame.Value = ModeGame.PVP
+    override var mode: GameMode.Value = GameMode.PVP
 
     override def createGame(newVariant: GameVariant.Val): (Board, Player.Value) = {
 
@@ -92,9 +112,9 @@ object ModelHnefatafl {
 
     override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = parserProlog.showPossibleCells(cell)
 
-    override def setMove(cellStart: Pair[Int], cellArrival: Pair[Int]): Unit = {
+    override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
 
-      game = parserProlog.makeMove(cellStart, cellArrival)
+      game = parserProlog.makeMove(fromCoordinate, toCoordinate)
 
       if(lastNineBoards.size == SIZE_DRAW) {
         lastNineBoards = lastNineBoards.tail
@@ -105,15 +125,18 @@ object ModelHnefatafl {
       incrementCapturedPieces(game._1, game._4)
 
       if(checkThreefoldRepetition()) {
-        controller.gameEnded(Player.Draw, ListBuffer.empty)
+        controller.gameEnded(Player.Draw, Option.empty)
       }
       else if(someoneHasWon(game._2)) {
-        controller.gameEnded(game._2, parserProlog.findKing())
+        controller.gameEnded(game._2, Option(parserProlog.findKing.head))
       }
 
       controller.notifyMove(game._3, numberBlackCaptured, numberWhiteCaptured)
     }
 
+    override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
+
+    override def isCornerCell(coordinate: Pair[Int]): Boolean = parserProlog.isCornerCell(coordinate)
     /**
       * Increments the number of pieces captured of the player.
       */

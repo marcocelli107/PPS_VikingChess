@@ -58,7 +58,7 @@ trait ViewFactory {
    * row of GridLayout.
    * @return a new GamePanel.
    */
-  def createBoardPanel(): JPanel
+  def createBoardPanel: JPanel
 
   /**
    * Creates a new MenuPanel.
@@ -142,7 +142,7 @@ trait ViewFactory {
    * @return a label.
    *
    */
-  def createKingPawn: JLabel
+  def createWhiteKing: JLabel
 
   def createLostBlackPawn : JLabel
 
@@ -159,9 +159,9 @@ trait ViewFactory {
 
 }
 
-object View {
+object ViewFactory {
 
-  case class ViewImpl() extends ViewFactory {
+  case class ViewFactoryImpl() extends ViewFactory {
 
     private var colorProvider = new ColorProviderImpl
     private var cellDimension = 0;
@@ -180,7 +180,7 @@ object View {
 
     override def createNormalCell(dimension: Int): JButton = new NormalCell(dimension)
 
-    override def createBoardPanel(): JPanel = new BoardPanel()
+    override def createBoardPanel: JPanel = new BoardPanel()
 
     override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
 
@@ -206,7 +206,7 @@ object View {
 
     override def createBlackPawn: JLabel = new BlackPawn
 
-    override def createKingPawn: JLabel = new KingPawn
+    override def createWhiteKing: JLabel = new KingPawn
 
     override def createLostBlackPawn : JLabel = new LostBlackPawn
 
@@ -293,7 +293,7 @@ object View {
       setBackground(colorNormalCell)
     }
 
-    private class BoardPanel() extends JPanel {
+    private class BoardPanel extends JPanel {
       this.setBackground(colorProvider.getLightBrownColor)
     }
 

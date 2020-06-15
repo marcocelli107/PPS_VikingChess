@@ -41,6 +41,26 @@ trait ParserProlog {
     * @return king's coordinate.
     */
   def findKing(): ListBuffer[Pair[Int]]
+
+  /**
+   * Checks if the cell at the specified coordinate is the central cell.
+   *
+   * @param coordinate
+   *                   coordinate of the cell to inspect
+   *
+   * @return boolean.
+   */
+  def isCentralCell(coordinate: Pair[Int]): Boolean
+
+  /**
+   * Checks if the cell at the specified coordinate is a corner cell.
+   *
+   * @param coordinate
+   *                   coordinate of the cell to inspect
+   *
+   * @return boolean.
+   */
+  def isCornerCell(coordinate: Pair[Int]): Boolean
 }
 
 object ParserProlog {
@@ -103,6 +123,18 @@ object ParserProlog {
       setListCellsView(goalString)
     }
 
+    override def isCentralCell(coordinate: Pair[Int]): Boolean = {
+      goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, coord(${coordinate.getX},${coordinate.getY})).")
+
+      goal.isSuccess
+    }
+
+    override def isCornerCell(coordinate: Pair[Int]): Boolean = {
+      goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, coord(${coordinate.getX},${coordinate.getY})).")
+
+      goal.isSuccess
+    }
+
     /**
       * Sets game's terms returned from prolog.
       */
@@ -149,16 +181,16 @@ object ParserProlog {
         var coordinateCell: Array[String] = null
         if (elem.contains("e")) {
           coordinateCell = elem.substring(0, elem.length - 2).split(",")
-          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), PieceEnum.Void)
+          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Void)
         } else if (elem.contains("bp")) {
           coordinateCell = elem.substring(0, elem.length - 3).split(",")
-          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), PieceEnum.BlackPawn)
+          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.BlackPawn)
         } else if (elem.contains("wp")) {
           coordinateCell = elem.substring(0, elem.length - 3).split(",")
-          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), PieceEnum.WhitePawn)
+          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhitePawn)
         } else if (elem.contains("wk")) {
           coordinateCell = elem.substring(0, elem.length - 3).split(",")
-          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), PieceEnum.WhiteKing)
+          listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhiteKing)
         }
       })
 
