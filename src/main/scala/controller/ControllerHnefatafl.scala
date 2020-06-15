@@ -51,9 +51,12 @@ object ControllerHnefatafl {
   case class ControllerHnefataflImpl() extends ControllerHnefatafl {
 
     private val viewGame: GameViewImpl = new GameViewImpl(this)
-    private val modelGame: ModelHnefatafl = ModelHnefatafl(this)
+    private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val): Board = modelGame.createGame(variant)
+    override def newGame(variant: GameVariant.Val): Board = {
+      modelGame = ModelHnefatafl(this)
+      modelGame.createGame(variant)
+    }
 
     override def getPossibleMoves(coordinate: Pair[Int]): util.List[Pair[Int]] = modelGame.showPossibleCells(coordinate).asJava
 

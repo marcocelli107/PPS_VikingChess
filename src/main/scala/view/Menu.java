@@ -81,10 +81,10 @@ public class Menu {
     public ActionListener chooseListener(String text){
         ActionListener listener;
         listener = e -> {
+            setBoardVariant(text);
             if (gameMode == ModeGame.PVP()) {
                 gameViewImpl.showOverlay(variantsPanel, playerChoicePanel);
             } else {
-                setBoardVariant(text);
                 gameViewImpl.showOverlay(variantsPanel, diffPanel);
             }
         };
