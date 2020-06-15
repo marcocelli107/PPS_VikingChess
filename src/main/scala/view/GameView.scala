@@ -4,7 +4,7 @@ import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
 import model.Player
 import utils.BoardGame.Board
-import utils.{BoardGame, Pair}
+import utils.Pair
 import view.ViewFactory.ViewFactoryImpl
 
 trait GameView {
@@ -14,7 +14,7 @@ trait GameView {
   def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int])
   def getPossibleMoves(coordinate: Pair[Int]): Seq[Pair[Int]]
 
-  def updateMove(board: Board, nBlackCaptured: Int, nWhiteCaptured: Int)
+  def updateMove(playerToMove: Player.Value, winner: Player.Value, board: Board, nBlackCaptured: Int, nWhiteCaptured: Int)
   def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]])
 
   def initOrRestoreGUI()
@@ -47,7 +47,6 @@ object GameView {
   def apply(controller: ControllerHnefatafl): GameView = GameViewImpl(controller)
 
   case class GameViewImpl(controller: ControllerHnefatafl) extends GameView {
-    /* TODO perché viewfactoryimpl? */
     private val viewFactory: ViewFactory = new ViewFactoryImpl
     private val menuUtils: Menu = Menu(viewFactory, this)
     private val gameUtils: Game = Game(viewFactory, this)
@@ -67,8 +66,7 @@ object GameView {
     initInGameMenu()
     overlayPanel.add(inGameMenuPanel)
 
-    /* TODO DAFUQ? CHIEDI AL MODEL */
-    private var dimension: Int = 11
+    private var dimension: Int = _
 
     private var board: Board = _
 
@@ -119,6 +117,7 @@ object GameView {
       initGamePanel(board)
       overlayPanel.add(gamePanel)
       showGame()
+      gameUtils.getLabelPlayer.setText(newGame._2 + " moves.")
     }
 
     private def showGame(): Unit = {
@@ -139,8 +138,8 @@ object GameView {
       controller.makeMove(fromCoordinate, toCoordinate)
     }
 
-    def updateMove(board: Board, nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
-      gameUtils.updateMove(board, nBlackCaptured, nWhiteCaptured)
+    def updateMove(playerToMove: Player.Value, winner: Player.Value, board: Board, nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
+      gameUtils.updateMove(playerToMove, winner, board, nBlackCaptured, nWhiteCaptured)
     }
 
     def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = {

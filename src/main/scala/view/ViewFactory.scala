@@ -23,6 +23,7 @@ trait ViewFactory {
    * Creates a new Center Cell.
    *
    * @param dimension
+   *                cell's dimension in percent.
    *
    * @return a new Center Cell.
    */
@@ -149,6 +150,17 @@ trait ViewFactory {
 
   def createLostWhitePawn : JLabel
 
+
+
+
+  /**
+    * Creates a Winner Label.
+    *
+    * @return a JLabel.
+    *
+    */
+  def createLabelPlayerToMoveWinner : JLabel
+
   /**
    * Creates a Frame.
    *
@@ -161,11 +173,13 @@ trait ViewFactory {
 
 object ViewFactory {
 
+  def apply: ViewFactory = ViewFactoryImpl()
+
   case class ViewFactoryImpl() extends ViewFactory {
 
-    private var colorProvider = new ColorProviderImpl
-    private var cellDimension = 0;
-    var smallerSide = ScreenSize.getSmallerSide * 9 / 10
+    private val colorProvider = new ColorProviderImpl
+    private var cellDimension = 0
+    var smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
     val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
     val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
     ge.registerFont(f)
@@ -212,14 +226,17 @@ object ViewFactory {
 
     override def createLostWhitePawn : JLabel = new LostWhitePawn
 
+    override def createLabelPlayerToMoveWinner: JLabel = new LabelPlayer_Winner
+
     override def createFrame: JFrame = new Frame
 
     abstract private class Cell(dimension: Int) extends JButton {
       cellDimension = smallerSide / dimension * 80 / 100
 
-      var colorCell: Color = null
+      var colorCell: Color = _
 
-      var color: Color = null
+      var color: Color = _
+
       setPreferredSize(new Dimension(cellDimension, cellDimension))
       setAlignmentX(Component.CENTER_ALIGNMENT)
       setAlignmentY(Component.CENTER_ALIGNMENT)
@@ -229,14 +246,14 @@ object ViewFactory {
       setOpaque(true)
       addMouseListener(new MouseAdapter() {
         override def mouseEntered(e: MouseEvent): Unit = {
-          if( !getBackground().equals(Color.green) && !getBackground().equals(Color.red)){
+          if( !getBackground.equals(colorProvider.getWhiteWinColor) && !getBackground.equals(colorProvider.getBlackWinColor)){
             color = getBackground
             setBackground(Color.LIGHT_GRAY)
           }
         }
         override def mouseExited(e: MouseEvent): Unit = {
-          if( !getBackground().equals(Color.green) && !getBackground().equals(Color.red)){
-              if (getComponents().length > 0) {
+          if(!getBackground.equals(colorProvider.getWhiteWinColor) && !getBackground.equals(colorProvider.getBlackWinColor)){
+              if (getComponents.length > 0) {
                 setBackground(colorCell)
               }
               else {
@@ -262,7 +279,7 @@ object ViewFactory {
 
       image = image.getScaledInstance(cellDimension * 70/100, cellDimension * 70/100, Image.SCALE_SMOOTH)
 
-      iconCell = new ImageIcon(image);
+      iconCell = new ImageIcon(image)
 
       setIcon(iconCell)
 
@@ -275,7 +292,7 @@ object ViewFactory {
 
       image = image.getScaledInstance(cellDimension * 70/100, cellDimension * 70/100, Image.SCALE_SMOOTH)
 
-      iconCell = new ImageIcon(image);
+      iconCell = new ImageIcon(image)
 
       setIcon(iconCell)
 
@@ -379,9 +396,9 @@ object ViewFactory {
       setMaximumSize(getPreferredSize)
       setAlignmentX(Component.CENTER_ALIGNMENT)
 
-      setOpaque(false);
-      setContentAreaFilled(false);
-      setBorderPainted(false);
+      setOpaque(false)
+      setContentAreaFilled(false)
+      setBorderPainted(false)
 
       setFont(new Font(f.getFontName, Font.BOLD, FONT_DIMENSION))
       setForeground(colorProvider.getWhiteColor)
@@ -394,7 +411,7 @@ object ViewFactory {
         override def mouseExited(e: MouseEvent): Unit = {
           setForeground(colorProvider.getWhiteColor)
         }
-      });
+      })
     }
 
     private class GameButton(s: String) extends EmptyButton(s) {
@@ -404,8 +421,8 @@ object ViewFactory {
       imageIcon = new ImageIcon(image)
       setIcon(imageIcon)
       setBorderPainted(false)
-      setOpaque(false);
-      setContentAreaFilled(false);
+      setOpaque(false)
+      setContentAreaFilled(false)
 
     }
 
@@ -432,12 +449,12 @@ object ViewFactory {
 
     abstract private class Pawn extends JLabel {
 
-      protected var externalColor: Color = null
-      protected var internalColor: Color = null
-      protected var namePawn: String = null
+      protected var externalColor: Color = _
+      protected var internalColor: Color = _
+      protected var namePawn: String = _
 
-      protected var EXTERNAL_ROUNDRECT_DIMENSION = cellDimension * 8 / 10
-      protected var INTERNAL_ROUNDRECT_DIMENSION = cellDimension * 7 / 10
+      protected var EXTERNAL_ROUNDRECT_DIMENSION: Int= cellDimension * 8 / 10
+      protected var INTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 7 / 10
 
       setOpaque(false)
       setVisible(true)
@@ -490,6 +507,12 @@ object ViewFactory {
     private class LostBlackPawn extends BlackPawn {
       EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
       INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
+    }
+
+    private class LabelPlayer_Winner extends JLabel {
+      private val DIMENSION_FONT: Int = smallerSide * 7 / 100
+      setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
+      setForeground(colorProvider.getPossibleMovesColor)
     }
 
     private class Frame extends JFrame {

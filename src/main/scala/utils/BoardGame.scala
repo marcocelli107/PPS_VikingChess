@@ -1,10 +1,6 @@
 package utils
 
-import java.util
-
 import model.Piece.PieceType
-
-import scala.collection.JavaConverters._
 
 object BoardGame {
 

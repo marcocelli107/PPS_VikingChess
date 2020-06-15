@@ -20,6 +20,9 @@ trait ModelHnefatafl {
   /**
     * Calls parser for a new Game.
     *
+    * @param variant
+    *              indicates the variant chosen by the user.
+    *
     * @return created board and player to move.
     */
   def createGame(variant: GameVariant.Val): (Board, Player.Value)
@@ -116,22 +119,19 @@ object ModelHnefatafl {
 
       game = parserProlog.makeMove(fromCoordinate, toCoordinate)
 
-      if(lastNineBoards.size == SIZE_DRAW) {
+      if(lastNineBoards.size == SIZE_DRAW)
         lastNineBoards = lastNineBoards.tail
-      }
 
       lastNineBoards += game._3
 
       incrementCapturedPieces(game._1, game._4)
 
-      if(checkThreefoldRepetition()) {
+      if(checkThreefoldRepetition())
         controller.gameEnded(Player.Draw, Option.empty)
-      }
-      else if(someoneHasWon(game._2)) {
+      else if(someoneHasWon(game._2))
         controller.gameEnded(game._2, Option(parserProlog.findKing.head))
-      }
 
-      controller.notifyMove(game._3, numberBlackCaptured, numberWhiteCaptured)
+      controller.notifyMove(game._1, game._2, game._3, numberBlackCaptured, numberWhiteCaptured)
     }
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
