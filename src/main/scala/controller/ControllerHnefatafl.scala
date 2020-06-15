@@ -1,7 +1,7 @@
 package controller
 
 import model.{GameVariant, ModelHnefatafl, Player}
-import view.{GameView}
+import view.GameView
 import utils.BoardGame.Board
 import utils.Pair
 
@@ -36,7 +36,7 @@ trait ControllerHnefatafl {
   /**
     * Notifies the view that the move has been updated.
     */
-  def notifyMove(board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit
+  def notifyMove(playerToMove: Player.Value, winner: Player.Value, board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -79,12 +79,12 @@ object ControllerHnefatafl {
       modelGame.makeMove(coordinateStart, coordinateArrival)
     }
 
-    override def notifyMove(board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit = {
-      viewGame.updateMove(board, numberBlackCaptured, numberWhiteCaptured)
+    override def notifyMove(playerToMove: Player.Value, winner: Player.Value, board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit = {
+      viewGame.updateMove(playerToMove, winner, board, numberBlackCaptured, numberWhiteCaptured)
     }
 
     override def gameEnded(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = {
-        viewGame.setEndGame(winner, kingCoordinate)
+      viewGame.setEndGame(winner, kingCoordinate)
     }
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = modelGame.isCentralCell(coordinate)
