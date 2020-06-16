@@ -70,6 +70,13 @@ trait ParserProlog {
    */
 
   def copy():ParserProlog
+
+  /**
+   * Get the Board
+   *
+   * @return Board.
+   */
+  def getActualBoard(): Board
 }
 
 object ParserPrologImpl {
@@ -105,6 +112,11 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   def getVariant: Term = variant
 
   engine.setTheory(new Theory(new FileInputStream(theory)))
+
+  override def getActualBoard(): Board = {
+    goalString = replaceBoardString(board)
+    parseBoard(goalString)
+  }
 
   override def createGame(newVariant: String): (Player.Value, Player.Value, Board, Int) = {
     goal = engine.solve(s"newGame($newVariant,(V,P,W,B)).")
