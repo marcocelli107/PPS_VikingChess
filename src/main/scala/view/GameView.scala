@@ -5,7 +5,6 @@ import javax.swing.{JFrame, JPanel}
 import model.Player
 import utils.BoardGame.Board
 import utils.Pair
-import view.ViewFactory.ViewFactoryImpl
 
 trait GameView {
   def getDimension: Int
@@ -47,12 +46,11 @@ object GameView {
   def apply(controller: ControllerHnefatafl): GameView = GameViewImpl(controller)
 
   case class GameViewImpl(controller: ControllerHnefatafl) extends GameView {
-    private val viewFactory: ViewFactory = new ViewFactoryImpl
-    private val menuUtils: Menu = Menu(viewFactory, this)
-    private val gameUtils: Game = Game(viewFactory, this)
-    private val frame: JFrame = viewFactory.createFrame
-    private val overlayPanel: JPanel = viewFactory.createOverlayLayoutPanel
-    private var gamePanel: JPanel = viewFactory.createGamePanel
+    private val menuUtils: Menu = Menu(this)
+    private val gameUtils: Game = Game(this)
+    private val frame: JFrame = ViewFactory.createFrame
+    private val overlayPanel: JPanel = ViewFactory.createOverlayLayoutPanel
+    private var gamePanel: JPanel = ViewFactory.createGamePanel
     private var menuPanel, variantsPanel, diffPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
 
     initMainMenu()

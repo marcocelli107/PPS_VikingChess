@@ -30,34 +30,30 @@ trait ColorProvider {
 
 }
 
-object ColorProvider {
+object ColorProvider extends ColorProvider {
 
-  def apply: ColorProvider = ColorProviderImpl()
+  override def getBlackColor: Color = Color.BLACK
 
-  case class ColorProviderImpl() extends ColorProvider {
+  override def getHighlightColor: Color = Color.LIGHT_GRAY
 
-    override def getBlackColor: Color = Color.BLACK
+  override def getSpecialCellColor: Color = new Color(46, 50, 100)
 
-    override def getHighlightColor: Color = Color.LIGHT_GRAY
+  override def getPawnCellColor: Color = new Color(153, 203, 205)
 
-    override def getSpecialCellColor: Color = new Color(46, 50, 100)
+  override def getNormalCellColor: Color = new Color(83, 143, 159)
 
-    override def getPawnCellColor: Color = new Color(153, 203, 205)
+  override def getPossibleMovesColor: Color = new Color(41, 71, 79)
 
-    override def getNormalCellColor: Color = new Color(83, 143, 159)
+  override def getLightBrownColor: Color = new Color(200, 170, 109)
 
-    override def getPossibleMovesColor: Color = new Color(41, 71, 79)
+  override def getBrownColor: Color = new Color(114, 73, 51)
 
-    override def getLightBrownColor: Color = new Color(200, 170, 109)
+  override def getWhiteColor: Color = new Color(255, 250, 240)
 
-    override def getBrownColor: Color = new Color(114, 73, 51)
+  override def getGoldColor: Color = new Color(212, 175, 55)
 
-    override def getWhiteColor: Color = new Color(255, 250, 240)
+  override def getBlackWinColor: Color = new Color(203, 50, 52)
 
-    override def getGoldColor: Color = new Color(212, 175, 55)
+  override def getWhiteWinColor: Color = new Color(119, 221, 119)
 
-    override def getBlackWinColor: Color = new Color(203, 50, 52)
-
-    override def getWhiteWinColor: Color = new Color(119, 221, 119)
-  }
 }
