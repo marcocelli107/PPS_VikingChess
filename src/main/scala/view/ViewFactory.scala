@@ -158,7 +158,21 @@ trait ViewFactory {
    *
    * @return a button.
    */
-  def createGameButton(string: String): JButton
+  def createGameButton(): JButton
+
+  /**
+    * Creates a previous move button.
+    *
+    * @return a button.
+    */
+  def createPreviousMoveButton(): JButton
+
+  /**
+    * Creates a next move button.
+    *
+    * @return a button.
+    */
+  def createNextMoveButton(): JButton
 
   /**
    * Creates a pawn black.
@@ -253,7 +267,11 @@ object ViewFactory {
 
     override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
 
-    override def createGameButton(s: String): JButton = new GameButton(s)
+    override def createGameButton(): JButton = new GameButtonTop()
+
+    override def createPreviousMoveButton(): JButton = new PreviousMoveBottom()
+
+    override def createNextMoveButton(): JButton = new NextMoveBottom()
 
     override def createWhitePawn: JLabel = new WhitePawn
 
@@ -428,8 +446,8 @@ object ViewFactory {
 
     private class MenuButton(s: String) extends EmptyButton(s) {
 
-      private val FONT_DIMENSION = smallerSide * 6 / 100
-      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 10/100)
+      private val FONT_DIMENSION = smallerSide * 5 / 100
+      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 8/100)
 
       setPreferredSize(BUTTON_DIMENSION)
       setMaximumSize(getPreferredSize)
@@ -453,10 +471,36 @@ object ViewFactory {
       })
     }
 
-    private class GameButton(s: String) extends EmptyButton(s) {
+    private class GameButtonTop() extends EmptyButton("") {
       private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
       private var image = imageIcon.getImage
       image = image.getScaledInstance(smallerSide * 7/ 100, smallerSide * 7/100, Image.SCALE_SMOOTH)
+      imageIcon = new ImageIcon(image)
+      setIcon(imageIcon)
+      setBorderPainted(false)
+      setOpaque(false)
+      setContentAreaFilled(false)
+
+    }
+
+    /* TODO IMPROVE */
+    private class PreviousMoveBottom() extends EmptyButton("") {
+      private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
+      private var image = imageIcon.getImage
+      image = image.getScaledInstance(smallerSide * 5/ 100, smallerSide * 5/100, Image.SCALE_SMOOTH)
+      imageIcon = new ImageIcon(image)
+      setIcon(imageIcon)
+      setBorderPainted(false)
+      setOpaque(false)
+      setContentAreaFilled(false)
+
+    }
+
+    /* TODO IMPROVE */
+    private class NextMoveBottom() extends EmptyButton("") {
+      private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
+      private var image = imageIcon.getImage
+      image = image.getScaledInstance(smallerSide * 5/ 100, smallerSide * 5/100, Image.SCALE_SMOOTH)
       imageIcon = new ImageIcon(image)
       setIcon(imageIcon)
       setBorderPainted(false)

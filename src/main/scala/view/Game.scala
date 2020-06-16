@@ -167,7 +167,7 @@ object Game {
       val layout: GridBagLayout = new java.awt.GridBagLayout()
       northPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      menuButton = viewFactory.createGameButton("")
+      menuButton = viewFactory.createGameButton()
       menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
       lim.gridx = 0
       lim.gridy = 0
@@ -177,7 +177,7 @@ object Game {
       northPanel.add(menuButton, lim)
 
       playerOrWinnerLabel = viewFactory.createLabelPlayerToMoveWinner
-      lim.anchor = GridBagConstraints.CENTER
+      lim.anchor = GridBagConstraints.LINE_START
       northPanel.add(playerOrWinnerLabel, lim)
     }
 
@@ -186,6 +186,26 @@ object Game {
       */
     private def initSouthPanel(): Unit = {
       southPanel = viewFactory.createTopBottomPanel
+      val layout: GridBagLayout = new java.awt.GridBagLayout()
+      southPanel.setLayout(layout)
+      val lim: GridBagConstraints = new java.awt.GridBagConstraints()
+      menuButton = viewFactory.createPreviousMoveButton()
+      //menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
+      lim.gridx = 0
+      lim.gridy = 0
+      lim.weightx = 1
+      lim.fill = GridBagConstraints.NONE
+      lim.anchor = GridBagConstraints.LINE_START
+      southPanel.add(menuButton, lim)
+
+      menuButton = viewFactory.createNextMoveButton()
+      //menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
+      lim.gridx = 0
+      lim.gridy = 0
+      lim.weightx = 1
+      lim.fill = GridBagConstraints.NONE
+      lim.anchor = GridBagConstraints.CENTER
+      southPanel.add(menuButton, lim)
     }
 
     /**
@@ -203,12 +223,16 @@ object Game {
       *               cell where possible moves begin.
       */
     private def actionCell(cell: JButton): Unit = {
-      if (cell.getComponents.length > 0 && possibleMoves.isEmpty)
+      if(cell.getComponents.length > 0 && possibleMoves.isEmpty)
         actionSelectCell(cell)
-      else if (possibleMoves.nonEmpty && !possibleMoves.contains(getCoordinate(cell)))
+      else if(possibleMoves.nonEmpty && !possibleMoves.contains(getCoordinate(cell))) {
         actionDeselectCell()
-      else if (possibleMoves.contains(getCoordinate(cell)) && selectedCell.isDefined)
+        actionSelectCell(cell)
+      }
+      else if(possibleMoves.contains(getCoordinate(cell)) && selectedCell.isDefined)
         actionMovePawn(cell)
+      else
+        actionDeselectCell()
     }
 
     /**
