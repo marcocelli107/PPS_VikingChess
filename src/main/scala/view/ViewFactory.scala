@@ -17,6 +17,11 @@ import view.ColorProvider.ColorProviderImpl
 
 trait ViewFactory {
 
+  /**
+    * Gets the smaller side of the monitor.
+    *
+    * @return int size
+    */
   def getSmallerSide: Int
 
   /**
@@ -33,13 +38,18 @@ trait ViewFactory {
   /**
    * Creates a new Corner Cell.
    *
+   * @param dimension
+   *           dimension of the cell.
+   *
    * @return a new Corner Cell.
    */
   def createCornerCell(dimension: Int): JButton
 
-
   /**
    * Creates a new Pawn Cell.
+   *
+   * @param dimension
+   *            dimension of the cell.
    *
    * @return a new Pawn Cell.
    */
@@ -48,127 +58,156 @@ trait ViewFactory {
   /**
    * Creates a new Normal Cell.
    *
+   * @param dimension
+   *             dimension of the cell.
+   *
    * @return a new Normal Cell.
    */
   def createNormalCell(dimension: Int): JButton
 
   /**
-   * Creates a new GamePanel.
+   * Creates a new BoardPanel.
    *
-   * column of GridLayout.
-   * row of GridLayout.
-   * @return a new GamePanel.
+   * @return a new BoardPanel.
    */
   def createBoardPanel: JPanel
 
   /**
    * Creates a new MenuPanel.
    *
+   * @param string
+   *             text of the menù panel.
+   *
    * @return a new MenuPanel.
    */
   def createMenuPanel(string: String): JPanel
 
-
   /**
-   * Creates a panel with flow layout.
+   * Creates top or bottom panel with FlowLayout.
    *
-   * @return a panel with flow layout.
+   * @return top or bottom panel.
    *
    */
   def createTopBottomPanel: JPanel
 
+  /**
+    * Creates right or left panel with GridLayout.
+    *
+    * @param columns
+    *                number of columns.
+    * @param rows
+    *                number of rows.
+    *
+    * @return right or left panel.
+    *
+    */
   def createLeftRightPanel(columns: Int, rows: Int): JPanel
 
   /**
-   * Creates a panel with overlay layout.
+   * Creates a panel with OverlayLayout.
    *
-   * @return a panel with overlay layout.
-   *
+   * @return a panel.
    */
   def createOverlayLayoutPanel: JPanel
 
   /**
-   * Creates a panel with border layout.
+   * Creates a panel with BorderLayout.
    *
-   * @return a panel with border layout.
-   *
+   * @return a panel.
    */
   def createGamePanel: JPanel
 
+  /**
+    * Creates a panel with BoxLayout, containing board, left and right panel.
+    *
+    * @return a panel.
+    */
   def createBoardPlusColumnsPanel: JPanel
 
   /**
-   * Creates a button with black background.
-   * * @param s
-   * name of button.
+   * Creates a menù button.
    *
-   * @return a panel with border layout.
+   * @param string
+   *               name of button.
    *
+   * @return a button.
    */
-  def createMenuButton(s: String): JButton
+  def createMenuButton(string: String): JButton
 
-  def createPopUpButton: JPopupMenu
+  /**
+    * Creates a popup menù.
+    *
+    * @return a popup.
+    */
+  def createPopUpMenu: JPopupMenu
 
+  /**
+    * Creates an item for popup menù.
+    *
+    * @param text
+    *               text of the item.
+    *
+    * @return an item.
+    */
   def createJMenuItem(text: String): JMenuItem
 
   /**
-   * Creates a button.
-   * *@param s
-   * name of button.
+   * Creates a game button.
+   * @param string
+   *                name of button.
    *
-   * @return a panel with border layout.
-   *
+   * @return a button.
    */
-  def createGameButton(s: String): JButton
+  def createGameButton(string: String): JButton
 
   /**
-   * Creates a black pawn.
+   * Creates a pawn black.
    *
    * @return a label.
-   *
    */
   def createBlackPawn: JLabel
 
   /**
-   * Creates a white pawn.
+   * Creates a pawn white.
    *
    * @return a label.
-   *
    */
   def createWhitePawn: JLabel
 
   /**
-   * Creates a king pawn.
+   * Creates a king white.
    *
    * @return a label.
-   *
    */
   def createWhiteKing: JLabel
 
+  /**
+    * Creates a lost pawn black.
+    *
+    * @return a label.
+    */
   def createLostBlackPawn : JLabel
 
-
+  /**
+    * Creates a lost pawn white.
+    *
+    * @return a label.
+    */
   def createLostWhitePawn : JLabel
 
-
-
-
   /**
-    * Creates a Winner Label.
+    * Creates a label to showing player to move and winner.
     *
-    * @return a JLabel.
-    *
+    * @return a label.
     */
   def createLabelPlayerToMoveWinner : JLabel
 
   /**
-   * Creates a Frame.
+   * Creates a frame.
    *
-   * @return a JFrame.
-   *
+   * @return a frame.
    */
   def createFrame: JFrame
-
 }
 
 object ViewFactory {
@@ -210,7 +249,7 @@ object ViewFactory {
 
     override def createMenuButton(s: String): JButton = new MenuButton(s)
 
-    override def createPopUpButton: JPopupMenu = new JPopupMenu
+    override def createPopUpMenu: JPopupMenu = new JPopupMenu
 
     override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
 
