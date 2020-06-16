@@ -168,7 +168,7 @@ object Game {
       northPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       menuButton = viewFactory.createGameButton("")
-      menuButton.addActionListener(_ => gameView.showOverlay(gamePanel, gameView.getInGameMenuPanel))
+      menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
       lim.gridx = 0
       lim.gridy = 0
       lim.weightx = 1

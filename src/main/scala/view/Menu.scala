@@ -115,13 +115,13 @@ object Menu {
     override def initDiffMenu: JPanel = {
       diffPanel = viewFactory.createMenuPanel("Choose Difficulty: ")
       newcomer = viewFactory.createMenuButton("Newcomer")
-      newcomer.addActionListener((_: ActionEvent) => gameView.showOverlay(diffPanel, playerChoicePanel))
+      newcomer.addActionListener((_: ActionEvent) => gameView.switchOverlay(diffPanel, playerChoicePanel))
       amateur = viewFactory.createMenuButton("Amateur")
-      amateur.addActionListener((_: ActionEvent) => gameView.showOverlay(diffPanel, playerChoicePanel))
+      amateur.addActionListener((_: ActionEvent) => gameView.switchOverlay(diffPanel, playerChoicePanel))
       standard = viewFactory.createMenuButton("Standard")
-      standard.addActionListener((_: ActionEvent) => gameView.showOverlay(diffPanel, playerChoicePanel))
+      standard.addActionListener((_: ActionEvent) => gameView.switchOverlay(diffPanel, playerChoicePanel))
       advanced = viewFactory.createMenuButton("Advanced")
-      advanced.addActionListener((_: ActionEvent) => gameView.showOverlay(diffPanel, playerChoicePanel))
+      advanced.addActionListener((_: ActionEvent) => gameView.switchOverlay(diffPanel, playerChoicePanel))
       diffPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       diffPanel.add(newcomer)
       diffPanel.add(amateur)
@@ -151,9 +151,9 @@ object Menu {
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = viewFactory.createMenuPanel("Choose Option: ")
       returnToGame = viewFactory.createMenuButton("Return to Game")
-      returnToGame.addActionListener((_: ActionEvent) => gameView.showOverlay(inGameMenuPanel, gameView.getGamePanel))
+      returnToGame.addActionListener((_: ActionEvent) => gameView.switchOverlay(inGameMenuPanel, gameView.getGamePanel))
       returnToMenu = viewFactory.createMenuButton("Leave Match")
-      returnToMenu.addActionListener((_: ActionEvent) => gameView.showOverlay(inGameMenuPanel, menuPanel))
+      returnToMenu.addActionListener((_: ActionEvent) => gameView.switchOverlay(inGameMenuPanel, menuPanel))
       quitGame = viewFactory.createMenuButton("Quit Game")
       quitGame.addActionListener((_: ActionEvent) => System.exit(0))
       inGameMenuPanel.add(Box.createRigidArea(DIMENSION_PANEL))
@@ -185,7 +185,7 @@ object Menu {
       * Switch from main menù to variant menù
       */
     private def showVariant(): Unit = {
-      gameView.showOverlay(menuPanel, variantsPanel)
+      gameView.switchOverlay(menuPanel, variantsPanel)
     }
 
     /**
@@ -207,8 +207,8 @@ object Menu {
       */
     private def chooseListener(text: String): ActionListener = (_: ActionEvent) => {
       setBoardVariant(text)
-      if (gameMode eq GameMode.PVP) gameView.showOverlay(variantsPanel, playerChoicePanel)
-      else gameView.showOverlay(variantsPanel, diffPanel)
+      if (gameMode eq GameMode.PVP) gameView.switchOverlay(variantsPanel, playerChoicePanel)
+      else gameView.switchOverlay(variantsPanel, diffPanel)
     }
 
     /**
