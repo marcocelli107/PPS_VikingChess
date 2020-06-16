@@ -66,6 +66,14 @@ trait ModelHnefatafl {
    * @return boolean.
    */
   def isCornerCell(coordinate: Pair[Int]): Boolean
+
+  /**
+   * Returns the coordinates of the last move.
+   *
+   * @return
+   *         from coordinate - to coordinate
+   */
+  def getLastMove: (Pair[Int], Pair[Int])
 }
 
 object ModelHnefatafl {
@@ -80,6 +88,7 @@ object ModelHnefatafl {
     private val THEORY: String = TheoryGame.GameRules.toString
     private val parserProlog: ParserProlog = ParserProlog(THEORY)
     private var lastNineBoards: ListBuffer[Board] = ListBuffer.empty
+    private var lastMove: (Pair[Int], Pair[Int]) = _
 
     /**
       * Defines status of the current game.
@@ -117,6 +126,8 @@ object ModelHnefatafl {
 
     override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
 
+      lastMove = (fromCoordinate, toCoordinate)
+
       game = parserProlog.makeMove(fromCoordinate, toCoordinate)
 
       if(lastNineBoards.size == SIZE_DRAW)
@@ -137,6 +148,9 @@ object ModelHnefatafl {
     override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
 
     override def isCornerCell(coordinate: Pair[Int]): Boolean = parserProlog.isCornerCell(coordinate)
+
+    override def getLastMove: (Pair[Int], Pair[Int]) = lastMove
+
     /**
       * Increments the number of pieces captured of the player.
       */
@@ -162,5 +176,6 @@ object ModelHnefatafl {
       case l if l.head.equals(l(4)) && l(4).equals(l(8)) => true
       case _ => false
     }
+
   }
 }

@@ -20,19 +20,18 @@ trait ViewFactory {
   /**
    * Creates a new Center Cell.
    *
-   * @param dimension
    * cell's dimension in percent.
    * @return a new Center Cell.
    */
 
-  def createCenterCell(dimension: Int): JButton
+  def createCenterCell(): Cell
 
   /**
    * Creates a new Corner Cell.
    *
    * @return a new Corner Cell.
    */
-  def createCornerCell(dimension: Int): JButton
+  def createCornerCell(): Cell
 
 
   /**
@@ -40,14 +39,14 @@ trait ViewFactory {
    *
    * @return a new Pawn Cell.
    */
-  def createPawnCell(dimension: Int): JButton
+  def createPawnCell(): Cell
 
   /**
    * Creates a new Normal Cell.
    *
    * @return a new Normal Cell.
    */
-  def createNormalCell(dimension: Int): JButton
+  def createNormalCell(): Cell
 
   /**
    * Creates a new GamePanel.
@@ -111,7 +110,7 @@ trait ViewFactory {
 
   /**
    * Creates a button.
-   * *@param s
+   * @param s
    * name of button.
    *
    * @return a panel with border layout.
@@ -165,6 +164,15 @@ trait ViewFactory {
    */
   def createFrame: JFrame
 
+  /**
+   * Sets the current board size to correctly define the dimension
+   * of the cells.
+   *
+   * @author Luca Nannini
+   * @param variantBoardSize
+   *                         variant board size
+   */
+  def setVariantBoardSize(variantBoardSize: Int): Unit
 }
 
 object ViewFactory extends ViewFactory {
@@ -177,13 +185,13 @@ object ViewFactory extends ViewFactory {
 
   override def getSmallerSide: Int = smallerSide
 
-  override def createCenterCell(dimension: Int): JButton = new CenterCell(dimension)
+  override def createCenterCell(): Cell = new CenterCell()
 
-  override def createCornerCell(dimension: Int): JButton = new CornerCell(dimension)
+  override def createCornerCell(): Cell = new CornerCell()
 
-  override def createPawnCell(dimension: Int): JButton = new PawnCell(dimension)
+  override def createPawnCell(): Cell = new PawnCell()
 
-  override def createNormalCell(dimension: Int): JButton = new NormalCell(dimension)
+  override def createNormalCell(): Cell = new NormalCell()
 
   override def createBoardPanel: JPanel = new BoardPanel()
 
@@ -221,12 +229,13 @@ object ViewFactory extends ViewFactory {
 
   override def createFrame: JFrame = new Frame
 
-  abstract private class Cell(dimension: Int) extends JButton {
-    cellDimension = smallerSide / dimension * 80 / 100
+  override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
 
-    var colorCell: Color = _
+  abstract class AbstractCell extends Cell {
+    private var isAPossibleMove: Boolean = false
+    private var isLastMove: Boolean = false
+    protected var defaultBackground: Color = _
 
-    var color: Color = _
 
     setPreferredSize(new Dimension(cellDimension, cellDimension))
     setAlignmentX(Component.CENTER_ALIGNMENT)
@@ -236,35 +245,58 @@ object ViewFactory extends ViewFactory {
     setCursor(new Cursor(Cursor.HAND_CURSOR))
     setOpaque(true)
     addMouseListener(new MouseAdapter() {
-      override def mouseEntered(e: MouseEvent): Unit = {
-        if (!getBackground.equals(ColorProvider.getWhiteWinColor) && !getBackground.equals(ColorProvider.getBlackWinColor)) {
-          color = getBackground
-          setBackground(Color.LIGHT_GRAY)
-        }
-      }
+      override def mouseEntered(e: MouseEvent): Unit =
+        setBackground(ColorProvider.getHighlightColor)
 
       override def mouseExited(e: MouseEvent): Unit = {
-        if (!getBackground.equals(ColorProvider.getWhiteWinColor) && !getBackground.equals(ColorProvider.getBlackWinColor)) {
-          if (getComponents.length > 0) {
-            setBackground(colorCell)
-          }
-          else {
-            setBackground(color)
-          }
-        }
+        if(isAPossibleMove)
+          setBackground(ColorProvider.getPossibleMovesColor)
+        else if(isLastMove)
+          setBackground(ColorProvider.getLastMoveColor)
+        else
+          resetBackground()
       }
     })
+
+    protected def resetBackground(): Unit = setBackground(defaultBackground)
+
+    override def setAsPossibleMove(): Unit = {
+      isAPossibleMove = true
+      setBackground(ColorProvider.getPossibleMovesColor)
+    }
+
+    override def unsetAsPossibleMove(): Unit = {
+      isAPossibleMove = false
+      resetBackground()
+    }
+
+    override def setAsKingCapturedCell(): Unit = {
+      defaultBackground = ColorProvider.getBlackWinColor
+      resetBackground()
+    }
+
+    override def setAsKingEscapedCell(): Unit = {
+      defaultBackground = ColorProvider.getWhiteWinColor
+      resetBackground()
+    }
+
+    override def setAsLastMoveCell(): Unit = {
+      isLastMove = true
+      setBackground(ColorProvider.getLastMoveColor)
+    }
+
+    override def unsetAsLastMoveCell(): Unit = {
+      isLastMove = false
+      resetBackground()
+    }
   }
 
-  private class SpecialCell(dimension: Int) extends Cell(dimension) {
-
-    private val colorCellWin = ColorProvider.getSpecialCellColor
-    colorCell = colorCellWin
-    setBackground(colorCellWin)
-
+  private abstract class SpecialCell() extends AbstractCell {
+    defaultBackground = ColorProvider.getSpecialCellColor
+    resetBackground()
   }
 
-  private class CenterCell(dimension: Int) extends SpecialCell(dimension) {
+  private class CenterCell() extends SpecialCell {
 
     private var iconCell = new ImageIcon("src/main/resources/images/iconThrone.png")
     private var image = iconCell.getImage
@@ -277,7 +309,7 @@ object ViewFactory extends ViewFactory {
 
   }
 
-  private class CornerCell(dimension: Int) extends SpecialCell(dimension) {
+  private class CornerCell() extends SpecialCell {
 
     private var iconCell = new ImageIcon("src/main/resources/images/iconCellWin.png")
     private var image = iconCell.getImage
@@ -290,16 +322,14 @@ object ViewFactory extends ViewFactory {
 
   }
 
-  private class PawnCell(dimension: Int) extends Cell(dimension) {
-    private val colorCellPawn = ColorProvider.getPawnCellColor
-    colorCell = colorCellPawn
-    setBackground(colorCellPawn)
+  private class PawnCell() extends AbstractCell {
+    defaultBackground = ColorProvider.getPawnCellColor
+    resetBackground()
   }
 
-  private class NormalCell(dimension: Int) extends Cell(dimension) {
-    private val colorNormalCell = ColorProvider.getNormalCellColor
-    colorCell = colorNormalCell
-    setBackground(colorNormalCell)
+  private class NormalCell() extends AbstractCell {
+    defaultBackground = ColorProvider.getNormalCellColor
+    resetBackground()
   }
 
   private class BoardPanel extends JPanel {
@@ -467,27 +497,21 @@ object ViewFactory extends ViewFactory {
   }
 
   private class WhitePawn extends Pawn {
-    private val white = ColorProvider.getWhiteColor
-    private val black = ColorProvider.getBlackColor
     namePawn = "white"
-    externalColor = black
-    internalColor = white
+    externalColor = ColorProvider.getBlackColor
+    internalColor = ColorProvider.getWhiteColor
   }
 
   private class BlackPawn extends Pawn {
-    private val white = ColorProvider.getWhiteColor
-    private val black = ColorProvider.getBlackColor
     namePawn = "black"
-    externalColor = white
-    internalColor = black
+    externalColor = ColorProvider.getWhiteColor
+    internalColor = ColorProvider.getBlackColor
   }
 
   private class KingPawn extends Pawn {
-    private val gold = ColorProvider.getGoldColor
-    private val white = ColorProvider.getWhiteColor
     namePawn = "king"
-    externalColor = gold
-    internalColor = white
+    externalColor = ColorProvider.getGoldColor
+    internalColor = ColorProvider.getWhiteColor
 
   }
 

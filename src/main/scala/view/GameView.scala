@@ -138,6 +138,7 @@ object GameView {
 
     def updateMove(playerToMove: Player.Value, winner: Player.Value, board: Board, nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
       gameUtils.updateMove(playerToMove, winner, board, nBlackCaptured, nWhiteCaptured)
+      gameUtils.highlightLastMove(controller.getLastMove)
     }
 
     def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = {

@@ -57,6 +57,14 @@ trait ControllerHnefatafl {
    * @return boolean.
    */
   def isCornerCell(coordinate: Pair[Int]): Boolean
+
+  /**
+   * Returns the coordinates of the last move.
+   *
+   * @return
+   *         from coordinate - to coordinate
+   */
+  def getLastMove: (Pair[Int], Pair[Int])
 }
 
 object ControllerHnefatafl {
@@ -90,6 +98,8 @@ object ControllerHnefatafl {
     override def isCentralCell(coordinate: Pair[Int]): Boolean = modelGame.isCentralCell(coordinate)
 
     override def isCornerCell(coordinate: Pair[Int]): Boolean = modelGame.isCornerCell(coordinate)
+
+    override def getLastMove: (Pair[Int], Pair[Int]) = modelGame.getLastMove
   }
 }
 

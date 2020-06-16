@@ -1,6 +1,6 @@
 package view
 
-import java.awt.{Color, GridBagConstraints, GridBagLayout}
+import java.awt.{GridBagConstraints, GridBagLayout}
 
 import javax.swing.{JButton, JLabel, JPanel}
 import model.{Piece, Player}
@@ -15,7 +15,7 @@ trait Game {
   def getLabelPlayer: JLabel
   def updateMove(playerToMove: Player.Value, winner: Player.Value, currentBoard: Board, nBlackCaptured: Int, nWhiteCaptured: Int)
   def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]])
-
+  def highlightLastMove(lastMove: (Pair[Int], Pair[Int]))
 }
 
 object Game {
@@ -27,14 +27,17 @@ object Game {
 
     private var playerOrWinnerLabel: JLabel = _
     private var menuButton: JButton = _
-    private val cells: mutable.HashMap[Pair[Int], JButton] = mutable.HashMap.empty
+    private val cells: mutable.HashMap[Pair[Int], Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Pair[Int]] = Seq.empty
     private var selectedCell: Option[Pair[Int]] = Option.empty
     private var board: Board = _
     private val player: Player.Value = gameView.getMenuUtils.getPlayer
+    private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
 
     def initGamePanel(board: Board): JPanel = {
       this.board = board
+
+      ViewFactory.setVariantBoardSize(this.gameView.getDimension)
 
       initNorthPanel()
       initSouthPanel()
@@ -63,7 +66,7 @@ object Game {
       for (i <- 1 to gameView.getDimension) {
         for (j <- 1 to gameView.getDimension) {
           val coordinate: Pair[Int] = Pair(i, j)
-          val cell: JButton = cellChoice(coordinate)
+          val cell: Cell = cellChoice(coordinate)
           cell.addActionListener(_ => actionCell(cell))
           lim.gridx = j
           lim.gridy = i
@@ -117,7 +120,7 @@ object Game {
     }
 
     private def actionDeselectCell(): Unit = {
-      possibleMoves.foreach(c => setColorBackground(c, ColorProvider.getNormalCellColor))
+      possibleMoves.foreach(c => cells(c).unsetAsPossibleMove())
       deselectCell()
     }
 
@@ -152,7 +155,7 @@ object Game {
 
     private def moveRequest(coordinate: Pair[Int]): Unit = {
       possibleMoves = gameView.getPossibleMoves(coordinate)
-      possibleMoves.foreach(k => cells(k).setBackground(ColorProvider.getPossibleMovesColor))
+      possibleMoves.foreach(c => cells(c).setAsPossibleMove())
     }
 
     private def deselectCell(): Unit = {
@@ -183,7 +186,7 @@ object Game {
       addLostPawns(nBlackCaptured, nWhiteCaptured)
       setPawns(currentBoard.cells)
       boardPanel.repaint()
-      possibleMoves.foreach(c => setColorBackground(c, ColorProvider.getNormalCellColor))
+      possibleMoves.foreach(c => cells(c).unsetAsPossibleMove())
       deselectCell()
       boardPanel.validate()
       gamePanel.validate()
@@ -196,22 +199,22 @@ object Game {
       case (Player.White, _) =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
-        cells(kingCoordinate.get).setBackground(ColorProvider.getWhiteWinColor)
+        cells(kingCoordinate.get).setAsKingEscapedCell()
 
       case (Player.Black, _) =>
         playerOrWinnerLabel.setForeground(ColorProvider.getBlackColor)
         playerOrWinnerLabel.setText("Black has Won!")
-        cells(kingCoordinate.get).setBackground(ColorProvider.getBlackWinColor)
+        cells(kingCoordinate.get).setAsKingCapturedCell()
 
       case (Player.Draw, _) => playerOrWinnerLabel.setText("Draw!")
     }
 
-    private def cellChoice(c: Pair[Int]): JButton = {
+    private def cellChoice(c: Pair[Int]): Cell = {
       if (gameView.isCornerCell(c))
-        return ViewFactory.createCornerCell(gameView.getDimension)
+        return ViewFactory.createCornerCell()
       if (gameView.isCentralCell(c))
-        return ViewFactory.createCenterCell(gameView.getDimension)
-      ViewFactory.createNormalCell(gameView.getDimension)
+        return ViewFactory.createCenterCell()
+      ViewFactory.createNormalCell()
     }
 
     override def restoreGame(): Unit = {
@@ -221,14 +224,14 @@ object Game {
 
     override def getLabelPlayer: JLabel = playerOrWinnerLabel
 
-    private def setColorBackground(c: Pair[Int], color: Color): Unit = {
-      val button: JButton = cells(c)
-      if (!(button.getBackground == ColorProvider.getWhiteWinColor) && !(button.getBackground == ColorProvider.getBlackWinColor)) {
-        if (gameView.isCentralCell(c) || gameView.isCornerCell(c))
-          button.setBackground(ColorProvider.getSpecialCellColor)
-        else
-          button.setBackground(color)
+    def highlightLastMove(lastMove: (Pair[Int], Pair[Int])): Unit = {
+      if(lastMoveCells.nonEmpty) {
+        lastMoveCells.get._1.unsetAsLastMoveCell()
+        lastMoveCells.get._2.unsetAsLastMoveCell()
       }
+      lastMoveCells = Option(cells(lastMove._1), cells(lastMove._2))
+      lastMoveCells.get._1.setAsLastMoveCell()
+      lastMoveCells.get._2.setAsLastMoveCell()
     }
 
   }

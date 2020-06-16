@@ -28,6 +28,7 @@ trait ColorProvider {
 
   def getWhiteWinColor: Color
 
+  def getLastMoveColor: Color
 }
 
 object ColorProvider extends ColorProvider {
@@ -55,5 +56,7 @@ object ColorProvider extends ColorProvider {
   override def getBlackWinColor: Color = new Color(203, 50, 52)
 
   override def getWhiteWinColor: Color = new Color(119, 221, 119)
+
+  override def getLastMoveColor: Color = new Color(230, 228, 135)
 
 }
