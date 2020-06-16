@@ -428,8 +428,8 @@ object ViewFactory {
 
     private class MenuButton(s: String) extends EmptyButton(s) {
 
-      private val FONT_DIMENSION = smallerSide * 6 / 100
-      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 10/100)
+      private val FONT_DIMENSION = smallerSide * 5 / 100
+      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 8/100)
 
       setPreferredSize(BUTTON_DIMENSION)
       setMaximumSize(getPreferredSize)

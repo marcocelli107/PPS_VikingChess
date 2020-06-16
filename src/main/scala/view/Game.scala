@@ -203,12 +203,16 @@ object Game {
       *               cell where possible moves begin.
       */
     private def actionCell(cell: JButton): Unit = {
-      if (cell.getComponents.length > 0 && possibleMoves.isEmpty)
+      if(cell.getComponents.length > 0 && possibleMoves.isEmpty)
         actionSelectCell(cell)
-      else if (possibleMoves.nonEmpty && !possibleMoves.contains(getCoordinate(cell)))
+      else if(possibleMoves.nonEmpty && !possibleMoves.contains(getCoordinate(cell))) {
         actionDeselectCell()
-      else if (possibleMoves.contains(getCoordinate(cell)) && selectedCell.isDefined)
+        actionSelectCell(cell)
+      }
+      else if(possibleMoves.contains(getCoordinate(cell)) && selectedCell.isDefined)
         actionMovePawn(cell)
+      else
+        actionDeselectCell()
     }
 
     /**
