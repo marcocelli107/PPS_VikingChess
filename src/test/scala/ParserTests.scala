@@ -185,7 +185,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     assert(parser.equals(copyParser))
   }
 
-  test("Tests 2 deep clone.") {
+  test("Tests 3 deep clone.") {
     var copyParser: ParserProlog = null
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
