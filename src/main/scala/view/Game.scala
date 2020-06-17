@@ -165,7 +165,7 @@ object Game {
       for (i <- 1 to gameView.getDimension) {
         for (j <- 1 to gameView.getDimension) {
           val coordinate: Pair[Int] = Pair(i, j)
-          val cell: Cell = cellChoice(coordinate)
+          val cell: Cell = setTypeCell(coordinate)
           cell.addActionListener(_ => actionCell(cell))
           lim.gridx = j
           lim.gridy = i
@@ -211,12 +211,21 @@ object Game {
       lim.gridy = 0
       lim.weightx = 1
       lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.LINE_START
+      lim.anchor = GridBagConstraints.CENTER
       southPanel.add(menuButton, lim)
 
       menuButton = ViewFactory.createNextMoveButton()
       //menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
-      lim.gridx = 0
+      lim.gridx = 1
+      lim.gridy = 0
+      lim.weightx = 1
+      lim.fill = GridBagConstraints.NONE
+      lim.anchor = GridBagConstraints.CENTER
+      southPanel.add(menuButton, lim)
+
+      menuButton = ViewFactory.createUndoMoveButton()
+      //menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
+      lim.gridx = 2
       lim.gridy = 0
       lim.weightx = 1
       lim.fill = GridBagConstraints.NONE
@@ -394,12 +403,12 @@ object Game {
      * @param cell
      *             cell to be set.
      */
-    private def cellChoice(cell: Pair[Int]): Cell = {
-      if (gameView.isCornerCell(cell))
-        return ViewFactory.createCornerCell()
-      if (gameView.isCentralCell(cell))
-        return ViewFactory.createCenterCell()
-      ViewFactory.createNormalCell()
+    private def setTypeCell(cell: Pair[Int]): Cell = cell match {
+      case coordinate if gameView.isCornerCell(coordinate) => ViewFactory.createCornerCell()
+      case coordinate if gameView.isCentralCell(coordinate) => ViewFactory.createCenterCell()
+      case coordinate if gameView.isPawnCell(coordinate) => ViewFactory.createPawnCell()
+      case _ => ViewFactory.createNormalCell()
+
     }
   }
 }
