@@ -157,6 +157,13 @@ trait ViewFactory {
   def createNextMoveButton(): JButton
 
   /**
+    * Creates a undo move button.
+    *
+    * @return a button.
+    */
+  def createUndoMoveButton(): JButton
+
+  /**
    * Creates a pawn black.
    *
    * @return a label.
@@ -264,9 +271,11 @@ object ViewFactory extends ViewFactory {
 
   override def createGameButton(): JButton = new GameButton()
 
-  override def createPreviousMoveButton(): JButton = new PreviousMoveBottom()
+  override def createPreviousMoveButton(): JButton = new PreviousMoveButton()
 
-  override def createNextMoveButton(): JButton = new NextMoveBottom()
+  override def createNextMoveButton(): JButton = new NextMoveButton()
+
+  override def createUndoMoveButton(): JButton = new UndoMoveButton()
 
   override def createWhiteKing: JLabel = new KingPawn
 
@@ -492,18 +501,20 @@ object ViewFactory extends ViewFactory {
     image = image.getScaledInstance(smallerSide * 7 / 100, smallerSide * 7 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setToolTipText("Game Menu")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
   }
 
   /* TODO IMPROVE */
-  private class PreviousMoveBottom() extends EmptyButton("") {
+  private class PreviousMoveButton() extends EmptyButton("") {
     private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setToolTipText("Show Previous Move")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
@@ -511,12 +522,27 @@ object ViewFactory extends ViewFactory {
   }
 
   /* TODO IMPROVE */
-  private class NextMoveBottom() extends EmptyButton("") {
+  private class NextMoveButton() extends EmptyButton("") {
     private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setToolTipText("Show Next Move")
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+
+  }
+
+  /* TODO IMPROVE */
+  private class UndoMoveButton() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/iconUndoMove.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setToolTipText("Request Undo Move")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)

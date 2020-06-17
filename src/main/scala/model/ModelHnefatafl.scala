@@ -68,6 +68,16 @@ trait ModelHnefatafl {
   def isCornerCell(coordinate: Pair[Int]): Boolean
 
   /**
+    * Checks if the cell at the specified coordinate is a init pawn cell.
+    *
+    * @param coordinate
+    *                   coordinate of the cell to inspect
+    *
+    * @return boolean.
+    */
+  def isPawnCell(coordinate: Pair[Int]): Boolean
+
+  /**
    * Returns the coordinates of the last move.
    *
    * @return
@@ -148,6 +158,8 @@ object ModelHnefatafl {
     override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
 
     override def isCornerCell(coordinate: Pair[Int]): Boolean = parserProlog.isCornerCell(coordinate)
+
+    override def isPawnCell(coordinate: Pair[Int]): Boolean = parserProlog.isPawnCell(coordinate)
 
     override def getLastMove: (Pair[Int], Pair[Int]) = lastMove
 

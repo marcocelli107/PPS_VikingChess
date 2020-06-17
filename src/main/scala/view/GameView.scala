@@ -113,6 +113,16 @@ trait GameView {
    * @return boolean.
    */
   def isCornerCell(coordinate: Pair[Int]): Boolean
+
+  /**
+    * Checks if the cell at the specified coordinate is a init pawn cell.
+    *
+    * @param coordinate
+    *                   coordinate of the cell to inspect
+    *
+    * @return boolean.
+    */
+  def isPawnCell(coordinate: Pair[Int]): Boolean
 }
 
 object GameView {
@@ -191,6 +201,8 @@ object GameView {
     override def isCentralCell(coordinate: Pair[Int]): Boolean = controller.isCentralCell(coordinate)
 
     override def isCornerCell(coordinate: Pair[Int]): Boolean = controller.isCornerCell(coordinate)
+
+    override def isPawnCell(coordinate: Pair[Int]): Boolean = controller.isPawnCell(coordinate)
 
     /**
       * Initializes the main menù.

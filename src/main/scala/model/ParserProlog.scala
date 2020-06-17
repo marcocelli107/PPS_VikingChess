@@ -64,6 +64,16 @@ trait ParserProlog {
   def isCornerCell(coordinate: Pair[Int]): Boolean
 
   /**
+    * Checks if the cell at the specified coordinate is a init pawn cell.
+    *
+    * @param coordinate
+    *                   coordinate of the cell to inspect
+    *
+    * @return boolean.
+    */
+  def isPawnCell(coordinate: Pair[Int]): Boolean
+
+  /**
    * Copy himself.
    *
    * @return ParserProlog.
@@ -155,6 +165,12 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
   override def isCornerCell(coordinate: Pair[Int]): Boolean = {
     goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, coord(${coordinate.getX},${coordinate.getY})).")
+
+    goal.isSuccess
+  }
+
+  override def isPawnCell(coordinate: Pair[Int]): Boolean = {
+    goal = engine.solve(s"isInitialPawnCoord($variant, coord(${coordinate.getX},${coordinate.getY})).")
 
     goal.isSuccess
   }
