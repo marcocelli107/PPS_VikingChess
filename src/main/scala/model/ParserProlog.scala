@@ -41,7 +41,7 @@ trait ParserProlog {
     *
     * @return king's coordinate.
     */
-  def findKing(): ListBuffer[Pair[Int]]
+  def findKing(): Pair[Int]
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -148,13 +148,13 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), goal.getTerm("L").toString.toInt)
   }
 
-  override def findKing(): ListBuffer[Pair[Int]] = {
+  override def findKing(): Pair[Int] = {
     goal = engine.solve(s"findKing($board, Coord).")
     list = goal.getTerm("Coord")
 
     goalString = replaceListCellsString(list)
 
-    setListCellsView(goalString)
+    setListCellsView(goalString).head
   }
 
   override def isCentralCell(coordinate: Pair[Int]): Boolean = {

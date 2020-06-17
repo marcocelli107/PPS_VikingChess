@@ -8,11 +8,6 @@ import javax.imageio.ImageIO
 import javax.swing._
 import javax.swing.border.LineBorder
 
-/**
- * @author Marco Celli
- * @author Pasquale Leo
- */
-
 trait ViewFactory {
 
   /**
@@ -294,6 +289,7 @@ object ViewFactory extends ViewFactory {
     private var isLastMove: Boolean = false
     private var isKingEscapedCell: Boolean = false
     private var isSelectedCell: Boolean = false
+    private var isKingCapturedCell: Boolean = false
 
     setPreferredSize(new Dimension(cellDimension, cellDimension))
     setAlignmentX(Component.CENTER_ALIGNMENT)
@@ -314,6 +310,10 @@ object ViewFactory extends ViewFactory {
           setLastMoveColor()
         else if(isSelectedCell)
           setSelectedCellColor()
+        else if(isKingEscapedCell)
+          setKingEscapedColor()
+        else if(isKingCapturedCell)
+          setKingCapturedColor()
         else
           resetBackground()
       }
@@ -330,14 +330,19 @@ object ViewFactory extends ViewFactory {
     }
 
     override def setAsKingCapturedCell(): Unit = {
-      defaultBackground = ColorProvider.getBlackWinColor
+      isKingCapturedCell = true
+      setKingCapturedColor()
+    }
+
+    override def resetKingCell(): Unit = {
+      isKingCapturedCell = false
+      isKingEscapedCell = false
       resetBackground()
     }
 
     override def setAsKingEscapedCell(): Unit = {
       isKingEscapedCell = true
-      defaultBackground = ColorProvider.getWhiteWinColor
-      resetBackground()
+      setKingEscapedColor()
     }
 
     override def setAsLastMoveCell(): Unit = {
@@ -366,6 +371,10 @@ object ViewFactory extends ViewFactory {
     protected def setLastMoveColor(): Unit = setBackground(ColorProvider.getLastMoveColor)
 
     protected def setSelectedCellColor(): Unit = setBackground(ColorProvider.getSelectedCellColor)
+
+    private def setKingEscapedColor(): Unit = setBackground(ColorProvider.getWhiteWinColor)
+
+    private def setKingCapturedColor(): Unit = setBackground(ColorProvider.getBlackWinColor)
 
     private def resetBackground(): Unit = setBackground(defaultBackground)
   }
@@ -542,7 +551,7 @@ object ViewFactory extends ViewFactory {
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
-    setToolTipText("Request Undo Move")
+    setToolTipText("Turn Back")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)

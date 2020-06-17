@@ -24,6 +24,12 @@ trait Cell extends JButton {
   def setAsKingCapturedCell()
 
   /**
+    * Resets the cell as the one where the king has been
+    * captured or escaped.
+    */
+  def resetKingCell()
+
+  /**
    * Sets the cell as the one where the king has
    * escaped
    */

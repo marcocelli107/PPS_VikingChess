@@ -1,7 +1,7 @@
 package controller
 
-import model.{GameVariant, ModelHnefatafl, Player}
-import view.GameView
+import model.{GameSnapshot, GameVariant, ModelHnefatafl, Player, Snapshot}
+import view.ViewHnefatafl
 import utils.BoardGame.Board
 import utils.Pair
 
@@ -29,14 +29,12 @@ trait ControllerHnefatafl {
   def makeMove(coordinateStart: Pair[Int], coordinateArrival: Pair[Int]): Unit
 
   /**
-    * Calls view for indicate the winner of the game.
-    */
-  def gameEnded(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit
-
-  /**
     * Notifies the view that the move has been updated.
+    *
+    * @param gameSnapshot
+    *                 snapshot to show.
     */
-  def notifyMove(playerToMove: Player.Value, winner: Player.Value, board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit
+  def notifyMove(gameSnapshot: GameSnapshot): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -69,12 +67,19 @@ trait ControllerHnefatafl {
   def isPawnCell(coordinate: Pair[Int]): Boolean
 
   /**
-   * Returns the coordinates of the last move.
-   *
-   * @return
-   *         from coordinate - to coordinate
-   */
-  def getLastMove: (Pair[Int], Pair[Int])
+    * Find king coordinate in the current board.
+    *
+    * @return king coordinate to list.
+    */
+  def findKing(): Pair[Int]
+
+  /**
+    * Returns a previous or later state of the current board.
+    *
+    * @param snapshotToShow
+    *                       indicates snapshot to show.
+    */
+  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
 }
 
 object ControllerHnefatafl {
@@ -83,7 +88,7 @@ object ControllerHnefatafl {
 
   case class ControllerHnefataflImpl() extends ControllerHnefatafl {
 
-    private val viewGame: GameView = GameView(this)
+    private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
     override def newGame(variant: GameVariant.Val): (Board, Player.Value) = {
@@ -97,13 +102,7 @@ object ControllerHnefatafl {
       modelGame.makeMove(coordinateStart, coordinateArrival)
     }
 
-    override def notifyMove(playerToMove: Player.Value, winner: Player.Value, board: Board, numberBlackCaptured: Int, numberWhiteCaptured: Int): Unit = {
-      viewGame.updateMove(playerToMove, winner, board, numberBlackCaptured, numberWhiteCaptured)
-    }
-
-    override def gameEnded(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = {
-      viewGame.setEndGame(winner, kingCoordinate)
-    }
+    override def notifyMove(gameSnapshot: GameSnapshot): Unit = viewGame.updateMove(gameSnapshot)
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = modelGame.isCentralCell(coordinate)
 
@@ -111,7 +110,9 @@ object ControllerHnefatafl {
 
     override def isPawnCell(coordinate: Pair[Int]): Boolean = modelGame.isPawnCell(coordinate)
 
-    override def getLastMove: (Pair[Int], Pair[Int]) = modelGame.getLastMove
+    override def findKing(): Pair[Int] = modelGame.findKing()
+
+    override def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit = modelGame.showPreviousOrNextBoard(snapshotToShow)
   }
 }
 
