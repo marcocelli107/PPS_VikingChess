@@ -15,12 +15,18 @@ import javax.swing.border.LineBorder
 
 trait ViewFactory {
 
+  /**
+   * Gets the smaller side of the monitor.
+   *
+   * @return int size
+   */
   def getSmallerSide: Int
 
   /**
    * Creates a new Center Cell.
    *
    * cell's dimension in percent.
+   *
    * @return a new Center Cell.
    */
 
@@ -32,7 +38,6 @@ trait ViewFactory {
    * @return a new Corner Cell.
    */
   def createCornerCell(): Cell
-
 
   /**
    * Creates a new Pawn Cell.
@@ -49,118 +54,154 @@ trait ViewFactory {
   def createNormalCell(): Cell
 
   /**
-   * Creates a new GamePanel.
+   * Creates a new BoardPanel.
    *
-   * column of GridLayout.
-   * row of GridLayout.
-   *
-   * @return a new GamePanel.
+   * @return a new BoardPanel.
    */
   def createBoardPanel: JPanel
 
   /**
    * Creates a new MenuPanel.
    *
+   * @param string
+   * text of the menù panel.
    * @return a new MenuPanel.
    */
   def createMenuPanel(string: String): JPanel
 
-
   /**
-   * Creates a panel with flow layout.
+   * Creates top or bottom panel with FlowLayout.
    *
-   * @return a panel with flow layout.
+   * @return top or bottom panel.
    *
    */
   def createTopBottomPanel: JPanel
 
+  /**
+   * Creates right or left panel with GridLayout.
+   *
+   * @param columns
+   * number of columns.
+   * @param rows
+   * number of rows.
+   * @return right or left panel.
+   *
+   */
   def createLeftRightPanel(columns: Int, rows: Int): JPanel
 
   /**
-   * Creates a panel with overlay layout.
+   * Creates a panel with OverlayLayout.
    *
-   * @return a panel with overlay layout.
-   *
+   * @return a panel.
    */
   def createOverlayLayoutPanel: JPanel
 
   /**
-   * Creates a panel with border layout.
+   * Creates a panel with BorderLayout.
    *
-   * @return a panel with border layout.
-   *
+   * @return a panel.
    */
   def createGamePanel: JPanel
 
+  /**
+   * Creates a panel with BoxLayout, containing board, left and right panel.
+   *
+   * @return a panel.
+   */
   def createBoardPlusColumnsPanel: JPanel
 
   /**
-   * Creates a button with black background.
-   * * @param s
+   * Creates a menù button.
+   *
+   * @param string
    * name of button.
-   *
-   * @return a panel with border layout.
-   *
+   * @return a button.
    */
-  def createMenuButton(s: String): JButton
+  def createMenuButton(string: String): JButton
 
-  def createPopUpButton: JPopupMenu
+  /**
+   * Creates a popup menù.
+   *
+   * @return a popup.
+   */
+  def createPopUpMenu: JPopupMenu
 
+  /**
+   * Creates an item for popup menù.
+   *
+   * @param text
+   * text of the item.
+   * @return an item.
+   */
   def createJMenuItem(text: String): JMenuItem
 
   /**
-   * Creates a button.
-   * @param s
-   * name of button.
+   * Creates a game button.
    *
-   * @return a panel with border layout.
-   *
+   * @return a button.
    */
-  def createGameButton(s: String): JButton
+  def createGameButton(): JButton
 
   /**
-   * Creates a black pawn.
+   * Creates a previous move button.
+   *
+   * @return a button.
+   */
+  def createPreviousMoveButton(): JButton
+
+  /**
+   * Creates a next move button.
+   *
+   * @return a button.
+   */
+  def createNextMoveButton(): JButton
+
+  /**
+   * Creates a pawn black.
    *
    * @return a label.
-   *
    */
   def createBlackPawn: JLabel
 
   /**
-   * Creates a white pawn.
+   * Creates a pawn white.
    *
    * @return a label.
-   *
    */
   def createWhitePawn: JLabel
 
   /**
-   * Creates a king pawn.
+   * Creates a king white.
    *
    * @return a label.
-   *
    */
   def createWhiteKing: JLabel
 
+  /**
+   * Creates a lost pawn black.
+   *
+   * @return a label.
+   */
   def createLostBlackPawn: JLabel
 
-
+  /**
+   * Creates a lost pawn white.
+   *
+   * @return a label.
+   */
   def createLostWhitePawn: JLabel
 
-
   /**
-   * Creates a Winner Label.
+   * Creates a label to showing player to move and winner.
    *
-   * @return a JLabel.
-   *
+   * @return a label.
    */
   def createLabelPlayerToMoveWinner: JLabel
 
   /**
-   * Creates a Frame.
+   * Creates a frame.
    *
-   * @return a JFrame.
-   *
+   * @return a frame.
    */
   def createFrame: JFrame
 
@@ -170,28 +211,32 @@ trait ViewFactory {
    *
    * @author Luca Nannini
    * @param variantBoardSize
-   *                         variant board size
+   * variant board size
    */
   def setVariantBoardSize(variantBoardSize: Int): Unit
+
 }
 
 object ViewFactory extends ViewFactory {
 
   private var cellDimension = 0
-  var smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
-  val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
-  val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
+  private val smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
+  private val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
+  private val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
   ge.registerFont(f)
+  private val centerCellIconPath: String = "src/main/resources/images/iconThrone.png"
+  private val cornerCellIconPath: String =  "src/main/resources/images/iconCellWin.png"
+
 
   override def getSmallerSide: Int = smallerSide
 
-  override def createCenterCell(): Cell = new CenterCell()
+  override def createCenterCell(): Cell = centerCell()
 
-  override def createCornerCell(): Cell = new CornerCell()
+  override def createCornerCell(): Cell = cornerCell()
 
-  override def createPawnCell(): Cell = new PawnCell()
+  override def createPawnCell(): Cell = pawnCell()
 
-  override def createNormalCell(): Cell = new NormalCell()
+  override def createNormalCell(): Cell = normalCell()
 
   override def createBoardPanel: JPanel = new BoardPanel()
 
@@ -209,15 +254,19 @@ object ViewFactory extends ViewFactory {
 
   override def createMenuButton(s: String): JButton = new MenuButton(s)
 
-  override def createPopUpButton: JPopupMenu = new JPopupMenu
-
   override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
 
-  override def createGameButton(s: String): JButton = new GameButton(s)
+  override def createPopUpMenu: JPopupMenu = new JPopupMenu
 
   override def createWhitePawn: JLabel = new WhitePawn
 
   override def createBlackPawn: JLabel = new BlackPawn
+
+  override def createGameButton(): JButton = new GameButton()
+
+  override def createPreviousMoveButton(): JButton = new PreviousMoveBottom()
+
+  override def createNextMoveButton(): JButton = new NextMoveBottom()
 
   override def createWhiteKing: JLabel = new KingPawn
 
@@ -231,11 +280,11 @@ object ViewFactory extends ViewFactory {
 
   override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
 
-  abstract class AbstractCell extends Cell {
+  private class BasicCell(private var defaultBackground: Color) extends Cell {
     private var isAPossibleMove: Boolean = false
     private var isLastMove: Boolean = false
-    protected var defaultBackground: Color = _
-
+    private var isKingEscapedCell: Boolean = false
+    private var isSelectedCell: Boolean = false
 
     setPreferredSize(new Dimension(cellDimension, cellDimension))
     setAlignmentX(Component.CENTER_ALIGNMENT)
@@ -244,25 +293,26 @@ object ViewFactory extends ViewFactory {
     setBorder(new LineBorder(Color.BLACK))
     setCursor(new Cursor(Cursor.HAND_CURSOR))
     setOpaque(true)
+    resetBackground()
     addMouseListener(new MouseAdapter() {
       override def mouseEntered(e: MouseEvent): Unit =
         setBackground(ColorProvider.getHighlightColor)
 
       override def mouseExited(e: MouseEvent): Unit = {
         if(isAPossibleMove)
-          setBackground(ColorProvider.getPossibleMovesColor)
-        else if(isLastMove)
-          setBackground(ColorProvider.getLastMoveColor)
+          setPossibleMoveColor()
+        else if(isLastMove && !isKingEscapedCell)
+          setLastMoveColor()
+        else if(isSelectedCell)
+          setSelectedCellColor()
         else
           resetBackground()
       }
     })
 
-    protected def resetBackground(): Unit = setBackground(defaultBackground)
-
     override def setAsPossibleMove(): Unit = {
       isAPossibleMove = true
-      setBackground(ColorProvider.getPossibleMovesColor)
+      setPossibleMoveColor()
     }
 
     override def unsetAsPossibleMove(): Unit = {
@@ -276,61 +326,61 @@ object ViewFactory extends ViewFactory {
     }
 
     override def setAsKingEscapedCell(): Unit = {
+      isKingEscapedCell = true
       defaultBackground = ColorProvider.getWhiteWinColor
       resetBackground()
     }
 
     override def setAsLastMoveCell(): Unit = {
       isLastMove = true
-      setBackground(ColorProvider.getLastMoveColor)
+      if(!isKingEscapedCell)
+        setLastMoveColor()
     }
 
     override def unsetAsLastMoveCell(): Unit = {
       isLastMove = false
       resetBackground()
     }
+
+    override def setAsSelectedCell(): Unit = {
+      isSelectedCell = true
+      setSelectedCellColor()
+    }
+
+    override def unsetAsSelectedCell(): Unit = {
+      isSelectedCell = false
+      resetBackground()
+    }
+
+    protected def setPossibleMoveColor(): Unit = setBackground(ColorProvider.getPossibleMovesColor)
+
+    protected def setLastMoveColor(): Unit = setBackground(ColorProvider.getLastMoveColor)
+
+    protected def setSelectedCellColor(): Unit = setBackground(ColorProvider.getSelectedCellColor)
+
+    private def resetBackground(): Unit = setBackground(defaultBackground)
   }
 
-  private abstract class SpecialCell() extends AbstractCell {
-    defaultBackground = ColorProvider.getSpecialCellColor
-    resetBackground()
-  }
-
-  private class CenterCell() extends SpecialCell {
-
-    private var iconCell = new ImageIcon("src/main/resources/images/iconThrone.png")
+  private class IconCell(private var defaultColor: Color, private var iconPath: String) extends BasicCell(defaultColor) {
+    private var iconCell = new ImageIcon(iconPath)
     private var image = iconCell.getImage
 
     image = image.getScaledInstance(cellDimension * 70 / 100, cellDimension * 70 / 100, Image.SCALE_SMOOTH)
-
     iconCell = new ImageIcon(image)
-
     setIcon(iconCell)
 
-  }
+    override def setPossibleMoveColor(): Unit = setBackground(ColorProvider.getSpecialCellPossibleMovesColor)
 
-  private class CornerCell() extends SpecialCell {
+    override def setLastMoveColor(): Unit = setBackground(ColorProvider.getSpecialCellLastMoveColor)
 
-    private var iconCell = new ImageIcon("src/main/resources/images/iconCellWin.png")
-    private var image = iconCell.getImage
-
-    image = image.getScaledInstance(cellDimension * 70 / 100, cellDimension * 70 / 100, Image.SCALE_SMOOTH)
-
-    iconCell = new ImageIcon(image)
-
-    setIcon(iconCell)
+    override def setSelectedCellColor(): Unit = setBackground(ColorProvider.getSpecialCellSelectedCellColor)
 
   }
 
-  private class PawnCell() extends AbstractCell {
-    defaultBackground = ColorProvider.getPawnCellColor
-    resetBackground()
-  }
-
-  private class NormalCell() extends AbstractCell {
-    defaultBackground = ColorProvider.getNormalCellColor
-    resetBackground()
-  }
+  private def pawnCell(): Cell = new BasicCell(ColorProvider.getPawnCellColor)
+  private def normalCell(): Cell = new BasicCell(ColorProvider.getNormalCellColor)
+  private def centerCell(): Cell = new IconCell(ColorProvider.getSpecialCellColor, centerCellIconPath)
+  private def cornerCell(): Cell = new IconCell(ColorProvider.getSpecialCellColor, cornerCellIconPath)
 
   private class BoardPanel extends JPanel {
     this.setBackground(ColorProvider.getLightBrownColor)
@@ -410,8 +460,8 @@ object ViewFactory extends ViewFactory {
 
   private class MenuButton(s: String) extends EmptyButton(s) {
 
-    private val FONT_DIMENSION = smallerSide * 6 / 100
-    private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 10 / 100)
+    private val FONT_DIMENSION = smallerSide * 5 / 100
+    private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
 
     setPreferredSize(BUTTON_DIMENSION)
     setMaximumSize(getPreferredSize)
@@ -436,10 +486,35 @@ object ViewFactory extends ViewFactory {
     })
   }
 
-  private class GameButton(s: String) extends EmptyButton(s) {
+  private class GameButton() extends EmptyButton("") {
     private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 7 / 100, smallerSide * 7 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+  }
+
+  /* TODO IMPROVE */
+  private class PreviousMoveBottom() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+
+  }
+
+  /* TODO IMPROVE */
+  private class NextMoveBottom() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
     setBorderPainted(false)
@@ -542,4 +617,5 @@ object ViewFactory extends ViewFactory {
     setSize(smallerSide, smallerSide)
     setLocationRelativeTo(null)
   }
+
 }

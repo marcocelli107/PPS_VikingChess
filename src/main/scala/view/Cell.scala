@@ -40,4 +40,9 @@ trait Cell extends JButton {
    * occured.
    */
   def unsetAsLastMoveCell()
+
+
+  def setAsSelectedCell()
+
+  def unsetAsSelectedCell()
 }

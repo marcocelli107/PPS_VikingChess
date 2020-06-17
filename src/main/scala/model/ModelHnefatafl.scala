@@ -86,7 +86,7 @@ object ModelHnefatafl {
       * Inits the parser prolog and set the file of the prolog rules.
       */
     private val THEORY: String = TheoryGame.GameRules.toString
-    private val parserProlog: ParserProlog = ParserProlog(THEORY)
+    private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
     private var lastNineBoards: ListBuffer[Board] = ListBuffer.empty
     private var lastMove: (Pair[Int], Pair[Int]) = _
 

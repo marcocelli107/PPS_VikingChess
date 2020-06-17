@@ -80,6 +80,11 @@ initBoard(
     ]
 ).
 
+%%% Returns if the specified +Coordinate corresponds to an initial pawn cell.
+% [isInitialPawnCoord(+GameVariant, +Coordinate)]
+isInitialPawnCoord(V, coord(X, Y)) :-
+	initBoard(V, B), ithElem(X, B, R), ithElem(Y, R, cell(C, P)), isPawn(P).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  					         	List Utils			               		  %%
@@ -87,7 +92,7 @@ initBoard(
 
 
 %%% Puts +Element in last position of +List.
-% addLast(+List, +Element, -OutputList)
+% [addLast(+List, +Element, -OutputList)]
 addLast([], X, [X]).
 addLast([X|Xs], Y, [X|L]) :- addLast(Xs, Y, L).
 
