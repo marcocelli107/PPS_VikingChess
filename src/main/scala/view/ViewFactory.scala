@@ -7,63 +7,51 @@ import java.io.File
 import javax.imageio.ImageIO
 import javax.swing._
 import javax.swing.border.LineBorder
-import view.ColorProvider.ColorProviderImpl
-
 
 /**
-@author Marco Celli
-@author Pasquale Leo
+ * @author Marco Celli
+ * @author Pasquale Leo
  */
 
 trait ViewFactory {
 
   /**
-    * Gets the smaller side of the monitor.
-    *
-    * @return int size
-    */
+   * Gets the smaller side of the monitor.
+   *
+   * @return int size
+   */
   def getSmallerSide: Int
 
   /**
    * Creates a new Center Cell.
    *
-   * @param dimension
-   *                cell's dimension in percent.
+   * cell's dimension in percent.
    *
    * @return a new Center Cell.
    */
 
-  def createCenterCell(dimension: Int): JButton
+  def createCenterCell(): Cell
 
   /**
    * Creates a new Corner Cell.
    *
-   * @param dimension
-   *           dimension of the cell.
-   *
    * @return a new Corner Cell.
    */
-  def createCornerCell(dimension: Int): JButton
+  def createCornerCell(): Cell
 
   /**
    * Creates a new Pawn Cell.
    *
-   * @param dimension
-   *            dimension of the cell.
-   *
    * @return a new Pawn Cell.
    */
-  def createPawnCell(dimension: Int): JButton
+  def createPawnCell(): Cell
 
   /**
    * Creates a new Normal Cell.
    *
-   * @param dimension
-   *             dimension of the cell.
-   *
    * @return a new Normal Cell.
    */
-  def createNormalCell(dimension: Int): JButton
+  def createNormalCell(): Cell
 
   /**
    * Creates a new BoardPanel.
@@ -76,8 +64,7 @@ trait ViewFactory {
    * Creates a new MenuPanel.
    *
    * @param string
-   *             text of the menù panel.
-   *
+   * text of the menù panel.
    * @return a new MenuPanel.
    */
   def createMenuPanel(string: String): JPanel
@@ -91,16 +78,15 @@ trait ViewFactory {
   def createTopBottomPanel: JPanel
 
   /**
-    * Creates right or left panel with GridLayout.
-    *
-    * @param columns
-    *                number of columns.
-    * @param rows
-    *                number of rows.
-    *
-    * @return right or left panel.
-    *
-    */
+   * Creates right or left panel with GridLayout.
+   *
+   * @param columns
+   * number of columns.
+   * @param rows
+   * number of rows.
+   * @return right or left panel.
+   *
+   */
   def createLeftRightPanel(columns: Int, rows: Int): JPanel
 
   /**
@@ -118,60 +104,56 @@ trait ViewFactory {
   def createGamePanel: JPanel
 
   /**
-    * Creates a panel with BoxLayout, containing board, left and right panel.
-    *
-    * @return a panel.
-    */
+   * Creates a panel with BoxLayout, containing board, left and right panel.
+   *
+   * @return a panel.
+   */
   def createBoardPlusColumnsPanel: JPanel
 
   /**
    * Creates a menù button.
    *
    * @param string
-   *               name of button.
-   *
+   * name of button.
    * @return a button.
    */
   def createMenuButton(string: String): JButton
 
   /**
-    * Creates a popup menù.
-    *
-    * @return a popup.
-    */
+   * Creates a popup menù.
+   *
+   * @return a popup.
+   */
   def createPopUpMenu: JPopupMenu
 
   /**
-    * Creates an item for popup menù.
-    *
-    * @param text
-    *               text of the item.
-    *
-    * @return an item.
-    */
+   * Creates an item for popup menù.
+   *
+   * @param text
+   * text of the item.
+   * @return an item.
+   */
   def createJMenuItem(text: String): JMenuItem
 
   /**
    * Creates a game button.
-   * @param string
-   *                name of button.
    *
    * @return a button.
    */
   def createGameButton(): JButton
 
   /**
-    * Creates a previous move button.
-    *
-    * @return a button.
-    */
+   * Creates a previous move button.
+   *
+   * @return a button.
+   */
   def createPreviousMoveButton(): JButton
 
   /**
-    * Creates a next move button.
-    *
-    * @return a button.
-    */
+   * Creates a next move button.
+   *
+   * @return a button.
+   */
   def createNextMoveButton(): JButton
 
   /**
@@ -196,25 +178,25 @@ trait ViewFactory {
   def createWhiteKing: JLabel
 
   /**
-    * Creates a lost pawn black.
-    *
-    * @return a label.
-    */
-  def createLostBlackPawn : JLabel
+   * Creates a lost pawn black.
+   *
+   * @return a label.
+   */
+  def createLostBlackPawn: JLabel
 
   /**
-    * Creates a lost pawn white.
-    *
-    * @return a label.
-    */
-  def createLostWhitePawn : JLabel
+   * Creates a lost pawn white.
+   *
+   * @return a label.
+   */
+  def createLostWhitePawn: JLabel
 
   /**
-    * Creates a label to showing player to move and winner.
-    *
-    * @return a label.
-    */
-  def createLabelPlayerToMoveWinner : JLabel
+   * Creates a label to showing player to move and winner.
+   *
+   * @return a label.
+   */
+  def createLabelPlayerToMoveWinner: JLabel
 
   /**
    * Creates a frame.
@@ -222,392 +204,418 @@ trait ViewFactory {
    * @return a frame.
    */
   def createFrame: JFrame
+
+  /**
+   * Sets the current board size to correctly define the dimension
+   * of the cells.
+   *
+   * @author Luca Nannini
+   * @param variantBoardSize
+   * variant board size
+   */
+  def setVariantBoardSize(variantBoardSize: Int): Unit
+
 }
 
-object ViewFactory {
+object ViewFactory extends ViewFactory {
 
-  def apply: ViewFactory = ViewFactoryImpl()
-
-  case class ViewFactoryImpl() extends ViewFactory {
-
-    private val colorProvider = new ColorProviderImpl
-    private var cellDimension = 0
-    var smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
-    val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
-    val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
-    ge.registerFont(f)
-
-    override def getSmallerSide: Int = smallerSide
-
-    override def createCenterCell(dimension: Int): JButton = new CenterCell(dimension)
-
-    override def createCornerCell(dimension: Int): JButton = new CornerCell(dimension)
-
-    override def createPawnCell(dimension: Int): JButton = new PawnCell(dimension)
-
-    override def createNormalCell(dimension: Int): JButton = new NormalCell(dimension)
-
-    override def createBoardPanel: JPanel = new BoardPanel()
-
-    override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
-
-    override def createTopBottomPanel: JPanel = new TopBottomPanel
-
-    override def createLeftRightPanel(columns: Int, rows: Int): JPanel = new LeftRightPanel(columns, rows)
-
-    override def createOverlayLayoutPanel: JPanel = new OverlayLayoutPanel
-
-    override def createGamePanel: JPanel = new GamePanel
-
-    override def createBoardPlusColumnsPanel: JPanel = new BoardPlusColumns
-
-    override def createMenuButton(s: String): JButton = new MenuButton(s)
-
-    override def createPopUpMenu: JPopupMenu = new JPopupMenu
-
-    override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
-
-    override def createGameButton(): JButton = new GameButtonTop()
-
-    override def createPreviousMoveButton(): JButton = new PreviousMoveBottom()
-
-    override def createNextMoveButton(): JButton = new NextMoveBottom()
-
-    override def createWhitePawn: JLabel = new WhitePawn
-
-    override def createBlackPawn: JLabel = new BlackPawn
-
-    override def createWhiteKing: JLabel = new KingPawn
-
-    override def createLostBlackPawn : JLabel = new LostBlackPawn
-
-    override def createLostWhitePawn : JLabel = new LostWhitePawn
-
-    override def createLabelPlayerToMoveWinner: JLabel = new LabelPlayer_Winner
-
-    override def createFrame: JFrame = new Frame
-
-    abstract private class Cell(dimension: Int) extends JButton {
-      cellDimension = smallerSide / dimension * 80 / 100
-
-      var colorCell: Color = _
-
-      var color: Color = _
-
-      setPreferredSize(new Dimension(cellDimension, cellDimension))
-      setAlignmentX(Component.CENTER_ALIGNMENT)
-      setAlignmentY(Component.CENTER_ALIGNMENT)
-      setLayout(new GridLayout())
-      setBorder(new LineBorder(Color.BLACK))
-      setCursor(new Cursor(Cursor.HAND_CURSOR))
-      setOpaque(true)
-      addMouseListener(new MouseAdapter() {
-        override def mouseEntered(e: MouseEvent): Unit = {
-          if( !getBackground.equals(colorProvider.getWhiteWinColor) && !getBackground.equals(colorProvider.getBlackWinColor)){
-            color = getBackground
-            setBackground(Color.LIGHT_GRAY)
-          }
-        }
-        override def mouseExited(e: MouseEvent): Unit = {
-          if(!getBackground.equals(colorProvider.getWhiteWinColor) && !getBackground.equals(colorProvider.getBlackWinColor)){
-              if (getComponents.length > 0) {
-                setBackground(colorCell)
-              }
-              else {
-                setBackground(color)
-              }
-          }
-        }
-      })
-    }
-
-    private class SpecialCell(dimension: Int) extends Cell(dimension) {
-
-      private val colorCellWin = colorProvider.getSpecialCellColor
-      colorCell = colorCellWin
-      setBackground(colorCellWin)
-
-    }
-
-    private class CenterCell(dimension: Int) extends SpecialCell(dimension){
-
-      private var iconCell = new ImageIcon("src/main/resources/images/iconThrone.png")
-      private var image = iconCell.getImage
-
-      image = image.getScaledInstance(cellDimension * 70/100, cellDimension * 70/100, Image.SCALE_SMOOTH)
-
-      iconCell = new ImageIcon(image)
-
-      setIcon(iconCell)
-
-    }
-
-    private class CornerCell(dimension: Int) extends SpecialCell(dimension){
-
-      private var iconCell = new ImageIcon("src/main/resources/images/iconCellWin.png")
-      private var image = iconCell.getImage
-
-      image = image.getScaledInstance(cellDimension * 70/100, cellDimension * 70/100, Image.SCALE_SMOOTH)
-
-      iconCell = new ImageIcon(image)
-
-      setIcon(iconCell)
-
-    }
-
-    private class PawnCell(dimension: Int) extends Cell(dimension) {
-      private val colorCellPawn = colorProvider.getPawnCellColor
-      colorCell = colorCellPawn
-      setBackground(colorCellPawn)
-    }
-
-    private class NormalCell(dimension: Int) extends Cell(dimension) {
-      private val colorNormalCell = colorProvider.getNormalCellColor
-      colorCell = colorNormalCell
-      setBackground(colorNormalCell)
-    }
-
-    private class BoardPanel extends JPanel {
-      this.setBackground(colorProvider.getLightBrownColor)
-    }
-
-    private class MenuPanel(string: String) extends JPanel {
-
-      private val menuLabel = new JLabel()
-
-      private val chooseLabel = new JLabel()
-
-      private val image = ImageIO.read(new File("src/main/resources/images/Cornice.png"))
-
-      private val imageScaled = image.getScaledInstance(smallerSide, smallerSide * 98/100, Image.SCALE_DEFAULT)
-
-      private val img = new ImageIcon("src/main/resources/images/logo.png")
-
-      setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
-      menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 25/ 100))
-      menuLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
-      menuLabel.setIcon(img)
-      chooseLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 6/ 100))
-      chooseLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
-      chooseLabel.setFont(new Font(f.getFontName, Font.BOLD, smallerSide * 6/100))
-      chooseLabel.setText(string)
-      chooseLabel.setForeground(colorProvider.getWhiteColor)
-      add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 5/100)))
-      add(menuLabel)
-      add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1/100)))
-      add(chooseLabel)
-      add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1/100)))
+  private var cellDimension = 0
+  private val smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
+  private val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
+  private val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
+  ge.registerFont(f)
+  private val centerCellIconPath: String = "src/main/resources/images/iconThrone.png"
+  private val cornerCellIconPath: String =  "src/main/resources/images/iconCellWin.png"
 
 
+  override def getSmallerSide: Int = smallerSide
 
-      override protected def paintComponent(g: Graphics): Unit = {
-        super.paintComponent(g)
-        g.drawImage(imageScaled, 0, 0, null)
+  override def createCenterCell(): Cell = centerCell()
+
+  override def createCornerCell(): Cell = cornerCell()
+
+  override def createPawnCell(): Cell = pawnCell()
+
+  override def createNormalCell(): Cell = normalCell()
+
+  override def createBoardPanel: JPanel = new BoardPanel()
+
+  override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
+
+  override def createTopBottomPanel: JPanel = new TopBottomPanel
+
+  override def createLeftRightPanel(columns: Int, rows: Int): JPanel = new LeftRightPanel(columns, rows)
+
+  override def createOverlayLayoutPanel: JPanel = new OverlayLayoutPanel
+
+  override def createGamePanel: JPanel = new GamePanel
+
+  override def createBoardPlusColumnsPanel: JPanel = new BoardPlusColumns
+
+  override def createMenuButton(s: String): JButton = new MenuButton(s)
+
+  override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
+
+  override def createPopUpMenu: JPopupMenu = new JPopupMenu
+
+  override def createWhitePawn: JLabel = new WhitePawn
+
+  override def createBlackPawn: JLabel = new BlackPawn
+
+  override def createGameButton(): JButton = new GameButton()
+
+  override def createPreviousMoveButton(): JButton = new PreviousMoveBottom()
+
+  override def createNextMoveButton(): JButton = new NextMoveBottom()
+
+  override def createWhiteKing: JLabel = new KingPawn
+
+  override def createLostBlackPawn: JLabel = new LostBlackPawn
+
+  override def createLostWhitePawn: JLabel = new LostWhitePawn
+
+  override def createLabelPlayerToMoveWinner: JLabel = new LabelPlayer_Winner
+
+  override def createFrame: JFrame = new Frame
+
+  override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
+
+  private class BasicCell(private var defaultBackground: Color) extends Cell {
+    private var isAPossibleMove: Boolean = false
+    private var isLastMove: Boolean = false
+    private var isKingEscapedCell: Boolean = false
+    private var isSelectedCell: Boolean = false
+
+    setPreferredSize(new Dimension(cellDimension, cellDimension))
+    setAlignmentX(Component.CENTER_ALIGNMENT)
+    setAlignmentY(Component.CENTER_ALIGNMENT)
+    setLayout(new GridLayout())
+    setBorder(new LineBorder(Color.BLACK))
+    setCursor(new Cursor(Cursor.HAND_CURSOR))
+    setOpaque(true)
+    resetBackground()
+    addMouseListener(new MouseAdapter() {
+      override def mouseEntered(e: MouseEvent): Unit =
+        setBackground(ColorProvider.getHighlightColor)
+
+      override def mouseExited(e: MouseEvent): Unit = {
+        if(isAPossibleMove)
+          setPossibleMoveColor()
+        else if(isLastMove && !isKingEscapedCell)
+          setLastMoveColor()
+        else if(isSelectedCell)
+          setSelectedCellColor()
+        else
+          resetBackground()
       }
+    })
+
+    override def setAsPossibleMove(): Unit = {
+      isAPossibleMove = true
+      setPossibleMoveColor()
     }
 
-    private class TopBottomPanel extends JPanel {
-      private val WIDTH_DIMENSION = smallerSide
-      private val HEIGHT_DIMENSION = smallerSide * 8 / 100
-
-      setBackground(colorProvider.getLightBrownColor)
-      setPreferredSize(new Dimension(WIDTH_DIMENSION, HEIGHT_DIMENSION))
-      setAlignmentX(Component.RIGHT_ALIGNMENT)
-
+    override def unsetAsPossibleMove(): Unit = {
+      isAPossibleMove = false
+      resetBackground()
     }
 
-    private class LeftRightPanel(val columns: Int, val rows: Int) extends JPanel {
-      private val WIDTH_DIMENSION = smallerSide * 10 / 100
-      private val HEIGHT_DIMENSION = smallerSide * 80 / 100
-      private val colorSide = colorProvider.getLightBrownColor
-      setLayout(new GridLayout(rows, columns))
-      setBackground(colorSide)
-      setPreferredSize(new Dimension(WIDTH_DIMENSION, HEIGHT_DIMENSION))
+    override def setAsKingCapturedCell(): Unit = {
+      defaultBackground = ColorProvider.getBlackWinColor
+      resetBackground()
     }
 
-    private class OverlayLayoutPanel extends JPanel {
-      setLayout(new OverlayLayout(this))
-      setVisible(true)
+    override def setAsKingEscapedCell(): Unit = {
+      isKingEscapedCell = true
+      defaultBackground = ColorProvider.getWhiteWinColor
+      resetBackground()
     }
 
-    private class GamePanel extends JPanel {
-      setBackground(colorProvider.getLightBrownColor)
+    override def setAsLastMoveCell(): Unit = {
+      isLastMove = true
+      if(!isKingEscapedCell)
+        setLastMoveColor()
     }
 
-    private class BoardPlusColumns extends JPanel {
-      setLayout(new BoxLayout(this, BoxLayout.X_AXIS))
+    override def unsetAsLastMoveCell(): Unit = {
+      isLastMove = false
+      resetBackground()
     }
 
-    abstract private class EmptyButton(val s: String) extends JButton {
-      setCursor(new Cursor(Cursor.HAND_CURSOR))
-      setHorizontalAlignment(SwingConstants.CENTER)
-      setText(s)
+    override def setAsSelectedCell(): Unit = {
+      isSelectedCell = true
+      setSelectedCellColor()
     }
 
-    private class MenuButton(s: String) extends EmptyButton(s) {
-
-      private val FONT_DIMENSION = smallerSide * 5 / 100
-      private val BUTTON_DIMENSION = new Dimension(smallerSide * 60/100, smallerSide * 8/100)
-
-      setPreferredSize(BUTTON_DIMENSION)
-      setMaximumSize(getPreferredSize)
-      setAlignmentX(Component.CENTER_ALIGNMENT)
-
-      setOpaque(false)
-      setContentAreaFilled(false)
-      setBorderPainted(false)
-
-      setFont(new Font(f.getFontName, Font.BOLD, FONT_DIMENSION))
-      setForeground(colorProvider.getWhiteColor)
-      setBorderPainted(false)
-
-      addMouseListener(new MouseAdapter() {
-        override def mouseEntered(e: MouseEvent): Unit = {
-          setForeground(colorProvider.getNormalCellColor)
-        }
-        override def mouseExited(e: MouseEvent): Unit = {
-          setForeground(colorProvider.getWhiteColor)
-        }
-      })
+    override def unsetAsSelectedCell(): Unit = {
+      isSelectedCell = false
+      resetBackground()
     }
 
-    private class GameButtonTop() extends EmptyButton("") {
-      private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
-      private var image = imageIcon.getImage
-      image = image.getScaledInstance(smallerSide * 7/ 100, smallerSide * 7/100, Image.SCALE_SMOOTH)
-      imageIcon = new ImageIcon(image)
-      setIcon(imageIcon)
-      setBorderPainted(false)
-      setOpaque(false)
-      setContentAreaFilled(false)
+    protected def setPossibleMoveColor(): Unit = setBackground(ColorProvider.getPossibleMovesColor)
 
-    }
+    protected def setLastMoveColor(): Unit = setBackground(ColorProvider.getLastMoveColor)
 
-    /* TODO IMPROVE */
-    private class PreviousMoveBottom() extends EmptyButton("") {
-      private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
-      private var image = imageIcon.getImage
-      image = image.getScaledInstance(smallerSide * 5/ 100, smallerSide * 5/100, Image.SCALE_SMOOTH)
-      imageIcon = new ImageIcon(image)
-      setIcon(imageIcon)
-      setBorderPainted(false)
-      setOpaque(false)
-      setContentAreaFilled(false)
+    protected def setSelectedCellColor(): Unit = setBackground(ColorProvider.getSelectedCellColor)
 
-    }
+    private def resetBackground(): Unit = setBackground(defaultBackground)
+  }
 
-    /* TODO IMPROVE */
-    private class NextMoveBottom() extends EmptyButton("") {
-      private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
-      private var image = imageIcon.getImage
-      image = image.getScaledInstance(smallerSide * 5/ 100, smallerSide * 5/100, Image.SCALE_SMOOTH)
-      imageIcon = new ImageIcon(image)
-      setIcon(imageIcon)
-      setBorderPainted(false)
-      setOpaque(false)
-      setContentAreaFilled(false)
+  private class IconCell(private var defaultColor: Color, private var iconPath: String) extends BasicCell(defaultColor) {
+    private var iconCell = new ImageIcon(iconPath)
+    private var image = iconCell.getImage
 
-    }
+    image = image.getScaledInstance(cellDimension * 70 / 100, cellDimension * 70 / 100, Image.SCALE_SMOOTH)
+    iconCell = new ImageIcon(image)
+    setIcon(iconCell)
 
-    private class PopUpMenu extends JPopupMenu {
+    override def setPossibleMoveColor(): Unit = setBackground(ColorProvider.getSpecialCellPossibleMovesColor)
 
-      private val FONT_DIMENSION = smallerSide * 3 / 100
-      setCursor(new Cursor(Cursor.HAND_CURSOR))
-      setFont(new Font(f.getFontName, Font.PLAIN, FONT_DIMENSION))
+    override def setLastMoveColor(): Unit = setBackground(ColorProvider.getSpecialCellLastMoveColor)
 
-    }
+    override def setSelectedCellColor(): Unit = setBackground(ColorProvider.getSpecialCellSelectedCellColor)
 
-    private class MenuItem(text: String) extends JMenuItem {
+  }
 
-      private val colorSide = colorProvider.getBrownColor
-      private val FONT_DIMENSION = smallerSide * 3 / 100
+  private def pawnCell(): Cell = new BasicCell(ColorProvider.getPawnCellColor)
+  private def normalCell(): Cell = new BasicCell(ColorProvider.getNormalCellColor)
+  private def centerCell(): Cell = new IconCell(ColorProvider.getSpecialCellColor, centerCellIconPath)
+  private def cornerCell(): Cell = new IconCell(ColorProvider.getSpecialCellColor, cornerCellIconPath)
 
-      setText(text)
-      setFont(new Font(f.getFontName, Font.PLAIN, FONT_DIMENSION))
-      setForeground(Color.WHITE)
-      setBackground(colorSide)
-      setOpaque(true)
+  private class BoardPanel extends JPanel {
+    this.setBackground(ColorProvider.getLightBrownColor)
+  }
 
-    }
+  private class MenuPanel(string: String) extends JPanel {
 
-    abstract private class Pawn extends JLabel {
+    private val menuLabel = new JLabel()
 
-      protected var externalColor: Color = _
-      protected var internalColor: Color = _
-      protected var namePawn: String = _
+    private val chooseLabel = new JLabel()
 
-      protected var EXTERNAL_ROUNDRECT_DIMENSION: Int= cellDimension * 8 / 10
-      protected var INTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 7 / 10
+    private val image = ImageIO.read(new File("src/main/resources/images/Cornice.png"))
 
-      setOpaque(false)
-      setVisible(true)
+    private val imageScaled = image.getScaledInstance(smallerSide, smallerSide * 98 / 100, Image.SCALE_DEFAULT)
+
+    private val img = new ImageIcon("src/main/resources/images/logo.png")
+
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
+    menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 25 / 100))
+    menuLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
+    menuLabel.setIcon(img)
+    chooseLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 6 / 100))
+    chooseLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
+    chooseLabel.setFont(new Font(f.getFontName, Font.BOLD, smallerSide * 6 / 100))
+    chooseLabel.setText(string)
+    chooseLabel.setForeground(ColorProvider.getWhiteColor)
+    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 5 / 100)))
+    add(menuLabel)
+    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
+    add(chooseLabel)
+    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
 
 
-      override def paintComponent(g: Graphics): Unit = {
-        super.paintComponent(g)
-        val X_CENTRE = getWidth / 2
-        val Y_CENTRE = getHeight / 2
-        val radius1 = EXTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
-        val radius2 = INTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
-        g.setColor(externalColor)
-        g.fillRoundRect(X_CENTRE - radius1, Y_CENTRE - radius1, EXTERNAL_ROUNDRECT_DIMENSION, EXTERNAL_ROUNDRECT_DIMENSION, 10, 10)
-        g.setColor(internalColor)
-        g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_DIMENSION, INTERNAL_ROUNDRECT_DIMENSION, 10, 10)
-      }
-
-    }
-
-    private class WhitePawn extends Pawn {
-      private val white = colorProvider.getWhiteColor
-      private val black = colorProvider.getBlackColor
-      namePawn = "white"
-      externalColor = black
-      internalColor = white
-    }
-
-    private class BlackPawn extends Pawn {
-      private val white = colorProvider.getWhiteColor
-      private val black = colorProvider.getBlackColor
-      namePawn = "black"
-      externalColor = white
-      internalColor = black
-    }
-
-    private class KingPawn extends Pawn {
-      private val gold = colorProvider.getGoldColor
-      private val white = colorProvider.getWhiteColor
-      namePawn = "king"
-      externalColor = gold
-      internalColor = white
-
-    }
-
-    private class LostWhitePawn extends WhitePawn {
-      EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
-      INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
-    }
-
-    private class LostBlackPawn extends BlackPawn {
-      EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
-      INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
-    }
-
-    private class LabelPlayer_Winner extends JLabel {
-      private val DIMENSION_FONT: Int = smallerSide * 7 / 100
-      setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
-      setForeground(colorProvider.getPossibleMovesColor)
-    }
-
-    private class Frame extends JFrame {
-      private val FRAME_TITLE = "Viking Chess - Hnefatafl"
-      private val iconApp = new ImageIcon("src/main/resources/images/iconApp.png")
-
-      setTitle(FRAME_TITLE)
-      setIconImage(iconApp.getImage)
-      setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-      setResizable(false)
-      setSize(smallerSide, smallerSide)
-      setLocationRelativeTo(null)
+    override protected def paintComponent(g: Graphics): Unit = {
+      super.paintComponent(g)
+      g.drawImage(imageScaled, 0, 0, null)
     }
   }
+
+  private class TopBottomPanel extends JPanel {
+    private val WIDTH_DIMENSION = smallerSide
+    private val HEIGHT_DIMENSION = smallerSide * 8 / 100
+
+    setBackground(ColorProvider.getLightBrownColor)
+    setPreferredSize(new Dimension(WIDTH_DIMENSION, HEIGHT_DIMENSION))
+    setAlignmentX(Component.RIGHT_ALIGNMENT)
+
+  }
+
+  private class LeftRightPanel(val columns: Int, val rows: Int) extends JPanel {
+    private val WIDTH_DIMENSION = smallerSide * 10 / 100
+    private val HEIGHT_DIMENSION = smallerSide * 80 / 100
+    private val colorSide = ColorProvider.getLightBrownColor
+    setLayout(new GridLayout(rows, columns))
+    setBackground(colorSide)
+    setPreferredSize(new Dimension(WIDTH_DIMENSION, HEIGHT_DIMENSION))
+  }
+
+  private class OverlayLayoutPanel extends JPanel {
+    setLayout(new OverlayLayout(this))
+    setVisible(true)
+  }
+
+  private class GamePanel extends JPanel {
+    setBackground(ColorProvider.getLightBrownColor)
+  }
+
+  private class BoardPlusColumns extends JPanel {
+    setLayout(new BoxLayout(this, BoxLayout.X_AXIS))
+  }
+
+  abstract private class EmptyButton(val s: String) extends JButton {
+    setCursor(new Cursor(Cursor.HAND_CURSOR))
+    setHorizontalAlignment(SwingConstants.CENTER)
+    setText(s)
+  }
+
+  private class MenuButton(s: String) extends EmptyButton(s) {
+
+    private val FONT_DIMENSION = smallerSide * 5 / 100
+    private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
+
+    setPreferredSize(BUTTON_DIMENSION)
+    setMaximumSize(getPreferredSize)
+    setAlignmentX(Component.CENTER_ALIGNMENT)
+
+    setOpaque(false)
+    setContentAreaFilled(false)
+    setBorderPainted(false)
+
+    setFont(new Font(f.getFontName, Font.BOLD, FONT_DIMENSION))
+    setForeground(ColorProvider.getWhiteColor)
+    setBorderPainted(false)
+
+    addMouseListener(new MouseAdapter() {
+      override def mouseEntered(e: MouseEvent): Unit = {
+        setForeground(ColorProvider.getNormalCellColor)
+      }
+
+      override def mouseExited(e: MouseEvent): Unit = {
+        setForeground(ColorProvider.getWhiteColor)
+      }
+    })
+  }
+
+  private class GameButton() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 7 / 100, smallerSide * 7 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+  }
+
+  /* TODO IMPROVE */
+  private class PreviousMoveBottom() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+
+  }
+
+  /* TODO IMPROVE */
+  private class NextMoveBottom() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+
+  }
+
+  private class PopUpMenu extends JPopupMenu {
+
+    private val FONT_DIMENSION = smallerSide * 3 / 100
+    setCursor(new Cursor(Cursor.HAND_CURSOR))
+    setFont(new Font(f.getFontName, Font.PLAIN, FONT_DIMENSION))
+
+  }
+
+  private class MenuItem(text: String) extends JMenuItem {
+
+    private val colorSide = ColorProvider.getBrownColor
+    private val FONT_DIMENSION = smallerSide * 3 / 100
+
+    setText(text)
+    setFont(new Font(f.getFontName, Font.PLAIN, FONT_DIMENSION))
+    setForeground(Color.WHITE)
+    setBackground(colorSide)
+    setOpaque(true)
+
+  }
+
+  abstract private class Pawn extends JLabel {
+
+    protected var externalColor: Color = _
+    protected var internalColor: Color = _
+    protected var namePawn: String = _
+
+    protected var EXTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 8 / 10
+    protected var INTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 7 / 10
+
+    setOpaque(false)
+    setVisible(true)
+
+
+    override def paintComponent(g: Graphics): Unit = {
+      super.paintComponent(g)
+      val X_CENTRE = getWidth / 2
+      val Y_CENTRE = getHeight / 2
+      val radius1 = EXTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
+      val radius2 = INTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
+      g.setColor(externalColor)
+      g.fillRoundRect(X_CENTRE - radius1, Y_CENTRE - radius1, EXTERNAL_ROUNDRECT_DIMENSION, EXTERNAL_ROUNDRECT_DIMENSION, 10, 10)
+      g.setColor(internalColor)
+      g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_DIMENSION, INTERNAL_ROUNDRECT_DIMENSION, 10, 10)
+    }
+
+  }
+
+  private class WhitePawn extends Pawn {
+    namePawn = "white"
+    externalColor = ColorProvider.getBlackColor
+    internalColor = ColorProvider.getWhiteColor
+  }
+
+  private class BlackPawn extends Pawn {
+    namePawn = "black"
+    externalColor = ColorProvider.getWhiteColor
+    internalColor = ColorProvider.getBlackColor
+  }
+
+  private class KingPawn extends Pawn {
+    namePawn = "king"
+    externalColor = ColorProvider.getGoldColor
+    internalColor = ColorProvider.getWhiteColor
+
+  }
+
+  private class LostWhitePawn extends WhitePawn {
+    EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
+    INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
+  }
+
+  private class LostBlackPawn extends BlackPawn {
+    EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
+    INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
+  }
+
+  private class LabelPlayer_Winner extends JLabel {
+    private val DIMENSION_FONT: Int = smallerSide * 7 / 100
+    setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
+    setForeground(ColorProvider.getPossibleMovesColor)
+  }
+
+  private class Frame extends JFrame {
+    private val FRAME_TITLE = "Viking Chess - Hnefatafl"
+    private val iconApp = new ImageIcon("src/main/resources/images/iconApp.png")
+
+    setTitle(FRAME_TITLE)
+    setIconImage(iconApp.getImage)
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+    setResizable(false)
+    setSize(smallerSide, smallerSide)
+    setLocationRelativeTo(null)
+  }
+
 }

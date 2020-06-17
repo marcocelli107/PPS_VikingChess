@@ -5,7 +5,6 @@ import javax.swing.{JFrame, JPanel}
 import model.Player
 import utils.BoardGame.Board
 import utils.Pair
-import view.ViewFactory.ViewFactoryImpl
 
 trait GameView {
 
@@ -76,7 +75,7 @@ trait GameView {
     *                 next player to move.
     * @param winner
     *                 possible winner.
-    * @param currentBoard
+    * @param board
     *                 board updated after the move.
     * @param nBlackCaptured
     *                 total number of black pieces captured.
@@ -125,12 +124,11 @@ object GameView {
     private var menuPanel, variantsPanel, diffPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
     private var dimension: Int = _
     private var board: Board = _
-    private val viewFactory: ViewFactory = new ViewFactoryImpl
-    private val menuUtils: Menu = Menu(viewFactory, this)
-    private val gameUtils: Game = Game(viewFactory, this)
-    private val frame: JFrame = viewFactory.createFrame
-    private val overlayPanel: JPanel = viewFactory.createOverlayLayoutPanel
-    private var gamePanel: JPanel = viewFactory.createGamePanel
+    private val menuUtils: Menu = Menu(this)
+    private val gameUtils: Game = Game(this)
+    private val frame: JFrame = ViewFactory.createFrame
+    private val overlayPanel: JPanel = ViewFactory.createOverlayLayoutPanel
+    private var gamePanel: JPanel = ViewFactory.createGamePanel
 
     initMainMenu()
     overlayPanel.add(menuPanel)
@@ -183,6 +181,7 @@ object GameView {
 
     override def updateMove(playerToMove: Player.Value, winner: Player.Value, board: Board, nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
       gameUtils.updateMove(playerToMove, winner, board, nBlackCaptured, nWhiteCaptured)
+      gameUtils.highlightLastMove(controller.getLastMove)
     }
 
     override def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = {
