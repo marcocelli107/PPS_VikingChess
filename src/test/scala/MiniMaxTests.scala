@@ -1,8 +1,8 @@
-import ia.{MiniMax}
+import ia.MiniMax
 import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, TheoryGame}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
-import utils.{BoardGame, Pair}
+import utils.{BoardGame, Coordinate}
 class MiniMaxTests extends FunSuite with MockFactory with Matchers{
 
   val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
@@ -15,22 +15,22 @@ class MiniMaxTests extends FunSuite with MockFactory with Matchers{
     var startCell: BoardGame.BoardCell= null
     inSequence {
       parser.createGame(GameVariant.Hnefatafl.toString().toLowerCase())
-      board = minmax.moveAnyPawn(parser, Pair(1,4), Pair(1,2) ).getActualBoard()
-      endCell= board.cells.filter(c => c.getCoordinate.equals(Pair(1,2))).head
-      startCell= board.cells.filter(c => c.getCoordinate.equals(Pair(1,4))).head
+      board = minmax.moveAnyPawn(parser, Coordinate(1,4), Coordinate(1,2) ).getActualBoard
+      endCell= board.cells.filter(c => c.getCoordinate.equals(Coordinate(1,2))).head
+      startCell= board.cells.filter(c => c.getCoordinate.equals(Coordinate(1,4))).head
     }
     assert(endCell.getPiece.equals( Piece.BlackPawn))
     assert(startCell.getPiece.equals( Piece.Void))
   }
 
   test("Tests calculation of a set of moves of a pawn."){
-    var setMoves: List[Pair[Int]] = null
+    var setMoves: List[Coordinate] = null
     var listParser: List[ParserProlog] = null
 
     inSequence{
       parser.createGame(GameVariant.Hnefatafl.toString().toLowerCase())
-      setMoves = parser.showPossibleCells( Pair(1,4)).toList
-      listParser = minmax.allMovesAnyPawn(parser, Pair(1,4), setMoves, List())
+      setMoves = parser.showPossibleCells( Coordinate(1,4)).toList
+      listParser = minmax.allMovesAnyPawn(parser, Coordinate(1,4), setMoves, List())
     }
     assert(( listParser.size == setMoves.size))
     listParser.foreach( parserSon =>  assert( !parserSon.equals(parser)))
@@ -38,12 +38,12 @@ class MiniMaxTests extends FunSuite with MockFactory with Matchers{
   }
 
   test("Tests calculation of all moves of a pawn." ){
-    var listCordPawn: List[Pair[Int]] = null
+    var listCordPawn: List[Coordinate] = null
     var listParser: List[ParserProlog] = null
 
     inSequence{
       parser.createGame(GameVariant.Hnefatafl.toString().toLowerCase())
-      listCordPawn = parser.getActualBoard().cells.filter( cell => cell.getPiece.equals(Piece.BlackPawn)).map( cell => cell.getCoordinate).toList
+      listCordPawn = parser.getActualBoard.cells.filter( cell => cell.getPiece.equals(Piece.BlackPawn)).map( cell => cell.getCoordinate).toList
       listParser = minmax.allMovesAllPawn(parser, listCordPawn, List())
     }
     assert( listParser.size == 116 )

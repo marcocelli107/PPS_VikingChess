@@ -4,7 +4,7 @@ import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
 import model.{GameSnapshot, Player, Snapshot}
 import utils.BoardGame.Board
-import utils.Pair
+import utils.Coordinate
 
 trait ViewHnefatafl {
 
@@ -57,7 +57,7 @@ trait ViewHnefatafl {
     * @param toCoordinate
     *              arrival coordiante.
     */
-  def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int])
+  def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate)
 
   /**
     * Gets the possible moves from a specifies coordiante.
@@ -66,7 +66,7 @@ trait ViewHnefatafl {
     *              starting coordinate.
     * @return sequence of possible coordinates.
     */
-  def getPossibleMoves(coordinate: Pair[Int]): Seq[Pair[Int]]
+  def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate]
 
   /**
     * Sets the move made by the user.
@@ -74,7 +74,7 @@ trait ViewHnefatafl {
     * @param gameSnapshot
     *                 snapshot to show.
     */
-  def updateMove(gameSnapshot: GameSnapshot)
+  def update(gameSnapshot: GameSnapshot)
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -84,7 +84,7 @@ trait ViewHnefatafl {
    *
    * @return boolean.
    */
-  def isCentralCell(coordinate: Pair[Int]): Boolean
+  def isCentralCell(coordinate: Coordinate): Boolean
 
   /**
    * Checks if the cell at the specified coordinate is a corner cell.
@@ -94,7 +94,7 @@ trait ViewHnefatafl {
    *
    * @return boolean.
    */
-  def isCornerCell(coordinate: Pair[Int]): Boolean
+  def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
     * Checks if the cell at the specified coordinate is a init pawn cell.
@@ -104,14 +104,14 @@ trait ViewHnefatafl {
     *
     * @return boolean.
     */
-  def isPawnCell(coordinate: Pair[Int]): Boolean
+  def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
     * Find king coordinate in the current board.
     *
     * @return king coordinate to list.
     */
-  def findKing(): Pair[Int]
+  def findKing(): Coordinate
 
   /**
     * Returns a previous or later state of the current board.
@@ -119,7 +119,12 @@ trait ViewHnefatafl {
     * @param snapshotToShow
     *                   indicates snapshot to show.
     */
-  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+
+  /**
+   * Undoes last move.
+   */
+  def undoMove(): Unit
 }
 
 object ViewHnefatafl {
@@ -178,25 +183,27 @@ object ViewHnefatafl {
       viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
     }
 
-    override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
+    override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
       controller.makeMove(fromCoordinate, toCoordinate)
     }
 
-    override def getPossibleMoves(coordinate: Pair[Int]): Seq[Pair[Int]] = {
+    override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = {
       controller.getPossibleMoves(coordinate)
     }
 
-    override def updateMove(gameSnapshot: GameSnapshot): Unit = viewMatch.updateMove(gameSnapshot)
+    override def update(gameSnapshot: GameSnapshot): Unit = viewMatch.update(gameSnapshot)
 
-    override def isCentralCell(coordinate: Pair[Int]): Boolean = controller.isCentralCell(coordinate)
+    override def isCentralCell(coordinate: Coordinate): Boolean = controller.isCentralCell(coordinate)
 
-    override def isCornerCell(coordinate: Pair[Int]): Boolean = controller.isCornerCell(coordinate)
+    override def isCornerCell(coordinate: Coordinate): Boolean = controller.isCornerCell(coordinate)
 
-    override def isPawnCell(coordinate: Pair[Int]): Boolean = controller.isPawnCell(coordinate)
+    override def isPawnCell(coordinate: Coordinate): Boolean = controller.isPawnCell(coordinate)
 
-    override def findKing(): Pair[Int] = controller.findKing()
+    override def findKing(): Coordinate = controller.findKing()
 
-    override def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit = controller.showPreviousOrNextBoard(snapshotToShow)
+    override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = controller.changeSnapshot(snapshotToShow)
+
+    override def undoMove(): Unit = controller.undoMove()
 
     /**
       * Initializes the main menù.

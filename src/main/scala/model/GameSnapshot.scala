@@ -1,7 +1,7 @@
 package model
 
 import utils.BoardGame.Board
-import utils.Pair
+import utils.Coordinate
 
 trait GameSnapshot {
 
@@ -19,7 +19,7 @@ trait GameSnapshot {
     * @return
     *         from coordinate - to coordinate
     */
-  def getLastMove: Option[(Pair[Int], Pair[Int])]
+  def getLastMove: Option[(Coordinate, Coordinate)]
 
   def getNumberCapturedBlacks: Int
 
@@ -28,10 +28,10 @@ trait GameSnapshot {
 
 object GameSnapshot {
 
-  def apply(variant: GameVariant.Val, playerToMove: Player.Value, winner: Player.Value, board: Board, lastMove: Option[(Pair[Int],Pair[Int])], numberCapturedBlacks: Int, numberCapturedWhites: Int): GameSnapshot =
+  def apply(variant: GameVariant.Val, playerToMove: Player.Value, winner: Player.Value, board: Board, lastMove: Option[(Coordinate,Coordinate)], numberCapturedBlacks: Int, numberCapturedWhites: Int): GameSnapshot =
     GameSnapshotImpl(variant, playerToMove, winner, board, lastMove, numberCapturedBlacks, numberCapturedWhites)
 
-  case class GameSnapshotImpl(variant: GameVariant.Val, playerToMove: Player.Value, winner: Player.Value, board: Board, lastMove: Option[(Pair[Int],Pair[Int])], numberCapturedBlacks: Int, numberCapturedWhites: Int) extends GameSnapshot {
+  case class GameSnapshotImpl(variant: GameVariant.Val, playerToMove: Player.Value, winner: Player.Value, board: Board, lastMove: Option[(Coordinate,Coordinate)], numberCapturedBlacks: Int, numberCapturedWhites: Int) extends GameSnapshot {
 
     override def getVariant: GameVariant.Val = variant
 
@@ -41,7 +41,7 @@ object GameSnapshot {
 
     override def getBoard: Board = board
 
-    override def getLastMove: Option[(Pair[Int], Pair[Int])] = lastMove
+    override def getLastMove: Option[(Coordinate, Coordinate)] = lastMove
 
     override def getNumberCapturedBlacks: Int = numberCapturedBlacks
 

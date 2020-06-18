@@ -2,9 +2,9 @@ package ia
 import model.MaxMin.MaxMin
 import model.{MaxMin, _}
 import utils.BoardGame.BoardCell
-import utils.Pair
+import utils.Coordinate
 
-case class Node(gameState: ParserProlog, score: Option[Int])
+case class MiniMaxNode(gameState: ParserProlog, score: Option[Int])
 
 class MiniMax( level: Int ) {
 
@@ -24,10 +24,10 @@ class MiniMax( level: Int ) {
   }
 
   def getPlayerAndBoard(parserProlog: ParserProlog ):(Player.Value, List[BoardCell] ) = {
-     (parserProlog.getPlayer(), parserProlog.getActualBoard().cells.toList)
+    (parserProlog.getPlayer(), parserProlog.getActualBoard().cells.toList)
   }
 
-  def findPlayerPawns(parserProlog: ParserProlog): List[Pair[Int]] = {
+  def findPlayerPawns(parserProlog: ParserProlog): List[Coordinate] = {
     val (player, boardCells ) = getPlayerAndBoard(parserProlog)
     for {
       cell <- boardCells
@@ -49,34 +49,34 @@ class MiniMax( level: Int ) {
     case h::t => computeAnyGame(t, levelGames :+allMovesAllPawn(h.copy(), findPlayerPawns(h.copy()), List()))
   }
 
-  def allMovesAllPawn(parserProlog: ParserProlog, listCordPawn: List[Pair[Int]], listParser: Game  ):Game = listCordPawn match {
+  def allMovesAllPawn(parserProlog: ParserProlog, listCordPawn: List[Coordinate], listParser: Game  ):Game = listCordPawn match {
     case Nil => listParser
     case h::t => allMovesAllPawn( parserProlog,
-                                  t,
-                                  listParser ++ allMovesAnyPawn(parserProlog.copy(), h,getPawnPossibleMove(h, parserProlog.copy()), List()))
+      t,
+      listParser ++ allMovesAnyPawn(parserProlog.copy(), h,getPawnPossibleMove(h, parserProlog.copy()), List()))
   }
 
-  def allMovesAnyPawn(parserProlog: ParserProlog, startCord: Pair[Int], listEndCord: List[Pair[Int]], listParser: Game):Game = listEndCord match {
+  def allMovesAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, listEndCord: List[Coordinate], listParser: Game):Game = listEndCord match {
     case Nil => listParser
     case h::t => allMovesAnyPawn(parserProlog,startCord, t, listParser :+ moveAnyPawn(parserProlog.copy(), startCord,h))
   }
 
-  def moveAnyPawn(parserProlog: ParserProlog, startCord: Pair[Int], endCord: Pair[Int] ): ParserProlog = {
+  def moveAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, endCord: Coordinate ): ParserProlog = {
     parserProlog.makeMove(startCord,endCord)
     parserProlog.copy()
   }
 
-  def pruningAlfaBeta (node: Node, depth: Int,  alfa: Int , beta: Int, phase: MaxMin ): Int =  (depth, phase)  match {
+  def pruningAlfaBeta (node: MiniMaxNode, depth: Int, alfa: Int, beta: Int, phase: MaxMin ): Int =  (depth, phase)  match {
     case (_,_)  if(isTerminalNode(node)) => evaluationFunction.score(node.gameState)
     case (0,_)  => ???
     case (_, MaxMin.Max) => maximizationPhase(node, depth, alfa, beta)
     case  _ => minimizationPhase()
   }
 
-  def maximizationPhase(node: Node, depth: Int,  alfa: Int , beta: Int):Int = {
+  def maximizationPhase(node: MiniMaxNode, depth: Int, alfa: Int, beta: Int):Int = {
     val v:Int= -100
 
-    def movesAllPawn(stateGame: ParserProlog, gameMoves: List[(Pair[Int],Pair[Int]) ], listParser: Game,  tempVal: Int ,depth: Int,  alfa: Int , beta: Int): Int = gameMoves match {
+    def movesAllPawn(stateGame: ParserProlog, gameMoves: List[(Coordinate,Coordinate) ], listParser: Game,  tempVal: Int ,depth: Int,  alfa: Int , beta: Int): Int = gameMoves match {
       case Nil => tempVal
       case _  if(beta <= alfa) => tempVal
       case h::t => ???
@@ -89,20 +89,20 @@ class MiniMax( level: Int ) {
 
   def minimizationPhase(): Int = ???
 
-  def isTerminalNode(node:Node):Boolean = ???
+  def isTerminalNode(node:MiniMaxNode):Boolean = ???
 
 
 
-  def getGamePossibleMoves(parserProlog: ParserProlog, pawnsPlayer: List[Pair[Int]], gamePossibleMoves: List[(Pair[Int],Pair[Int]) ] ) : List[(Pair[Int],Pair[Int]) ] = pawnsPlayer match {
+  def getGamePossibleMoves(parserProlog: ParserProlog, pawnsPlayer: List[Coordinate], gamePossibleMoves: List[(Coordinate,Coordinate) ] ) : List[(Coordinate,Coordinate) ] = pawnsPlayer match {
     case Nil => gamePossibleMoves
     case h::t => getGamePossibleMoves(parserProlog, t, getPawnPossibleMovesMap(h, parserProlog) ++ gamePossibleMoves )
   }
 
-  def getPawnPossibleMovesMap( pawnCord: Pair[Int], parserProlog: ParserProlog): List[(Pair[Int],Pair[Int])] = {
+  def getPawnPossibleMovesMap( pawnCord: Coordinate, parserProlog: ParserProlog): List[(Coordinate,Coordinate)] = {
     getPawnPossibleMove(pawnCord, parserProlog).map( endCord => (pawnCord,endCord ))
   }
 
-  def getPawnPossibleMove(coordinate: Pair[Int], parserProlog: ParserProlog): List[Pair[Int]] = {
+  def getPawnPossibleMove(coordinate: Coordinate, parserProlog: ParserProlog): List[Coordinate] = {
     parserProlog.showPossibleCells(coordinate).toList
   }
 
@@ -115,12 +115,9 @@ object TryMinMax extends App{
   val THEORY: String = TheoryGame.GameRules.toString
   val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
   val board = parserProlog.createGame(GameVariant.Brandubh.nameVariant.toLowerCase)._3
-//  var gameTree: GameTree = GameTree()
+  //  var gameTree: GameTree = GameTree()
   val miniMax = new MiniMax(  2)
 
   println( miniMax.findPlayerPawns(parserProlog ) )
 
 }
-
-
-

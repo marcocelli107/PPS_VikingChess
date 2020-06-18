@@ -5,7 +5,7 @@ import java.io.FileInputStream
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
 import utils.BoardGame.Board.BoardImpl
 import utils.BoardGame.{Board, BoardCell}
-import utils.Pair
+import utils.Coordinate
 
 import scala.collection.mutable.ListBuffer
 
@@ -24,7 +24,7 @@ trait ParserProlog {
     *                 coordinate of the Cell.
     * @return list buffer of coordinates.
     */
-  def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]]
+  def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
 
   /**
     * Sets player move if it's legit.
@@ -34,14 +34,24 @@ trait ParserProlog {
     *                 coordinate of the arrival cell.
     * @return new board.
     */
-  def makeMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Player.Value, Player.Value, Board, Int)
+  def makeMove(cellStart: Coordinate, cellArrival: Coordinate): (Player.Value, Player.Value, Board, Int)
+
+  /**
+   * Undoes the last move.
+   * @param fromCoordinate
+   *                 coordinate of the starting cell.
+   * @param toCoordinate
+   *                 coordinate of the arrival cell.
+   * @return new board.
+   */
+  def undoMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Value, Player.Value, Board, Int)
 
   /**
     * Finds king on game board.
     *
     * @return king's coordinate.
     */
-  def findKing(): Pair[Int]
+  def findKing(): Coordinate
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -51,7 +61,7 @@ trait ParserProlog {
    *
    * @return boolean.
    */
-  def isCentralCell(coordinate: Pair[Int]): Boolean
+  def isCentralCell(coordinate: Coordinate): Boolean
 
   /**
    * Checks if the cell at the specified coordinate is a corner cell.
@@ -61,7 +71,7 @@ trait ParserProlog {
    *
    * @return boolean.
    */
-  def isCornerCell(coordinate: Pair[Int]): Boolean
+  def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
     * Checks if the cell at the specified coordinate is a init pawn cell.
@@ -71,7 +81,7 @@ trait ParserProlog {
     *
     * @return boolean.
     */
-  def isPawnCell(coordinate: Pair[Int]): Boolean
+  def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
    * Copy himself.
@@ -87,6 +97,7 @@ trait ParserProlog {
    * @return Board.
    */
   def getActualBoard(): Board
+
 
   def getPlayer(): Player.Value
 
@@ -148,9 +159,9 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), 0)
   }
 
-  override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = {
+  override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
 
-    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$playerToWin,$board), coord(${cell.getX}, ${cell.getY}), L).")
+    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$playerToWin,$board), coord(${cell.x}, ${cell.y}), L).")
 
     list = goal.getTerm("L")
 
@@ -159,9 +170,16 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     setListCellsView(goalString)
   }
 
-  override def makeMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Player.Value, Player.Value, Board, Int) = {
+  override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Value, Player.Value, Board, Int) =
+    setMove(fromCoordinate, toCoordinate, "makeLegitMove")
 
-    goal = engine.solve(s"makeLegitMove(($variant, $playerToMove, $playerToWin, $board),coord(${cellStart.getX},${cellStart.getY}),coord(${cellArrival.getX},${cellArrival.getY}), L, (V,P,W,B)).")
+  override def undoMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Value, Player.Value, Board, Int) =
+    setMove(fromCoordinate, toCoordinate, "makeMove")
+
+  private def setMove(fromCoordinate: Coordinate, toCoordinate: Coordinate, predicate: String): (Player.Value, Player.Value, Board, Int) = {
+    goal = engine.solve(s"$predicate(($variant, $playerToMove, $playerToWin, $board)," +
+      s"coord(${fromCoordinate.x},${fromCoordinate.y})," +
+      s"coord(${toCoordinate.x},${toCoordinate.y}), L, (V,P,W,B)).")
 
     setGameTerms(goal)
 
@@ -170,7 +188,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), goal.getTerm("L").toString.toInt)
   }
 
-  override def findKing(): Pair[Int] = {
+  override def findKing(): Coordinate = {
     goal = engine.solve(s"findKing($board, Coord).")
     list = goal.getTerm("Coord")
 
@@ -179,20 +197,20 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     setListCellsView(goalString).head
   }
 
-  override def isCentralCell(coordinate: Pair[Int]): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, coord(${coordinate.getX},${coordinate.getY})).")
+  override def isCentralCell(coordinate: Coordinate): Boolean = {
+    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, coord(${coordinate.x},${coordinate.y})).")
 
     goal.isSuccess
   }
 
-  override def isCornerCell(coordinate: Pair[Int]): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, coord(${coordinate.getX},${coordinate.getY})).")
+  override def isCornerCell(coordinate: Coordinate): Boolean = {
+    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, coord(${coordinate.x},${coordinate.y})).")
 
     goal.isSuccess
   }
 
-  override def isPawnCell(coordinate: Pair[Int]): Boolean = {
-    goal = engine.solve(s"isInitialPawnCoord($variant, coord(${coordinate.getX},${coordinate.getY})).")
+  override def isPawnCell(coordinate: Coordinate): Boolean = {
+    goal = engine.solve(s"isInitialPawnCoord($variant, coord(${coordinate.x},${coordinate.y})).")
 
     goal.isSuccess
   }
@@ -243,16 +261,16 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
       var coordinateCell: Array[String] = null
       if (elem.contains("e")) {
         coordinateCell = elem.substring(0, elem.length - 2).split(",")
-        listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Void)
+        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Void)
       } else if (elem.contains("bp")) {
         coordinateCell = elem.substring(0, elem.length - 3).split(",")
-        listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.BlackPawn)
+        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.BlackPawn)
       } else if (elem.contains("wp")) {
         coordinateCell = elem.substring(0, elem.length - 3).split(",")
-        listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhitePawn)
+        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhitePawn)
       } else if (elem.contains("wk")) {
         coordinateCell = elem.substring(0, elem.length - 3).split(",")
-        listCells += BoardCell(Pair(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhiteKing)
+        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhiteKing)
       }
     })
 
@@ -267,13 +285,13 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    *
    * @return parsed list.
    */
-  private def setListCellsView(stringList: String): ListBuffer[Pair[Int]] = {
-    var listPossibleCoordinates: ListBuffer[Pair[Int]] = ListBuffer.empty[Pair[Int]]
+  private def setListCellsView(stringList: String): ListBuffer[Coordinate] = {
+    var listPossibleCoordinates: ListBuffer[Coordinate] = ListBuffer.empty[Coordinate]
 
     goalString.split("coord").tail.foreach(elem => {
       var coordinateCells: Array[String] = null
       coordinateCells = elem.split(",")
-      listPossibleCoordinates += Pair(coordinateCells(0).toInt, coordinateCells(1).toInt)
+      listPossibleCoordinates += Coordinate(coordinateCells(0).toInt, coordinateCells(1).toInt)
     })
     listPossibleCoordinates
   }
@@ -299,7 +317,6 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    * @return ParserProlog.
    */
   override def copy(): ParserProlog = ParserPrologImpl(theory, playerToWin, playerToMove, board, variant)
-
 
   override def equals(that: Any): Boolean = that match {
     case that: ParserPrologImpl =>

@@ -138,18 +138,32 @@ trait ViewFactory {
   def createGameButton(): JButton
 
   /**
-   * Creates a previous move button.
+   * Creates a go to first move button.
+   *
+   * @return
+   */
+  def createFirstMoveButton(): JButton
+
+  /**
+   * Creates a go to previous move button.
    *
    * @return a button.
    */
   def createPreviousMoveButton(): JButton
 
   /**
-   * Creates a next move button.
+   * Creates a go to next move button.
    *
    * @return a button.
    */
   def createNextMoveButton(): JButton
+
+  /**
+   * Creates a go to last move button.
+   *
+   * @return
+   */
+  def createLastMoveButton(): JButton
 
   /**
     * Creates a undo move button.
@@ -260,23 +274,27 @@ object ViewFactory extends ViewFactory {
 
   override def createPopUpMenu: JPopupMenu = new JPopupMenu
 
-  override def createWhitePawn: JLabel = new WhitePawn
+  override def createWhitePawn: JLabel = whitePawn()
 
-  override def createBlackPawn: JLabel = new BlackPawn
+  override def createBlackPawn: JLabel = blackPawn()
 
   override def createGameButton(): JButton = new GameButton()
 
-  override def createPreviousMoveButton(): JButton = new PreviousMoveButton()
+  override def createFirstMoveButton(): JButton = firstMoveButton()
 
-  override def createNextMoveButton(): JButton = new NextMoveButton()
+  override def createPreviousMoveButton(): JButton = previousMoveButton()
 
-  override def createUndoMoveButton(): JButton = new UndoMoveButton()
+  override def createNextMoveButton(): JButton = nextMoveButton()
 
-  override def createWhiteKing: JLabel = new KingPawn
+  override def createLastMoveButton(): JButton = lastMoveButton()
 
-  override def createLostBlackPawn: JLabel = new LostBlackPawn
+  override def createUndoMoveButton(): JButton = undoMoveButton()
 
-  override def createLostWhitePawn: JLabel = new LostWhitePawn
+  override def createWhiteKing: JLabel = kingPawn()
+
+  override def createLostBlackPawn: JLabel = capturedBlackPawn()
+
+  override def createLostWhitePawn: JLabel = capturedWhitePawn()
 
   override def createLabelPlayerToMoveWinner: JLabel = new LabelPlayer_Winner
 
@@ -516,47 +534,37 @@ object ViewFactory extends ViewFactory {
     setContentAreaFilled(false)
   }
 
-  /* TODO IMPROVE */
-  private class PreviousMoveButton() extends EmptyButton("") {
-    private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
+  private class SnapshotButton(private val iconPath: String, private val hoverText: String) extends EmptyButton("") {
+    private var imageIcon = new ImageIcon(iconPath)
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
-    setToolTipText("Show Previous Move")
+    setToolTipText(hoverText)
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
-
   }
 
-  /* TODO IMPROVE */
-  private class NextMoveButton() extends EmptyButton("") {
-    private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
-    private var image = imageIcon.getImage
-    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
-    imageIcon = new ImageIcon(image)
-    setIcon(imageIcon)
-    setToolTipText("Show Next Move")
-    setBorderPainted(false)
-    setOpaque(false)
-    setContentAreaFilled(false)
+  private val firstMoveButtonPath: String = "src/main/resources/images/iconFirstMove.png"
+  private val firstMoveButtonHoverText: String = "Show First Move"
+  private def firstMoveButton(): JButton = new SnapshotButton(firstMoveButtonPath, firstMoveButtonHoverText)
 
-  }
+  private val previousMoveButtonPath: String = "src/main/resources/images/iconPreviousMove.png"
+  private val previousMoveButtonHoverText: String = "Show Previous Move"
+  private def previousMoveButton(): JButton = new SnapshotButton(previousMoveButtonPath, previousMoveButtonHoverText)
 
-  /* TODO IMPROVE */
-  private class UndoMoveButton() extends EmptyButton("") {
-    private var imageIcon = new ImageIcon("src/main/resources/images/iconUndoMove.png")
-    private var image = imageIcon.getImage
-    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
-    imageIcon = new ImageIcon(image)
-    setIcon(imageIcon)
-    setToolTipText("Turn Back")
-    setBorderPainted(false)
-    setOpaque(false)
-    setContentAreaFilled(false)
+  private val nextMoveButtonPath: String = "src/main/resources/images/iconNextMove.png"
+  private val nextMoveButtonHoverText: String = "Show Next Move"
+  private def nextMoveButton(): JButton = new SnapshotButton(nextMoveButtonPath, nextMoveButtonHoverText)
 
-  }
+  private val lastMoveButtonPath: String = "src/main/resources/images/iconLastMove.png"
+  private val lastMoveButtonHoverText: String = "Show Last Move"
+  private def lastMoveButton(): JButton = new SnapshotButton(lastMoveButtonPath, lastMoveButtonHoverText)
+
+  private val undoMoveButtonPath: String = "src/main/resources/images/iconUndoMove.png"
+  private val undoMoveButtonHoverText: String = "Turn Back"
+  private def undoMoveButton(): JButton = new SnapshotButton(undoMoveButtonPath, undoMoveButtonHoverText)
 
   private class PopUpMenu extends JPopupMenu {
 
@@ -579,61 +587,35 @@ object ViewFactory extends ViewFactory {
 
   }
 
-  abstract private class Pawn extends JLabel {
-
-    protected var externalColor: Color = _
-    protected var internalColor: Color = _
-    protected var namePawn: String = _
-
-    protected var EXTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 8 / 10
-    protected var INTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 7 / 10
+  private class Pawn(private val internalColor: Color, private val externalColor: Color,
+              private val sizeMultiplier: Double) extends JLabel {
+    private val EXTERNAL_ROUNDRECT_MULTIPLIER: Int = (cellDimension * 8 / 10 * sizeMultiplier).toInt
+    private val INTERNAL_ROUNDRECT_MULTIPLIER: Int = (cellDimension * 7 / 10 * sizeMultiplier).toInt
+    private val ARC_DIMENSION: Int = 10
 
     setOpaque(false)
     setVisible(true)
-
 
     override def paintComponent(g: Graphics): Unit = {
       super.paintComponent(g)
       val X_CENTRE = getWidth / 2
       val Y_CENTRE = getHeight / 2
-      val radius1 = EXTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
-      val radius2 = INTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
+      val radius1 = EXTERNAL_ROUNDRECT_MULTIPLIER * Math.sqrt(2).toInt / 2
+      val radius2 = INTERNAL_ROUNDRECT_MULTIPLIER * Math.sqrt(2).toInt / 2
       g.setColor(externalColor)
-      g.fillRoundRect(X_CENTRE - radius1, Y_CENTRE - radius1, EXTERNAL_ROUNDRECT_DIMENSION, EXTERNAL_ROUNDRECT_DIMENSION, 10, 10)
+      g.fillRoundRect(X_CENTRE - radius1, Y_CENTRE - radius1, EXTERNAL_ROUNDRECT_MULTIPLIER, EXTERNAL_ROUNDRECT_MULTIPLIER, ARC_DIMENSION, ARC_DIMENSION)
       g.setColor(internalColor)
-      g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_DIMENSION, INTERNAL_ROUNDRECT_DIMENSION, 10, 10)
+      g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_MULTIPLIER, INTERNAL_ROUNDRECT_MULTIPLIER, ARC_DIMENSION, ARC_DIMENSION)
     }
 
   }
-
-  private class WhitePawn extends Pawn {
-    namePawn = "white"
-    externalColor = ColorProvider.getBlackColor
-    internalColor = ColorProvider.getWhiteColor
-  }
-
-  private class BlackPawn extends Pawn {
-    namePawn = "black"
-    externalColor = ColorProvider.getWhiteColor
-    internalColor = ColorProvider.getBlackColor
-  }
-
-  private class KingPawn extends Pawn {
-    namePawn = "king"
-    externalColor = ColorProvider.getGoldColor
-    internalColor = ColorProvider.getWhiteColor
-
-  }
-
-  private class LostWhitePawn extends WhitePawn {
-    EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
-    INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
-  }
-
-  private class LostBlackPawn extends BlackPawn {
-    EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
-    INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
-  }
+  private val basicPawnSizeMultiplier: Double = 1
+  private val capturedPawnSizeMultiplier: Double = 0.5
+  private def whitePawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getBlackColor, basicPawnSizeMultiplier)
+  private def blackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, basicPawnSizeMultiplier)
+  private def kingPawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getGoldColor, basicPawnSizeMultiplier)
+  private def capturedWhitePawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getBlackColor, capturedPawnSizeMultiplier)
+  private def capturedBlackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, capturedPawnSizeMultiplier)
 
   private class LabelPlayer_Winner extends JLabel {
     private val DIMENSION_FONT: Int = smallerSide * 7 / 100

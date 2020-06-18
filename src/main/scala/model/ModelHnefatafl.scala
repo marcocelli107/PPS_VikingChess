@@ -4,98 +4,98 @@ import scala.collection.mutable.ListBuffer
 import controller.ControllerHnefatafl
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
-import utils.Pair
+import utils.Coordinate
 
 import scala.collection.mutable
 
 trait ModelHnefatafl {
 
   /**
-    * Defines the game variant.
-    */
+   * Defines the game variant.
+   */
   var currentVariant: GameVariant.Val
 
   /**
-    * Defines the chosen mode.
-    */
+   * Defines the chosen mode.
+   */
   var mode: GameMode.Value
 
   /**
-    * Calls parser for a new Game.
-    *
-    * @param variant
-    *              indicates the variant chosen by the user.
-    *
-    * @return created board and player to move.
-    */
+   * Calls parser for a new Game.
+   *
+   * @param variant
+   * indicates the variant chosen by the user.
+   * @return created board and player to move.
+   */
   def createGame(variant: GameVariant.Val): (Board, Player.Value)
 
   /**
-    * Calls parser for the possible moves from a cell.
-    * @param cell
-    *                 coordinate of the Cell.
-    *
-    * @return list buffer of the possible computed moves.
-    */
-  def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]]
+   * Calls parser for the possible moves from a cell.
+   *
+   * @param cell
+   * coordinate of the Cell.
+   * @return list buffer of the possible computed moves.
+   */
+  def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
 
   /**
-    * Calls parser for making a move from coordinate to coordinate.
-    * @param fromCoordinate
-    *                 coordinate of the starting cell.
-    * @param toCoordinate
-    *                 coordinate of the arrival cell.
-    *
-    * @return updated board.
-    */
-  def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit
+   * Calls parser for making a move from coordinate to coordinate.
+   *
+   * @param fromCoordinate
+   * coordinate of the starting cell.
+   * @param toCoordinate
+   * coordinate of the arrival cell.
+   * @return updated board.
+   */
+  def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
    *
    * @param coordinate
-   *                   coordinate of the cell to inspect
-   *
+   * coordinate of the cell to inspect
    * @return boolean.
    */
-  def isCentralCell(coordinate: Pair[Int]): Boolean
+  def isCentralCell(coordinate: Coordinate): Boolean
 
   /**
    * Checks if the cell at the specified coordinate is a corner cell.
    *
    * @param coordinate
-   *                   coordinate of the cell to inspect
-   *
+   * coordinate of the cell to inspect
    * @return boolean.
    */
-  def isCornerCell(coordinate: Pair[Int]): Boolean
+  def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
-    * Checks if the cell at the specified coordinate is a init pawn cell.
-    *
-    * @param coordinate
-    *                   coordinate of the cell to inspect
-    *
-    * @return boolean.
-    */
-  def isPawnCell(coordinate: Pair[Int]): Boolean
+   * Checks if the cell at the specified coordinate is a init pawn cell.
+   *
+   * @param coordinate
+   * coordinate of the cell to inspect
+   * @return boolean.
+   */
+  def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
-    * Find king coordinate in the current board.
-    *
-    * @return king coordinate to list.
-    */
-  def findKing(): Pair[Int]
+   * Find king coordinate in the current board.
+   *
+   * @return king coordinate to list.
+   */
+  def findKing(): Coordinate
 
   /**
-    * Returns a previous or later state of the current board.
-    *
-    * @param snapshotToShow
-    *                   indicates snapshot to show.
-    *
-    * @return required board
-    */
-  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
+   * Returns a previous or later state of the current board.
+   *
+   * @param snapshotToShow
+   * indicates snapshot to show.
+   * @return required board
+   */
+  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+
+  /**
+   * Undoes last move.
+   */
+  def undoMove(): Unit
 }
 
 object ModelHnefatafl {
@@ -105,17 +105,17 @@ object ModelHnefatafl {
   case class ModelHnefataflImpl(controller: ControllerHnefatafl) extends ModelHnefatafl {
 
     /**
-      * Inits the parser prolog and set the file of the prolog rules.
-      */
+     * Inits the parser prolog and set the file of the prolog rules.
+     */
     private val THEORY: String = TheoryGame.GameRules.toString
     private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
 
     /**
-      * Defines status of the current game.
-      */
-    private var game: (Player.Value,Player.Value,Board, Int) = _
+     * Defines status of the current game.
+     */
+    private var game: (Player.Value, Player.Value, Board, Int) = _
 
     private final val SIZE_DRAW: Int = 9
 
@@ -134,43 +134,38 @@ object ModelHnefatafl {
       (game._3, game._1)
     }
 
-    override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = {
-      if(showingCurrentSnapshot)
+    override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
+      if (showingCurrentSnapshot)
         parserProlog.showPossibleCells(cell)
       else ListBuffer.empty
     }
 
-    override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
+    override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
 
       game = parserProlog.makeMove(fromCoordinate, toCoordinate)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
       var winner: Player.Value = game._2
 
-      if(checkThreefoldRepetition()) {
+      if (checkThreefoldRepetition())
         winner = Player.Draw
-        //controller.gameEnded(Player.Draw, Option.empty)
-      }
-
-      /*else if(someoneHasWon(game._2))
-        controller.gameEnded(game._2, Option(parserProlog.findKing().head))*/
 
       storySnapshot += GameSnapshot(currentVariant, game._1, winner, game._3, Option(fromCoordinate, toCoordinate), pieceCaptured._1, pieceCaptured._2)
 
       currentSnapshot += 1
 
-      controller.notifyMove(storySnapshot.last)
+      controller.updateView(storySnapshot.last)
     }
 
-    override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
+    override def isCentralCell(coordinate: Coordinate): Boolean = parserProlog.isCentralCell(coordinate)
 
-    override def isCornerCell(coordinate: Pair[Int]): Boolean = parserProlog.isCornerCell(coordinate)
+    override def isCornerCell(coordinate: Coordinate): Boolean = parserProlog.isCornerCell(coordinate)
 
-    override def isPawnCell(coordinate: Pair[Int]): Boolean = parserProlog.isPawnCell(coordinate)
+    override def isPawnCell(coordinate: Coordinate): Boolean = parserProlog.isPawnCell(coordinate)
 
-    override def findKing(): Pair[Int] = parserProlog.findKing()
+    override def findKing(): Coordinate = parserProlog.findKing()
 
-    override def showPreviousOrNextBoard(previousOrNext: Snapshot.Value): Unit = {
+    override def changeSnapshot(previousOrNext: Snapshot.Value): Unit = {
       previousOrNext match {
         case Snapshot.Previous => decrementCurrentSnapshot()
         case Snapshot.Next => incrementCurrentSnapshot()
@@ -178,32 +173,45 @@ object ModelHnefatafl {
         case Snapshot.Last => currentSnapshot = storySnapshot.size - 1
       }
       val gameSnapshot = storySnapshot(currentSnapshot)
-      controller.notifyMove(gameSnapshot)
+      controller.updateView(gameSnapshot)
+    }
+
+    override def undoMove(): Unit = {
+      if (showingCurrentSnapshot) {
+        val lastMove: Option[(Coordinate, Coordinate)] = storySnapshot.last.getLastMove
+        if (lastMove.nonEmpty) {
+          parserProlog.undoMove(lastMove.get._2, lastMove.get._1)
+          storySnapshot -= storySnapshot.last
+          currentSnapshot -= 1
+          controller.updateView(storySnapshot.last)
+        }
+      }
     }
 
     /**
-      * Increments the number of pieces captured of the player.
-      */
-    private def incrementCapturedPieces(player: Player.Value, piecesCaptured: Int): (Int,Int) = player match {
+     * Increments the number of pieces captured of the player.
+     */
+    private def incrementCapturedPieces(player: Player.Value, piecesCaptured: Int): (Int, Int) = player match {
       case Player.Black => (storySnapshot.last.getNumberCapturedBlacks + piecesCaptured, storySnapshot.last.getNumberCapturedWhites)
-      case Player.White => (storySnapshot.last.getNumberCapturedBlacks , storySnapshot.last.getNumberCapturedWhites + piecesCaptured)
+      case Player.White => (storySnapshot.last.getNumberCapturedBlacks, storySnapshot.last.getNumberCapturedWhites + piecesCaptured)
     }
 
     /**
-      * Checks if there was a threefold repetition.
-      *
-      * @return boolean
-      */
+     * Checks if there was a threefold repetition.
+     *
+     * @return boolean
+     */
     private def checkThreefoldRepetition(): Boolean = storySnapshot.reverse.take(SIZE_DRAW) match {
       case l if l.isEmpty || l.size < SIZE_DRAW => false
       case l if l.head.equals(l(4)) && l(4).equals(l(8)) => true
       case _ => false
     }
 
-    private def incrementCurrentSnapshot(): Unit = if(!showingCurrentSnapshot) currentSnapshot += 1
+    private def incrementCurrentSnapshot(): Unit = if (!showingCurrentSnapshot) currentSnapshot += 1
 
-    private def decrementCurrentSnapshot(): Unit = if(currentSnapshot > 0) currentSnapshot -= 1
+    private def decrementCurrentSnapshot(): Unit = if (currentSnapshot > 0) currentSnapshot -= 1
 
     private def showingCurrentSnapshot: Boolean = currentSnapshot == storySnapshot.size - 1
   }
+
 }
