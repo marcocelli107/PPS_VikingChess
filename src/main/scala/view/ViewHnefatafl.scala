@@ -2,11 +2,11 @@ package view
 
 import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
-import model.Player
+import model.{GameSnapshot, Player, Snapshot}
 import utils.BoardGame.Board
 import utils.Pair
 
-trait GameView {
+trait ViewHnefatafl {
 
   /**
     * Gets the dimension according to game variant.
@@ -71,28 +71,10 @@ trait GameView {
   /**
     * Sets the move made by the user.
     *
-    * @param playerToMove
-    *                 next player to move.
-    * @param winner
-    *                 possible winner.
-    * @param board
-    *                 board updated after the move.
-    * @param nBlackCaptured
-    *                 total number of black pieces captured.
-    * @param nWhiteCaptured
-    *                 total number of white pieces captured.
+    * @param gameSnapshot
+    *                 snapshot to show.
     */
-  def updateMove(playerToMove: Player.Value, winner: Player.Value, board: Board, nBlackCaptured: Int, nWhiteCaptured: Int)
-
-  /**
-    * Sets the end game.
-    *
-    * @param winner
-    *                 winner of the game.
-    * @param kingCoordinate
-    *                 king's coordinate in the board.
-    */
-  def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]])
+  def updateMove(gameSnapshot: GameSnapshot)
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -113,19 +95,44 @@ trait GameView {
    * @return boolean.
    */
   def isCornerCell(coordinate: Pair[Int]): Boolean
+
+  /**
+    * Checks if the cell at the specified coordinate is a init pawn cell.
+    *
+    * @param coordinate
+    *                   coordinate of the cell to inspect
+    *
+    * @return boolean.
+    */
+  def isPawnCell(coordinate: Pair[Int]): Boolean
+
+  /**
+    * Find king coordinate in the current board.
+    *
+    * @return king coordinate to list.
+    */
+  def findKing(): Pair[Int]
+
+  /**
+    * Returns a previous or later state of the current board.
+    *
+    * @param snapshotToShow
+    *                   indicates snapshot to show.
+    */
+  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
 }
 
-object GameView {
+object ViewHnefatafl {
 
-  def apply(controller: ControllerHnefatafl): GameView = GameViewImpl(controller)
+  def apply(controller: ControllerHnefatafl): ViewHnefatafl = ViewHnefataflImpl(controller)
 
-  case class GameViewImpl(controller: ControllerHnefatafl) extends GameView {
+  case class ViewHnefataflImpl(controller: ControllerHnefatafl) extends ViewHnefatafl {
 
     private var menuPanel, variantsPanel, diffPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
     private var dimension: Int = _
     private var board: Board = _
-    private val menuUtils: Menu = Menu(this)
-    private val gameUtils: Game = Game(this)
+    private val viewMainMenu: Menu = Menu(this)
+    private val viewMatch: ViewMatch = ViewMatch(this)
     private val frame: JFrame = ViewFactory.createFrame
     private val overlayPanel: JPanel = ViewFactory.createOverlayLayoutPanel
     private var gamePanel: JPanel = ViewFactory.createGamePanel
@@ -155,20 +162,20 @@ object GameView {
 
     override def getGamePanel: JPanel = gamePanel
 
-    override def getMenuUtils: Menu = menuUtils
+    override def getMenuUtils: Menu = viewMainMenu
 
     override def initOrRestoreGUI(): Unit = {
       if (gamePanel.getComponents.length > 0) {
-        gameUtils.restoreGame()
+        viewMatch.restoreGame()
         overlayPanel.remove(gamePanel)
       }
-      val newGame: (Board, Player.Value) = controller.newGame(menuUtils.getBoardVariant)
+      val newGame: (Board, Player.Value) = controller.newGame(viewMainMenu.getBoardVariant)
       board = newGame._1.asInstanceOf[Board]
       dimension = board.size
       initGamePanel(board)
       overlayPanel.add(gamePanel)
       showGame()
-      gameUtils.getLabelPlayer.setText(newGame._2 + " moves.")
+      viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
     }
 
     override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
@@ -179,52 +186,51 @@ object GameView {
       controller.getPossibleMoves(coordinate)
     }
 
-    override def updateMove(playerToMove: Player.Value, winner: Player.Value, board: Board, nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
-      gameUtils.updateMove(playerToMove, winner, board, nBlackCaptured, nWhiteCaptured)
-      gameUtils.highlightLastMove(controller.getLastMove)
-    }
-
-    override def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = {
-      gameUtils.setEndGame(winner, kingCoordinate)
-    }
+    override def updateMove(gameSnapshot: GameSnapshot): Unit = viewMatch.updateMove(gameSnapshot)
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = controller.isCentralCell(coordinate)
 
     override def isCornerCell(coordinate: Pair[Int]): Boolean = controller.isCornerCell(coordinate)
 
+    override def isPawnCell(coordinate: Pair[Int]): Boolean = controller.isPawnCell(coordinate)
+
+    override def findKing(): Pair[Int] = controller.findKing()
+
+    override def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit = controller.showPreviousOrNextBoard(snapshotToShow)
+
     /**
       * Initializes the main menù.
       */
     private def initMainMenu(): Unit = {
-      menuPanel = menuUtils.initMenu
+      menuPanel = viewMainMenu.initMenu
     }
 
     /**
       * Initializes the variant menù.
       */
     private def initVariantsMenu(): Unit = {
-      variantsPanel = menuUtils.initVariantsMenu
+      variantsPanel = viewMainMenu.initVariantsMenu
     }
 
     /**
       * Initializes the difficult selection menù.
       */
     private def initDiffMenu(): Unit = {
-      diffPanel = menuUtils.initDiffMenu
+      diffPanel = viewMainMenu.initDiffMenu
     }
 
     /**
       * Initializes the player selection menù.
       */
     private def initPlayerChoiceMenu(): Unit = {
-      playerChoicePanel = menuUtils.initPlayerChoiceMenu
+      playerChoicePanel = viewMainMenu.initPlayerChoiceMenu
     }
 
     /**
       * Initializes the game menù.
       */
     private def initInGameMenu(): Unit = {
-      inGameMenuPanel = menuUtils.initInGameMenu
+      inGameMenuPanel = viewMainMenu.initInGameMenu
     }
 
     /**
@@ -234,7 +240,7 @@ object GameView {
       *               board returned from parser.
       */
     private def initGamePanel(board: Board): Unit = {
-      gamePanel = gameUtils.initGamePanel(board)
+      gamePanel = viewMatch.initGamePanel(board)
     }
 
     /**
