@@ -77,6 +77,8 @@ trait ParserProlog {
    * @return Board.
    */
   def getActualBoard(): Board
+
+  def getPlayer(): Player.Value
 }
 
 object ParserPrologImpl {
@@ -116,6 +118,10 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   override def getActualBoard(): Board = {
     goalString = replaceBoardString(board)
     parseBoard(goalString)
+  }
+
+  override def getPlayer(): Player.Value = {
+    setPlayer(playerToMove.toString)
   }
 
   override def createGame(newVariant: String): (Player.Value, Player.Value, Board, Int) = {
