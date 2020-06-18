@@ -260,9 +260,9 @@ object ViewFactory extends ViewFactory {
 
   override def createPopUpMenu: JPopupMenu = new JPopupMenu
 
-  override def createWhitePawn: JLabel = new WhitePawn
+  override def createWhitePawn: JLabel = whitePawn()
 
-  override def createBlackPawn: JLabel = new BlackPawn
+  override def createBlackPawn: JLabel = blackPawn()
 
   override def createGameButton(): JButton = new GameButton()
 
@@ -272,11 +272,11 @@ object ViewFactory extends ViewFactory {
 
   override def createUndoMoveButton(): JButton = new UndoMoveButton()
 
-  override def createWhiteKing: JLabel = new KingPawn
+  override def createWhiteKing: JLabel = kingPawn()
 
-  override def createLostBlackPawn: JLabel = new LostBlackPawn
+  override def createLostBlackPawn: JLabel = capturedBlackPawn()
 
-  override def createLostWhitePawn: JLabel = new LostWhitePawn
+  override def createLostWhitePawn: JLabel = capturedWhitePawn()
 
   override def createLabelPlayerToMoveWinner: JLabel = new LabelPlayer_Winner
 
@@ -579,61 +579,35 @@ object ViewFactory extends ViewFactory {
 
   }
 
-  abstract private class Pawn extends JLabel {
-
-    protected var externalColor: Color = _
-    protected var internalColor: Color = _
-    protected var namePawn: String = _
-
-    protected var EXTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 8 / 10
-    protected var INTERNAL_ROUNDRECT_DIMENSION: Int = cellDimension * 7 / 10
+  private class Pawn(private val internalColor: Color, private val externalColor: Color,
+              private val sizeMultiplier: Double) extends JLabel {
+    private val EXTERNAL_ROUNDRECT_MULTIPLIER: Int = (cellDimension * 8 / 10 * sizeMultiplier).toInt
+    private val INTERNAL_ROUNDRECT_MULTIPLIER: Int = (cellDimension * 7 / 10 * sizeMultiplier).toInt
+    private val ARC_DIMENSION: Int = 10
 
     setOpaque(false)
     setVisible(true)
-
 
     override def paintComponent(g: Graphics): Unit = {
       super.paintComponent(g)
       val X_CENTRE = getWidth / 2
       val Y_CENTRE = getHeight / 2
-      val radius1 = EXTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
-      val radius2 = INTERNAL_ROUNDRECT_DIMENSION * Math.sqrt(2).toInt / 2
+      val radius1 = EXTERNAL_ROUNDRECT_MULTIPLIER * Math.sqrt(2).toInt / 2
+      val radius2 = INTERNAL_ROUNDRECT_MULTIPLIER * Math.sqrt(2).toInt / 2
       g.setColor(externalColor)
-      g.fillRoundRect(X_CENTRE - radius1, Y_CENTRE - radius1, EXTERNAL_ROUNDRECT_DIMENSION, EXTERNAL_ROUNDRECT_DIMENSION, 10, 10)
+      g.fillRoundRect(X_CENTRE - radius1, Y_CENTRE - radius1, EXTERNAL_ROUNDRECT_MULTIPLIER, EXTERNAL_ROUNDRECT_MULTIPLIER, ARC_DIMENSION, ARC_DIMENSION)
       g.setColor(internalColor)
-      g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_DIMENSION, INTERNAL_ROUNDRECT_DIMENSION, 10, 10)
+      g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_MULTIPLIER, INTERNAL_ROUNDRECT_MULTIPLIER, ARC_DIMENSION, ARC_DIMENSION)
     }
 
   }
-
-  private class WhitePawn extends Pawn {
-    namePawn = "white"
-    externalColor = ColorProvider.getBlackColor
-    internalColor = ColorProvider.getWhiteColor
-  }
-
-  private class BlackPawn extends Pawn {
-    namePawn = "black"
-    externalColor = ColorProvider.getWhiteColor
-    internalColor = ColorProvider.getBlackColor
-  }
-
-  private class KingPawn extends Pawn {
-    namePawn = "king"
-    externalColor = ColorProvider.getGoldColor
-    internalColor = ColorProvider.getWhiteColor
-
-  }
-
-  private class LostWhitePawn extends WhitePawn {
-    EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
-    INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
-  }
-
-  private class LostBlackPawn extends BlackPawn {
-    EXTERNAL_ROUNDRECT_DIMENSION = EXTERNAL_ROUNDRECT_DIMENSION / 2
-    INTERNAL_ROUNDRECT_DIMENSION = INTERNAL_ROUNDRECT_DIMENSION / 2
-  }
+  private val basicPawnSizeMultiplier: Double = 1
+  private val capturedPawnSizeMultiplier: Double = 0.5
+  private def whitePawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getBlackColor, basicPawnSizeMultiplier)
+  private def blackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, basicPawnSizeMultiplier)
+  private def kingPawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getGoldColor, basicPawnSizeMultiplier)
+  private def capturedWhitePawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getBlackColor, capturedPawnSizeMultiplier)
+  private def capturedBlackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, capturedPawnSizeMultiplier)
 
   private class LabelPlayer_Winner extends JLabel {
     private val DIMENSION_FONT: Int = smallerSide * 7 / 100
