@@ -2,20 +2,14 @@ package utils
 
 import model.Piece.PieceType
 
+/**
+  * Utils class that using coordinates of the cell as tuples of int.
+  */
 case class Coordinate(x: Int, y: Int)
 
 object BoardGame {
 
   trait BoardCell {
-    /**
-      * Coordinate of the cell
-      */
-    //def coordinates: Coordinate
-
-    /**
-      * Piece in the cell
-      */
-    //def piece: PieceType
 
     /**
       * Gets piece in the cell
@@ -33,13 +27,6 @@ object BoardGame {
     def apply(coordinateCell: Coordinate, piece: PieceType): BoardCell = BoardCellImpl(coordinateCell, piece)
 
     case class BoardCellImpl(coordinateCell: Coordinate, pieceCell: PieceType) extends BoardCell {
-
-      //override def coordinates: Coordinate = coordinateCell
-
-      //override def piece: PieceType = pieceCell
-      //private val coordinate: Coordinate = coordinateCell
-
-      //private val piece: PieceType = pieceCell
 
       override def getPiece: PieceType = pieceCell
 
