@@ -61,3 +61,11 @@ object Snapshot extends Enumeration {
   type SnapshotType = Value
   val Previous, Next, First, Last = Value
 }
+
+/**
+ * Defines Enumeration for Maximize or Minimize.
+ */
+object MaxMin extends Enumeration {
+  type MaxMin = Value
+  val Max, min = Value
+}

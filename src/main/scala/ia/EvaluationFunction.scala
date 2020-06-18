@@ -1,19 +1,19 @@
 package ia
 
 
-import model.{Piece, Player}
+import model.{ParserProlog, Piece}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Pair
 
 
 trait EvaluationFunction{
-  def score(board :Board, maxPlayer: Player.Value):Double
+  def score(gameState: ParserProlog):Int
 
 }
 
 class  EvaluationFunctionImpl extends EvaluationFunction {
 
-   override def score(board: Board, maxPlayer: Player.Value): Double = ???
+   override def score(gameState: ParserProlog): Int = ???
 
 
    /* RULES */
@@ -65,7 +65,7 @@ class  EvaluationFunctionImpl extends EvaluationFunction {
 
 }
 
-object EvaluationFunction {
+object EvaluationFunctionImpl {
 
   def apply(): EvaluationFunction = new EvaluationFunctionImpl()
 }

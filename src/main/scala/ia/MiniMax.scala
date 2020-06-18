@@ -1,12 +1,15 @@
 package ia
-import model._
+import model.MaxMin.MaxMin
+import model.{MaxMin, _}
 import utils.BoardGame.BoardCell
 import utils.Pair
 
+case class Node(gameState: ParserProlog, score: Option[Int])
 
-class MiniMax(  level: Int ) {
+class MiniMax( level: Int ) {
 
   var parserHistory: List[ParserProlog] = List()
+  var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl()
 
   type Game = List[ParserProlog]
 
@@ -49,20 +52,34 @@ class MiniMax(  level: Int ) {
 
   def allMovesAllPawn(parserProlog: ParserProlog, listCordPawn: List[Pair[Int]], listParser: Game  ):Game = listCordPawn match {
     case Nil => listParser
-    case h::t => allMovesAllPawn( parserProlog.copy(), t,
-                                  listParser ++ allMovesAnyPawn(parserProlog.copy(), h,
-                                  createBufferedList(h, parserProlog.copy()), List()))
+    case h::t => allMovesAllPawn( parserProlog,
+                                  t,
+                                  listParser ++ allMovesAnyPawn(parserProlog.copy(), h,createBufferedList(h, parserProlog.copy()), List()))
   }
 
-  def allMovesAnyPawn(parserProlog: ParserProlog,startCord: Pair[Int], listEndCord: List[Pair[Int]], listParser: Game):Game = listEndCord match {
+  def allMovesAnyPawn(parserProlog: ParserProlog, startCord: Pair[Int], listEndCord: List[Pair[Int]], listParser: Game):Game = listEndCord match {
     case Nil => listParser
-    case h::t => allMovesAnyPawn(parserProlog.copy(),startCord, t, listParser :+ moveAnyPawn(parserProlog.copy(), startCord,h))
+    case h::t => allMovesAnyPawn(parserProlog,startCord, t, listParser :+ moveAnyPawn(parserProlog.copy(), startCord,h))
   }
 
   def moveAnyPawn(parserProlog: ParserProlog, startCord: Pair[Int], endCord: Pair[Int] ): ParserProlog = {
     parserProlog.makeMove(startCord,endCord)
     parserProlog.copy()
   }
+
+  def pruningAlfaBeta (node: Node, depth: Int,  alfa: Double , beta: Double, phase: MaxMin ): Int =  (depth, phase)  match {
+    case (_,_)  if(isTerminalNode(node)) => evaluationFunction.score(node.gameState)
+    case (0,_)  => ???
+    case (_, MaxMin.Max) => maximizationPhase()
+    case  _ => minimizationPhase()
+  }
+
+  def maximizationPhase():Int = ???
+
+  def minimizationPhase(): Int = ???
+
+  def isTerminalNode(node:Node):Boolean = ???
+
 
 }
 object TryMinMax extends App{
