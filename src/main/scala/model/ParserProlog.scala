@@ -92,20 +92,15 @@ trait ParserProlog {
   def copy():ParserProlog
 
   /**
-   * Return the board
+   * Get the Board
    *
    * @return Board.
    */
+  def getActualBoard(): Board
 
-  def getActualBoard:Board
 
-  /**
-   * Returns the current player
-   *
-   * @return Board.
-   */
+  def getPlayer(): Player.Value
 
-  def getPlayer: Player.Value
 }
 
 object ParserPrologImpl {
@@ -144,6 +139,15 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   def getVariant: Term = variant
 
   engine.setTheory(new Theory(new FileInputStream(theory)))
+
+  override def getActualBoard(): Board = {
+    goalString = replaceBoardString(board)
+    parseBoard(goalString)
+  }
+
+  override def getPlayer(): Player.Value = {
+    setPlayer(playerToMove.toString)
+  }
 
   override def createGame(newVariant: String): (Player.Value, Player.Value, Board, Int) = {
     goal = engine.solve(s"newGame($newVariant,(V,P,W,B)).")
@@ -313,27 +317,6 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    * @return ParserProlog.
    */
   override def copy(): ParserProlog = ParserPrologImpl(theory, playerToWin, playerToMove, board, variant)
-
-  /**
-   * Return the board
-   *
-   * @return Board.
-   */
-
-  override def getActualBoard: Board = {
-    goalString = replaceBoardString(board)
-    parseBoard(goalString)
-  }
-
-  /**
-   * Returns the current player
-   *
-   * @return Board.
-   */
-
-  override def getPlayer: Player.Value = {
-    setPlayer(playerToMove.toString)
-  }
 
   override def equals(that: Any): Boolean = that match {
     case that: ParserPrologImpl =>

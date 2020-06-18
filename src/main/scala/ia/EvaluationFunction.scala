@@ -1,44 +1,45 @@
 package ia
 
 
-import model.{Piece, Player}
+import model.{ParserProlog, Piece}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
 
-
 trait EvaluationFunction{
-  def score(board :Board, maxPlayer: Player.Value):Double
+  def score(gameState: ParserProlog):Int
 
 }
 
 class  EvaluationFunctionImpl extends EvaluationFunction {
 
-   override def score(board: Board, maxPlayer: Player.Value): Double = ???
+
+  override def score(gameState: ParserProlog): Int = ???
 
 
-   /* RULES */
 
-   def scoreKingNearCorners(board: Board): Double = {
-     val kingCoord: Coordinate= findKing(board.cells)
-     if( getCoordCorners(board.size).filter(coord => distanceBetweenCells(kingCoord,coord) == 1 ).size == 0 )  0 else 1
+  /* RULES */
 
-   }
+  def scoreKingNearCorners(board: Board): Double = {
+    val kingCoord: Coordinate = findKing(board.cells)
+    if( getCoordCorners(board.size).filter(coord => distanceBetweenCells(kingCoord,coord) == 1 ).size == 0 )  0 else 1
 
-   def scoreKingIsInFreeRowsOrColumns(cells: Seq[BoardCell]): Double = ??? /*{
+  }
+
+  def scoreKingIsInFreeRowsOrColumns(cells: Seq[BoardCell]): Double = ??? /*{
      val coordKing:Coordinate = findKing(cells)
      val row: Seq[BoardCell] = getRow(coordKing.getX, cells).filter(cell => !cell.getCoordinate.equals(coordKing))
      val column: Seq[BoardCell] = getRow(coordKing.getY, cells).filter(cell => !cell.getCoordinate.equals(coordKing))
-
    }*/
 
-   def scorePawnArrangedInSquare(): Double = ???
+  /* RULES */
 
-   def scoreCapturePawns(): Double  = ???
+  def scorePawnArrangedInSquare(): Double = ???
 
+  def scoreCapturePawns(): Double  = ???
 
   /* UTILS METHODS */
 
-  def distanceBetweenCells(start: Coordinate, end: Coordinate ): Double= scala.math.sqrt(scala.math.sqrt(start.x-end.y)+scala.math.sqrt(start.y-end.y))
+  def distanceBetweenCells(start: Coordinate, end: Coordinate ): Double= scala.math.sqrt(scala.math.sqrt(start.x - end.y)+scala.math.sqrt(start.y - end.y))
 
   def getSeqRows(board: Board): Seq[Seq[BoardCell]] = {
     board.cells.grouped(board.size).toSeq
@@ -65,7 +66,7 @@ class  EvaluationFunctionImpl extends EvaluationFunction {
 
 }
 
-object EvaluationFunction {
+object EvaluationFunctionImpl {
 
   def apply(): EvaluationFunction = new EvaluationFunctionImpl()
 }
