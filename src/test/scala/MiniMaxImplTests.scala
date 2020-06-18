@@ -1,13 +1,13 @@
-import ia.MiniMax
+import ia.MiniMaxImpl
 import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, TheoryGame}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
 import utils.{BoardGame, Coordinate}
-class MiniMaxTests extends FunSuite with MockFactory with Matchers{
+class MiniMaxImplTests extends FunSuite with MockFactory with Matchers{
 
   val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
 
-  val minmax: MiniMax = new MiniMax(3)
+  val minmax: MiniMaxImpl = new MiniMaxImpl(3)
   var board: BoardGame.Board = null
 
   test("Tests calculation of single move of a pawn.") {

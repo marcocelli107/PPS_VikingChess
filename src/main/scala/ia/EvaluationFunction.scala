@@ -7,14 +7,12 @@ import utils.Coordinate
 
 trait EvaluationFunction{
   def score(gameState: ParserProlog):Int
-
 }
 
 class  EvaluationFunctionImpl extends EvaluationFunction {
 
 
   override def score(gameState: ParserProlog): Int = ???
-
 
 
   /* RULES */

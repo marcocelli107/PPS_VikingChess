@@ -101,6 +101,9 @@ trait ParserProlog {
 
   def getPlayer(): Player.Value
 
+
+  def hasWinner():( Option[Player.Value] )
+
 }
 
 object ParserPrologImpl {
@@ -147,6 +150,12 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
   override def getPlayer(): Player.Value = {
     setPlayer(playerToMove.toString)
+  }
+
+  override def hasWinner():( Option[Player.Value] ) = setPlayer( playerToWin.toString) match {
+    case Player.Black => Option( Player.Black)
+    case Player.White => Option( Player.White)
+    case _ => Option.empty
   }
 
   override def createGame(newVariant: String): (Player.Value, Player.Value, Board, Int) = {
