@@ -1,4 +1,4 @@
-import ia.{GameTree, MiniMax}
+import ia.{MiniMax}
 import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, TheoryGame}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
@@ -6,8 +6,8 @@ import utils.{BoardGame, Pair}
 class MiniMaxTests extends FunSuite with MockFactory with Matchers{
 
   val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
-  var gameTree: GameTree = GameTree()
-  val minmax: MiniMax = new MiniMax(gameTree, 3)
+
+  val minmax: MiniMax = new MiniMax(3)
   var board: BoardGame.Board = null
 
   test("Tests calculation of single move of a pawn.") {
