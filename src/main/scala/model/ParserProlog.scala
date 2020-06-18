@@ -37,6 +37,16 @@ trait ParserProlog {
   def makeMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Player.Value, Player.Value, Board, Int)
 
   /**
+   * Undoes the last move.
+   * @param fromCoordinate
+   *                 coordinate of the starting cell.
+   * @param toCoordinate
+   *                 coordinate of the arrival cell.
+   * @return new board.
+   */
+  def undoMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): (Player.Value, Player.Value, Board, Int)
+
+  /**
     * Finds king on game board.
     *
     * @return king's coordinate.
@@ -156,9 +166,16 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     setListCellsView(goalString)
   }
 
-  override def makeMove(cellStart: Pair[Int], cellArrival: Pair[Int]): (Player.Value, Player.Value, Board, Int) = {
+  override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): (Player.Value, Player.Value, Board, Int) =
+    setMove(fromCoordinate, toCoordinate, "makeLegitMove")
 
-    goal = engine.solve(s"makeLegitMove(($variant, $playerToMove, $playerToWin, $board),coord(${cellStart.getX},${cellStart.getY}),coord(${cellArrival.getX},${cellArrival.getY}), L, (V,P,W,B)).")
+  override def undoMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): (Player.Value, Player.Value, Board, Int) =
+    setMove(fromCoordinate, toCoordinate, "makeMove")
+
+  private def setMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int], predicate: String): (Player.Value, Player.Value, Board, Int) = {
+    goal = engine.solve(s"$predicate(($variant, $playerToMove, $playerToWin, $board)," +
+      s"coord(${fromCoordinate.getX},${fromCoordinate.getY})," +
+      s"coord(${toCoordinate.getX},${toCoordinate.getY}), L, (V,P,W,B)).")
 
     setGameTerms(goal)
 

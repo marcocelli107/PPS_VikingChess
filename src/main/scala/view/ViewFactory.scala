@@ -138,18 +138,32 @@ trait ViewFactory {
   def createGameButton(): JButton
 
   /**
-   * Creates a previous move button.
+   * Creates a go to first move button.
+   *
+   * @return
+   */
+  def createFirstMoveButton(): JButton
+
+  /**
+   * Creates a go to previous move button.
    *
    * @return a button.
    */
   def createPreviousMoveButton(): JButton
 
   /**
-   * Creates a next move button.
+   * Creates a go to next move button.
    *
    * @return a button.
    */
   def createNextMoveButton(): JButton
+
+  /**
+   * Creates a go to last move button.
+   *
+   * @return
+   */
+  def createLastMoveButton(): JButton
 
   /**
     * Creates a undo move button.
@@ -266,11 +280,15 @@ object ViewFactory extends ViewFactory {
 
   override def createGameButton(): JButton = new GameButton()
 
-  override def createPreviousMoveButton(): JButton = new PreviousMoveButton()
+  override def createFirstMoveButton(): JButton = firstMoveButton()
 
-  override def createNextMoveButton(): JButton = new NextMoveButton()
+  override def createPreviousMoveButton(): JButton = previousMoveButton()
 
-  override def createUndoMoveButton(): JButton = new UndoMoveButton()
+  override def createNextMoveButton(): JButton = nextMoveButton()
+
+  override def createLastMoveButton(): JButton = lastMoveButton()
+
+  override def createUndoMoveButton(): JButton = undoMoveButton()
 
   override def createWhiteKing: JLabel = kingPawn()
 
@@ -516,47 +534,37 @@ object ViewFactory extends ViewFactory {
     setContentAreaFilled(false)
   }
 
-  /* TODO IMPROVE */
-  private class PreviousMoveButton() extends EmptyButton("") {
-    private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
+  private class SnapshotButton(private val iconPath: String, private val hoverText: String) extends EmptyButton("") {
+    private var imageIcon = new ImageIcon(iconPath)
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
-    setToolTipText("Show Previous Move")
+    setToolTipText(hoverText)
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
-
   }
 
-  /* TODO IMPROVE */
-  private class NextMoveButton() extends EmptyButton("") {
-    private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
-    private var image = imageIcon.getImage
-    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
-    imageIcon = new ImageIcon(image)
-    setIcon(imageIcon)
-    setToolTipText("Show Next Move")
-    setBorderPainted(false)
-    setOpaque(false)
-    setContentAreaFilled(false)
+  private val firstMoveButtonPath: String = "src/main/resources/images/iconFirstMove.png"
+  private val firstMoveButtonHoverText: String = "Show First Move"
+  private def firstMoveButton(): JButton = new SnapshotButton(firstMoveButtonPath, firstMoveButtonHoverText)
 
-  }
+  private val previousMoveButtonPath: String = "src/main/resources/images/iconPreviousMove.png"
+  private val previousMoveButtonHoverText: String = "Show Previous Move"
+  private def previousMoveButton(): JButton = new SnapshotButton(previousMoveButtonPath, previousMoveButtonHoverText)
 
-  /* TODO IMPROVE */
-  private class UndoMoveButton() extends EmptyButton("") {
-    private var imageIcon = new ImageIcon("src/main/resources/images/iconUndoMove.png")
-    private var image = imageIcon.getImage
-    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
-    imageIcon = new ImageIcon(image)
-    setIcon(imageIcon)
-    setToolTipText("Turn Back")
-    setBorderPainted(false)
-    setOpaque(false)
-    setContentAreaFilled(false)
+  private val nextMoveButtonPath: String = "src/main/resources/images/iconNextMove.png"
+  private val nextMoveButtonHoverText: String = "Show Next Move"
+  private def nextMoveButton(): JButton = new SnapshotButton(nextMoveButtonPath, nextMoveButtonHoverText)
 
-  }
+  private val lastMoveButtonPath: String = "src/main/resources/images/iconLastMove.png"
+  private val lastMoveButtonHoverText: String = "Show Last Move"
+  private def lastMoveButton(): JButton = new SnapshotButton(lastMoveButtonPath, lastMoveButtonHoverText)
+
+  private val undoMoveButtonPath: String = "src/main/resources/images/iconUndoMove.png"
+  private val undoMoveButtonHoverText: String = "Turn Back"
+  private def undoMoveButton(): JButton = new SnapshotButton(undoMoveButtonPath, undoMoveButtonHoverText)
 
   private class PopUpMenu extends JPopupMenu {
 

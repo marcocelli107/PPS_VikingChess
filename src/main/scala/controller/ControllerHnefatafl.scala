@@ -34,7 +34,7 @@ trait ControllerHnefatafl {
     * @param gameSnapshot
     *                 snapshot to show.
     */
-  def notifyMove(gameSnapshot: GameSnapshot): Unit
+  def updateView(gameSnapshot: GameSnapshot): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -79,7 +79,12 @@ trait ControllerHnefatafl {
     * @param snapshotToShow
     *                       indicates snapshot to show.
     */
-  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+
+  /**
+   * Undoes last move.
+   */
+  def undoMove(): Unit
 }
 
 object ControllerHnefatafl {
@@ -102,7 +107,7 @@ object ControllerHnefatafl {
       modelGame.makeMove(coordinateStart, coordinateArrival)
     }
 
-    override def notifyMove(gameSnapshot: GameSnapshot): Unit = viewGame.updateMove(gameSnapshot)
+    override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = modelGame.isCentralCell(coordinate)
 
@@ -112,7 +117,9 @@ object ControllerHnefatafl {
 
     override def findKing(): Pair[Int] = modelGame.findKing()
 
-    override def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit = modelGame.showPreviousOrNextBoard(snapshotToShow)
+    override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = modelGame.changeSnapshot(snapshotToShow)
+
+    override def undoMove(): Unit = modelGame.undoMove()
   }
 }
 

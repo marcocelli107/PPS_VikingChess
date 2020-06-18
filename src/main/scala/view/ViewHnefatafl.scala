@@ -74,7 +74,7 @@ trait ViewHnefatafl {
     * @param gameSnapshot
     *                 snapshot to show.
     */
-  def updateMove(gameSnapshot: GameSnapshot)
+  def update(gameSnapshot: GameSnapshot)
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -119,7 +119,12 @@ trait ViewHnefatafl {
     * @param snapshotToShow
     *                   indicates snapshot to show.
     */
-  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+
+  /**
+   * Undoes last move.
+   */
+  def undoMove(): Unit
 }
 
 object ViewHnefatafl {
@@ -186,7 +191,7 @@ object ViewHnefatafl {
       controller.getPossibleMoves(coordinate)
     }
 
-    override def updateMove(gameSnapshot: GameSnapshot): Unit = viewMatch.updateMove(gameSnapshot)
+    override def update(gameSnapshot: GameSnapshot): Unit = viewMatch.update(gameSnapshot)
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = controller.isCentralCell(coordinate)
 
@@ -196,7 +201,9 @@ object ViewHnefatafl {
 
     override def findKing(): Pair[Int] = controller.findKing()
 
-    override def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit = controller.showPreviousOrNextBoard(snapshotToShow)
+    override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = controller.changeSnapshot(snapshotToShow)
+
+    override def undoMove(): Unit = controller.undoMove()
 
     /**
       * Initializes the main menù.

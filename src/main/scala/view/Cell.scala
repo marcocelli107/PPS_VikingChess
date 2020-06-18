@@ -47,8 +47,13 @@ trait Cell extends JButton {
    */
   def unsetAsLastMoveCell()
 
-
+  /**
+   * Sets the cell as the selected cell.
+   */
   def setAsSelectedCell()
 
+  /**
+   * Unsets the cell as the selected cell.
+   */
   def unsetAsSelectedCell()
 }

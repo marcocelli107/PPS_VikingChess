@@ -39,7 +39,7 @@ trait ViewMatch {
     * @param gameSnapshot
     *                 snapshot to show.
     */
-  def updateMove(gameSnapshot: GameSnapshot)
+  def update(gameSnapshot: GameSnapshot)
 
   /**
     * Sets the end game.
@@ -59,7 +59,7 @@ object ViewMatch {
         leftPanel, rightPanel: JPanel = _
 
     private var playerOrWinnerLabel: JLabel = _
-    private var menuButton, nextMoveButton, previousMoveButton, undoMoveButton: JButton = _
+    private var menuButton, firstMoveButton, nextMoveButton, previousMoveButton, lastMoveButton, undoMoveButton: JButton = _
     private val cells: mutable.HashMap[Pair[Int], Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Pair[Int]] = Seq.empty
     private var selectedCell: Option[Pair[Int]] = Option.empty
@@ -99,7 +99,7 @@ object ViewMatch {
 
     override def getLabelPlayer: JLabel = playerOrWinnerLabel
 
-    override def updateMove(gameSnapshot: GameSnapshot): Unit = {
+    override def update(gameSnapshot: GameSnapshot): Unit = {
       player = gameSnapshot.getPlayerToMove
       addLostPawns(gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites)
       drawPawns(gameSnapshot.getBoard.cells)
@@ -117,9 +117,10 @@ object ViewMatch {
         setEndGame(gameSnapshot.getWinner)
       }
 
-
+      resetLastMoveCells()
       if(gameSnapshot.getLastMove.nonEmpty)
         highlightLastMove(gameSnapshot.getLastMove.get)
+
 
       boardPanel.repaint()
       boardPanel.validate()
@@ -147,13 +148,16 @@ object ViewMatch {
       *                 last move fromCoordinate and toCoordinate
       */
     private def highlightLastMove(lastMove: (Pair[Int], Pair[Int])): Unit = {
+      lastMoveCells = Option(cells(lastMove._1), cells(lastMove._2))
+      lastMoveCells.get._1.setAsLastMoveCell()
+      lastMoveCells.get._2.setAsLastMoveCell()
+    }
+
+    private def resetLastMoveCells(): Unit = {
       if(lastMoveCells.nonEmpty) {
         lastMoveCells.get._1.unsetAsLastMoveCell()
         lastMoveCells.get._2.unsetAsLastMoveCell()
       }
-      lastMoveCells = Option(cells(lastMove._1), cells(lastMove._2))
-      lastMoveCells.get._1.setAsLastMoveCell()
-      lastMoveCells.get._2.setAsLastMoveCell()
     }
 
     /**
@@ -212,31 +216,34 @@ object ViewMatch {
       val layout: GridBagLayout = new java.awt.GridBagLayout()
       southPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      previousMoveButton = ViewFactory.createPreviousMoveButton()
-      previousMoveButton.addActionListener(_ => showPreviousOrNextMove(Snapshot.Previous))
-      lim.gridx = 0
       lim.gridy = 0
       lim.weightx = 1
       lim.fill = GridBagConstraints.NONE
       lim.anchor = GridBagConstraints.CENTER
+
+      firstMoveButton = ViewFactory.createFirstMoveButton()
+      firstMoveButton.addActionListener(_ => changeSnapshot(Snapshot.First))
+      lim.gridx = 0
+      southPanel.add(firstMoveButton, lim)
+
+      previousMoveButton = ViewFactory.createPreviousMoveButton()
+      previousMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Previous))
+      lim.gridx = 1
       southPanel.add(previousMoveButton, lim)
 
       nextMoveButton = ViewFactory.createNextMoveButton()
-      nextMoveButton.addActionListener(_ => showPreviousOrNextMove(Snapshot.Next))
-      lim.gridx = 1
-      lim.gridy = 0
-      lim.weightx = 1
-      lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.CENTER
+      nextMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Next))
+      lim.gridx = 2
       southPanel.add(nextMoveButton, lim)
 
+      lastMoveButton = ViewFactory.createLastMoveButton()
+      lastMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Last))
+      lim.gridx = 3
+      southPanel.add(lastMoveButton, lim)
+
       undoMoveButton = ViewFactory.createUndoMoveButton()
-      //undoMoveButton.addActionListener(_ => turnBackMove())
-      lim.gridx = 2
-      lim.gridy = 0
-      lim.weightx = 1
-      lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.CENTER
+      undoMoveButton.addActionListener(_ => undoMove())
+      lim.gridx = 4
       southPanel.add(undoMoveButton, lim)
     }
 
@@ -418,7 +425,8 @@ object ViewMatch {
 
     }
 
-    private def showPreviousOrNextMove(snapshotToShow: Snapshot.Value): Unit = view.showPreviousOrNextBoard(snapshotToShow)
+    private def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = view.changeSnapshot(snapshotToShow)
 
+    private def undoMove(): Unit = view.undoMove()
   }
 }
