@@ -8,11 +8,6 @@ import javax.imageio.ImageIO
 import javax.swing._
 import javax.swing.border.LineBorder
 
-/**
- * @author Marco Celli
- * @author Pasquale Leo
- */
-
 trait ViewFactory {
 
   /**
@@ -157,6 +152,13 @@ trait ViewFactory {
   def createNextMoveButton(): JButton
 
   /**
+    * Creates a undo move button.
+    *
+    * @return a button.
+    */
+  def createUndoMoveButton(): JButton
+
+  /**
    * Creates a pawn black.
    *
    * @return a label.
@@ -264,9 +266,11 @@ object ViewFactory extends ViewFactory {
 
   override def createGameButton(): JButton = new GameButton()
 
-  override def createPreviousMoveButton(): JButton = new PreviousMoveBottom()
+  override def createPreviousMoveButton(): JButton = new PreviousMoveButton()
 
-  override def createNextMoveButton(): JButton = new NextMoveBottom()
+  override def createNextMoveButton(): JButton = new NextMoveButton()
+
+  override def createUndoMoveButton(): JButton = new UndoMoveButton()
 
   override def createWhiteKing: JLabel = new KingPawn
 
@@ -285,6 +289,7 @@ object ViewFactory extends ViewFactory {
     private var isLastMove: Boolean = false
     private var isKingEscapedCell: Boolean = false
     private var isSelectedCell: Boolean = false
+    private var isKingCapturedCell: Boolean = false
 
     setPreferredSize(new Dimension(cellDimension, cellDimension))
     setAlignmentX(Component.CENTER_ALIGNMENT)
@@ -305,6 +310,10 @@ object ViewFactory extends ViewFactory {
           setLastMoveColor()
         else if(isSelectedCell)
           setSelectedCellColor()
+        else if(isKingEscapedCell)
+          setKingEscapedColor()
+        else if(isKingCapturedCell)
+          setKingCapturedColor()
         else
           resetBackground()
       }
@@ -321,14 +330,19 @@ object ViewFactory extends ViewFactory {
     }
 
     override def setAsKingCapturedCell(): Unit = {
-      defaultBackground = ColorProvider.getBlackWinColor
+      isKingCapturedCell = true
+      setKingCapturedColor()
+    }
+
+    override def resetKingCell(): Unit = {
+      isKingCapturedCell = false
+      isKingEscapedCell = false
       resetBackground()
     }
 
     override def setAsKingEscapedCell(): Unit = {
       isKingEscapedCell = true
-      defaultBackground = ColorProvider.getWhiteWinColor
-      resetBackground()
+      setKingEscapedColor()
     }
 
     override def setAsLastMoveCell(): Unit = {
@@ -357,6 +371,10 @@ object ViewFactory extends ViewFactory {
     protected def setLastMoveColor(): Unit = setBackground(ColorProvider.getLastMoveColor)
 
     protected def setSelectedCellColor(): Unit = setBackground(ColorProvider.getSelectedCellColor)
+
+    private def setKingEscapedColor(): Unit = setBackground(ColorProvider.getWhiteWinColor)
+
+    private def setKingCapturedColor(): Unit = setBackground(ColorProvider.getBlackWinColor)
 
     private def resetBackground(): Unit = setBackground(defaultBackground)
   }
@@ -492,18 +510,20 @@ object ViewFactory extends ViewFactory {
     image = image.getScaledInstance(smallerSide * 7 / 100, smallerSide * 7 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setToolTipText("Game Menu")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
   }
 
   /* TODO IMPROVE */
-  private class PreviousMoveBottom() extends EmptyButton("") {
+  private class PreviousMoveButton() extends EmptyButton("") {
     private var imageIcon = new ImageIcon("src/main/resources/images/iconPreviousMove.png")
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setToolTipText("Show Previous Move")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
@@ -511,12 +531,27 @@ object ViewFactory extends ViewFactory {
   }
 
   /* TODO IMPROVE */
-  private class NextMoveBottom() extends EmptyButton("") {
+  private class NextMoveButton() extends EmptyButton("") {
     private var imageIcon = new ImageIcon("src/main/resources/images/iconNextMove.png")
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setToolTipText("Show Next Move")
+    setBorderPainted(false)
+    setOpaque(false)
+    setContentAreaFilled(false)
+
+  }
+
+  /* TODO IMPROVE */
+  private class UndoMoveButton() extends EmptyButton("") {
+    private var imageIcon = new ImageIcon("src/main/resources/images/iconUndoMove.png")
+    private var image = imageIcon.getImage
+    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
+    imageIcon = new ImageIcon(image)
+    setIcon(imageIcon)
+    setToolTipText("Turn Back")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)

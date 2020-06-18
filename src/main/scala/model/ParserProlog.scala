@@ -41,7 +41,7 @@ trait ParserProlog {
     *
     * @return king's coordinate.
     */
-  def findKing(): ListBuffer[Pair[Int]]
+  def findKing(): Pair[Int]
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -62,6 +62,16 @@ trait ParserProlog {
    * @return boolean.
    */
   def isCornerCell(coordinate: Pair[Int]): Boolean
+
+  /**
+    * Checks if the cell at the specified coordinate is a init pawn cell.
+    *
+    * @param coordinate
+    *                   coordinate of the cell to inspect
+    *
+    * @return boolean.
+    */
+  def isPawnCell(coordinate: Pair[Int]): Boolean
 
   /**
    * Copy himself.
@@ -157,13 +167,13 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), goal.getTerm("L").toString.toInt)
   }
 
-  override def findKing(): ListBuffer[Pair[Int]] = {
+  override def findKing(): Pair[Int] = {
     goal = engine.solve(s"findKing($board, Coord).")
     list = goal.getTerm("Coord")
 
     goalString = replaceListCellsString(list)
 
-    setListCellsView(goalString)
+    setListCellsView(goalString).head
   }
 
   override def isCentralCell(coordinate: Pair[Int]): Boolean = {
@@ -174,6 +184,12 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
   override def isCornerCell(coordinate: Pair[Int]): Boolean = {
     goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, coord(${coordinate.getX},${coordinate.getY})).")
+
+    goal.isSuccess
+  }
+
+  override def isPawnCell(coordinate: Pair[Int]): Boolean = {
+    goal = engine.solve(s"isInitialPawnCoord($variant, coord(${coordinate.getX},${coordinate.getY})).")
 
     goal.isSuccess
   }

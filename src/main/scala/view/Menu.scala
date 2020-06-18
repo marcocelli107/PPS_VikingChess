@@ -59,11 +59,11 @@ trait Menu {
 
 object Menu {
 
-  def apply(gameView: GameView): Menu = MenuImpl(gameView)
+  def apply(gameView: ViewHnefatafl): Menu = MenuImpl(gameView)
 
-  case class MenuImpl(gameView: GameView) extends Menu {
+  case class MenuImpl(view: ViewHnefatafl) extends Menu {
 
-    private final val DIMENSION_PANEL: Dimension = 
+    private final val DIMENSION_PANEL: Dimension =
       new Dimension(ViewFactory.getSmallerSide, ViewFactory.getSmallerSide * 2 / 100)
     private var menuPanel, variantsPanel, diffPanel, playerChoicePanel, inGameMenuPanel: JPanel = _
     private var pvpButton, pveButton, exitButtonMenu, hnefatafl, tawlbwrdd, tablut, brandubh,
@@ -105,7 +105,7 @@ object Menu {
       brandubh.addActionListener(chooseVariantListener("Brandubh"))
 
       returnToMenu = ViewFactory.createMenuButton("Previous Menu")
-      returnToMenu.addActionListener((_: ActionEvent) => gameView.switchOverlay(variantsPanel, menuPanel))
+      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(variantsPanel, menuPanel))
 
       variantsPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       variantsPanel.add(hnefatafl)
@@ -130,7 +130,7 @@ object Menu {
       advanced.addActionListener(chooseLevelIAListener("Advanced"))
 
       returnToMenu = ViewFactory.createMenuButton("Previous Menu")
-      returnToMenu.addActionListener((_: ActionEvent) => gameView.switchOverlay(diffPanel, variantsPanel))
+      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(diffPanel, variantsPanel))
 
       diffPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       diffPanel.add(newcomer)
@@ -151,7 +151,7 @@ object Menu {
       blackButton.addActionListener(setPlayer("Black"))
 
       returnToMenu = ViewFactory.createMenuButton("Previous Menu")
-      returnToMenu.addActionListener((_: ActionEvent) => gameView.switchOverlay(playerChoicePanel, variantsPanel))
+      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(playerChoicePanel, variantsPanel))
 
       playerChoicePanel.add(Box.createRigidArea(DIMENSION_PANEL))
       playerChoicePanel.add(whiteButton)
@@ -167,13 +167,13 @@ object Menu {
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = ViewFactory.createMenuPanel("Choose Option: ")
       returnToGame = ViewFactory.createMenuButton("Return to Game")
-      returnToGame.addActionListener((_: ActionEvent) => gameView.switchOverlay(inGameMenuPanel, gameView.getGamePanel))
+      returnToGame.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, view.getGamePanel))
 
       restartGame = ViewFactory.createMenuButton("Restart Match")
-      restartGame.addActionListener((_: ActionEvent) => {gameView.initOrRestoreGUI(); gameView.switchOverlay(inGameMenuPanel, gameView.getGamePanel)})
+      restartGame.addActionListener((_: ActionEvent) => {view.initOrRestoreGUI(); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
 
       returnToMenu = ViewFactory.createMenuButton("Leave Match")
-      returnToMenu.addActionListener((_: ActionEvent) => gameView.switchOverlay(inGameMenuPanel, menuPanel))
+      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, menuPanel))
       quitGame = ViewFactory.createMenuButton("Quit Game")
       quitGame.addActionListener((_: ActionEvent) => System.exit(0))
       inGameMenuPanel.add(Box.createRigidArea(DIMENSION_PANEL))
@@ -206,7 +206,7 @@ object Menu {
       */
     private def chooseGameModeListener(gameMode: String): ActionListener = (_: ActionEvent) => {
       setGameMode(gameMode)
-      gameView.switchOverlay(menuPanel, variantsPanel)
+      view.switchOverlay(menuPanel, variantsPanel)
     }
 
     /**
@@ -229,8 +229,8 @@ object Menu {
     private def chooseVariantListener(variant: String): ActionListener = (_: ActionEvent) => {
       setBoardVariant(variant)
       gameMode match {
-        case GameMode.PVP => gameView.switchOverlay(variantsPanel, playerChoicePanel)
-        case GameMode.PVE => gameView.switchOverlay(variantsPanel, diffPanel)
+        case GameMode.PVP => view.switchOverlay(variantsPanel, playerChoicePanel)
+        case GameMode.PVE => view.switchOverlay(variantsPanel, diffPanel)
       }
     }
 
@@ -253,7 +253,7 @@ object Menu {
       */
     private def chooseLevelIAListener(level: String): ActionListener = (_: ActionEvent) => {
       setLevelIA(level)
-      gameView.switchOverlay(diffPanel, playerChoicePanel)
+      view.switchOverlay(diffPanel, playerChoicePanel)
     }
 
     /**
@@ -268,7 +268,7 @@ object Menu {
       * Initializes or restores the game by calling game view.
       */
     private def initOrRestore(): Unit = {
-      gameView.initOrRestoreGUI()
+      view.initOrRestoreGUI()
     }
   }
 }

@@ -3,13 +3,13 @@ package view
 import java.awt.{GridBagConstraints, GridBagLayout}
 
 import javax.swing.{JButton, JLabel, JPanel}
-import model.{Piece, Player}
+import model.{GameSnapshot, Piece, Player, Snapshot}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Pair
 
 import scala.collection.mutable
 
-trait Game {
+trait ViewMatch {
 
   /**
     * Initializes the game panel.
@@ -34,61 +34,44 @@ trait Game {
   def getLabelPlayer: JLabel
 
   /**
-    * Sets the move made by the user.
+    * Shows the specified snapshot of the game
     *
-    * @param playerToMove
-    *                 next player to move.
-    * @param winner
-    *                 possible winner.
-    * @param currentBoard
-    *                 board updated after the move.
-    * @param nBlackCaptured
-    *                 total number of black pieces captured.
-    * @param nWhiteCaptured
-    *                 total number of white pieces captured.
+    * @param gameSnapshot
+    *                 snapshot to show.
     */
-  def updateMove(playerToMove: Player.Value, winner: Player.Value, currentBoard: Board, nBlackCaptured: Int, nWhiteCaptured: Int)
+  def updateMove(gameSnapshot: GameSnapshot)
 
   /**
     * Sets the end game.
     *
     * @param winner
     *                 winner of the game.
-    * @param kingCoordinate
-    *                 king's coordinate in the board.
     */
-  def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]])
-
-  /**
-   * Highlights the cells where the last move occured.
-   *
-   * @param lastMove
-   *                 last move fromCoordinate and toCoordinate
-   */
-  def highlightLastMove(lastMove: (Pair[Int], Pair[Int]))
+  def setEndGame(winner: Player.Value)
 }
 
-object Game {
-  def apply(gameView: GameView): Game = GameImpl(gameView)
+object ViewMatch {
+  def apply(gameView: ViewHnefatafl): ViewMatch = ViewMatchImpl(gameView)
 
-  case class GameImpl(gameView: GameView) extends Game {
+  case class ViewMatchImpl(view: ViewHnefatafl) extends ViewMatch {
 
     private var gamePanel, northPanel, southPanel, boardPanel, boardPlusColumns,
         leftPanel, rightPanel: JPanel = _
 
     private var playerOrWinnerLabel: JLabel = _
-    private var menuButton: JButton = _
+    private var menuButton, nextMoveButton, previousMoveButton, undoMoveButton: JButton = _
     private val cells: mutable.HashMap[Pair[Int], Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Pair[Int]] = Seq.empty
     private var selectedCell: Option[Pair[Int]] = Option.empty
     private var board: Board = _
-    private var player: Player.Value = gameView.getMenuUtils.getPlayer
+    private var player: Player.Value = view.getMenuUtils.getPlayer
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
+    private var kingCoordinate: Option[Pair[Int]] = Option.empty
 
     override def initGamePanel(board: Board): JPanel = {
       this.board = board
 
-      ViewFactory.setVariantBoardSize(this.gameView.getDimension)
+      ViewFactory.setVariantBoardSize(this.view.getDimension)
 
       initNorthPanel()
       initSouthPanel()
@@ -116,35 +99,54 @@ object Game {
 
     override def getLabelPlayer: JLabel = playerOrWinnerLabel
 
-    override def updateMove(playerToMove: Player.Value, winner: Player.Value, currentBoard: Board, nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
-      player = playerToMove
-      addLostPawns(nBlackCaptured, nWhiteCaptured)
-      drawPawns(currentBoard.cells)
-      boardPanel.repaint()
+    override def updateMove(gameSnapshot: GameSnapshot): Unit = {
+      player = gameSnapshot.getPlayerToMove
+      addLostPawns(gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites)
+      drawPawns(gameSnapshot.getBoard.cells)
+
       possibleMoves.foreach(c => cells(c).unsetAsPossibleMove())
       deselectCell()
+
+      if(kingCoordinate.nonEmpty)
+        cells(kingCoordinate.get).resetKingCell()
+
+      if(gameSnapshot.getWinner.equals(Player.None))
+        playerOrWinnerLabel.setText(player + " moves")
+      else {
+        kingCoordinate = Option(view.findKing())
+        setEndGame(gameSnapshot.getWinner)
+      }
+
+
+      if(gameSnapshot.getLastMove.nonEmpty)
+        highlightLastMove(gameSnapshot.getLastMove.get)
+
+      boardPanel.repaint()
       boardPanel.validate()
       gamePanel.validate()
-
-      if(winner.equals(Player.None))
-        playerOrWinnerLabel.setText(playerToMove + " moves")
     }
 
-    override def setEndGame(winner: Player.Value, kingCoordinate: Option[Pair[Int]]): Unit = (winner, kingCoordinate) match {
-      case (Player.White, _) =>
+    override def setEndGame(winner: Player.Value): Unit = winner match {
+      case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
         cells(kingCoordinate.get).setAsKingEscapedCell()
 
-      case (Player.Black, _) =>
+      case Player.Black =>
         playerOrWinnerLabel.setForeground(ColorProvider.getBlackColor)
         playerOrWinnerLabel.setText("Black has Won!")
         cells(kingCoordinate.get).setAsKingCapturedCell()
 
-      case (Player.Draw, _) => playerOrWinnerLabel.setText("Draw!")
+      case Player.Draw => playerOrWinnerLabel.setText("Draw!")
     }
 
-    override def highlightLastMove(lastMove: (Pair[Int], Pair[Int])): Unit = {
+    /**
+      * Highlights the cells where the last move occured.
+      *
+      * @param lastMove
+      *                 last move fromCoordinate and toCoordinate
+      */
+    private def highlightLastMove(lastMove: (Pair[Int], Pair[Int])): Unit = {
       if(lastMoveCells.nonEmpty) {
         lastMoveCells.get._1.unsetAsLastMoveCell()
         lastMoveCells.get._2.unsetAsLastMoveCell()
@@ -162,10 +164,10 @@ object Game {
       val layout: GridBagLayout = new java.awt.GridBagLayout()
       boardPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      for (i <- 1 to gameView.getDimension) {
-        for (j <- 1 to gameView.getDimension) {
+      for (i <- 1 to view.getDimension) {
+        for (j <- 1 to view.getDimension) {
           val coordinate: Pair[Int] = Pair(i, j)
-          val cell: Cell = cellChoice(coordinate)
+          val cell: Cell = setTypeCell(coordinate)
           cell.addActionListener(_ => actionCell(cell))
           lim.gridx = j
           lim.gridy = i
@@ -185,14 +187,19 @@ object Game {
       northPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       menuButton = ViewFactory.createGameButton()
-      menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
+      menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
+      lim.gridx = 1
+      lim.gridy = 0
+      lim.weightx = 1
+      lim.fill = GridBagConstraints.NONE
+      lim.anchor = GridBagConstraints.CENTER
+      northPanel.add(menuButton, lim)
+
+      playerOrWinnerLabel = ViewFactory.createLabelPlayerToMoveWinner
       lim.gridx = 0
       lim.gridy = 0
       lim.weightx = 1
       lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.LINE_END
-      northPanel.add(menuButton, lim)
-      playerOrWinnerLabel = ViewFactory.createLabelPlayerToMoveWinner
       lim.anchor = GridBagConstraints.CENTER
       northPanel.add(playerOrWinnerLabel, lim)
     }
@@ -205,31 +212,40 @@ object Game {
       val layout: GridBagLayout = new java.awt.GridBagLayout()
       southPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      menuButton = ViewFactory.createPreviousMoveButton()
-      //menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
-      lim.gridx = 0
-      lim.gridy = 0
-      lim.weightx = 1
-      lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.LINE_START
-      southPanel.add(menuButton, lim)
-
-      menuButton = ViewFactory.createNextMoveButton()
-      //menuButton.addActionListener(_ => gameView.switchOverlay(gamePanel, gameView.getInGameMenuPanel))
+      previousMoveButton = ViewFactory.createPreviousMoveButton()
+      previousMoveButton.addActionListener(_ => showPreviousOrNextMove(Snapshot.Previous))
       lim.gridx = 0
       lim.gridy = 0
       lim.weightx = 1
       lim.fill = GridBagConstraints.NONE
       lim.anchor = GridBagConstraints.CENTER
-      southPanel.add(menuButton, lim)
+      southPanel.add(previousMoveButton, lim)
+
+      nextMoveButton = ViewFactory.createNextMoveButton()
+      nextMoveButton.addActionListener(_ => showPreviousOrNextMove(Snapshot.Next))
+      lim.gridx = 1
+      lim.gridy = 0
+      lim.weightx = 1
+      lim.fill = GridBagConstraints.NONE
+      lim.anchor = GridBagConstraints.CENTER
+      southPanel.add(nextMoveButton, lim)
+
+      undoMoveButton = ViewFactory.createUndoMoveButton()
+      //undoMoveButton.addActionListener(_ => turnBackMove())
+      lim.gridx = 2
+      lim.gridy = 0
+      lim.weightx = 1
+      lim.fill = GridBagConstraints.NONE
+      lim.anchor = GridBagConstraints.CENTER
+      southPanel.add(undoMoveButton, lim)
     }
 
     /**
       * Initializes the panels of captures.
       */
     private def initLeftRightPanel(): Unit = {
-      leftPanel = ViewFactory.createLeftRightPanel(1, gameView.getDimension)
-      rightPanel = ViewFactory.createLeftRightPanel(1, gameView.getDimension)
+      leftPanel = ViewFactory.createLeftRightPanel(1, view.getDimension)
+      rightPanel = ViewFactory.createLeftRightPanel(1, view.getDimension)
     }
 
     /**
@@ -291,7 +307,7 @@ object Game {
       *                 arrival coordinate.
       */
     private def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
-      gameView.makeMove(fromCoordinate, toCoordinate)
+      view.makeMove(fromCoordinate, toCoordinate)
     }
 
     /**
@@ -341,7 +357,7 @@ object Game {
       *               specifies coordinate.
       */
     private def moveRequest(coordinate: Pair[Int]): Unit = {
-      possibleMoves = gameView.getPossibleMoves(coordinate)
+      possibleMoves = view.getPossibleMoves(coordinate)
       possibleMoves.foreach(c => cells(c).setAsPossibleMove())
       if(possibleMoves.nonEmpty)
         cells(selectedCell.get).setAsSelectedCell()
@@ -394,12 +410,15 @@ object Game {
      * @param cell
      *             cell to be set.
      */
-    private def cellChoice(cell: Pair[Int]): Cell = {
-      if (gameView.isCornerCell(cell))
-        return ViewFactory.createCornerCell()
-      if (gameView.isCentralCell(cell))
-        return ViewFactory.createCenterCell()
-      ViewFactory.createNormalCell()
+    private def setTypeCell(cell: Pair[Int]): Cell = cell match {
+      case coordinate if view.isCornerCell(coordinate) => ViewFactory.createCornerCell()
+      case coordinate if view.isCentralCell(coordinate) => ViewFactory.createCenterCell()
+      case coordinate if view.isPawnCell(coordinate) => ViewFactory.createPawnCell()
+      case _ => ViewFactory.createNormalCell()
+
     }
+
+    private def showPreviousOrNextMove(snapshotToShow: Snapshot.Value): Unit = view.showPreviousOrNextBoard(snapshotToShow)
+
   }
 }
