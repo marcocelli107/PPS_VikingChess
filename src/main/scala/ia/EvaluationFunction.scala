@@ -13,28 +13,29 @@ trait EvaluationFunction{
 
 class  EvaluationFunctionImpl extends EvaluationFunction {
 
-   override def score(board: Board, maxPlayer: Player.Value): Double = ???
+  override def score(board: Board, maxPlayer: Player.Value): Double = ???
 
 
-   /* RULES */
+  /* RULES */
 
-   def scoreKingNearCorners(board: Board): Double = {
-     val kingCoord: Pair[Int]= findKing(board.cells)
-     if( getCoordCorners(board.size).filter(coord => distanceBetweenCells(kingCoord,coord) == 1 ).size == 0 )  0 else 1
+  def scoreKingNearCorners(board: Board): Double = {
+    val kingCoord: Pair[Int]= findKing(board.cells)
+    if( getCoordCorners(board.size).filter(coord => distanceBetweenCells(kingCoord,coord) == 1 ).size == 0 )  0 else 1
 
-   }
+  }
 
-   def scoreKingIsInFreeRowsOrColumns(cells: Seq[BoardCell]): Double = ??? /*{
+  def scoreKingIsInFreeRowsOrColumns(cells: Seq[BoardCell]): Double = ??? /*{
      val coordKing:Pair[Int] = findKing(cells)
      val row: Seq[BoardCell] = getRow(coordKing.getX, cells).filter(cell => !cell.getCoordinate.equals(coordKing))
      val column: Seq[BoardCell] = getRow(coordKing.getY, cells).filter(cell => !cell.getCoordinate.equals(coordKing))
 
    }*/
 
-   def scorePawnArrangedInSquare(): Double = ???
+   /* RULES */
 
-   def scoreCapturePawns(): Double  = ???
+  def scorePawnArrangedInSquare(): Double = ???
 
+  def scoreCapturePawns(): Double  = ???
 
   /* UTILS METHODS */
 
