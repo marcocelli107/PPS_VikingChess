@@ -2,8 +2,11 @@ package model
 
 import scala.collection.mutable.ListBuffer
 import controller.ControllerHnefatafl
+import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
 import utils.Pair
+
+import scala.collection.mutable
 
 trait ModelHnefatafl {
 
@@ -66,6 +69,33 @@ trait ModelHnefatafl {
    * @return boolean.
    */
   def isCornerCell(coordinate: Pair[Int]): Boolean
+
+  /**
+    * Checks if the cell at the specified coordinate is a init pawn cell.
+    *
+    * @param coordinate
+    *                   coordinate of the cell to inspect
+    *
+    * @return boolean.
+    */
+  def isPawnCell(coordinate: Pair[Int]): Boolean
+
+  /**
+    * Find king coordinate in the current board.
+    *
+    * @return king coordinate to list.
+    */
+  def findKing(): Pair[Int]
+
+  /**
+    * Returns a previous or later state of the current board.
+    *
+    * @param snapshotToShow
+    *                   indicates snapshot to show.
+    *
+    * @return required board
+    */
+  def showPreviousOrNextBoard(snapshotToShow: Snapshot.Value): Unit
 }
 
 object ModelHnefatafl {
@@ -79,22 +109,13 @@ object ModelHnefatafl {
       */
     private val THEORY: String = TheoryGame.GameRules.toString
     private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
-    private var lastNineBoards: ListBuffer[Board] = ListBuffer.empty
+    private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
+    private var currentSnapshot: Int = 0
 
     /**
       * Defines status of the current game.
       */
     private var game: (Player.Value,Player.Value,Board, Int) = _
-
-    /**
-      * Number of white pieces captured.
-      */
-    private var numberWhiteCaptured: Int = 0
-
-    /**
-      * Number of black pieces captured.
-      */
-    private var numberBlackCaptured: Int = 0
 
     private final val SIZE_DRAW: Int = 9
 
@@ -108,59 +129,81 @@ object ModelHnefatafl {
 
       game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
 
-      lastNineBoards += game._3
+      storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
 
       (game._3, game._1)
     }
 
-    override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = parserProlog.showPossibleCells(cell)
+    override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = {
+      if(showingCurrentSnapshot)
+        parserProlog.showPossibleCells(cell)
+      else ListBuffer.empty
+    }
 
     override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
 
       game = parserProlog.makeMove(fromCoordinate, toCoordinate)
 
-      if(lastNineBoards.size == SIZE_DRAW)
-        lastNineBoards = lastNineBoards.tail
+      val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
+      var winner: Player.Value = game._2
 
-      lastNineBoards += game._3
+      if(checkThreefoldRepetition()) {
+        winner = Player.Draw
+        //controller.gameEnded(Player.Draw, Option.empty)
+      }
 
-      incrementCapturedPieces(game._1, game._4)
+      /*else if(someoneHasWon(game._2))
+        controller.gameEnded(game._2, Option(parserProlog.findKing().head))*/
 
-      if(checkThreefoldRepetition())
-        controller.gameEnded(Player.Draw, Option.empty)
-      else if(someoneHasWon(game._2))
-        controller.gameEnded(game._2, Option(parserProlog.findKing.head))
+      storySnapshot += GameSnapshot(currentVariant, game._1, winner, game._3, Option(fromCoordinate, toCoordinate), pieceCaptured._1, pieceCaptured._2)
 
-      controller.notifyMove(game._1, game._2, game._3, numberBlackCaptured, numberWhiteCaptured)
+      currentSnapshot += 1
+
+      controller.notifyMove(storySnapshot.last)
     }
 
     override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
 
     override def isCornerCell(coordinate: Pair[Int]): Boolean = parserProlog.isCornerCell(coordinate)
-    /**
-      * Increments the number of pieces captured of the player.
-      */
-    private def incrementCapturedPieces(player: Player.Value, piecesCaptured: Int): Unit = player match {
-      case Player.Black => numberBlackCaptured += piecesCaptured
-      case Player.White => numberWhiteCaptured += piecesCaptured
+
+    override def isPawnCell(coordinate: Pair[Int]): Boolean = parserProlog.isPawnCell(coordinate)
+
+    override def findKing(): Pair[Int] = parserProlog.findKing()
+
+    override def showPreviousOrNextBoard(previousOrNext: Snapshot.Value): Unit = {
+      previousOrNext match {
+        case Snapshot.Previous => decrementCurrentSnapshot()
+        case Snapshot.Next => incrementCurrentSnapshot()
+        case Snapshot.First => currentSnapshot = 0
+        case Snapshot.Last => currentSnapshot = storySnapshot.size - 1
+      }
+      val gameSnapshot = storySnapshot(currentSnapshot)
+      controller.notifyMove(gameSnapshot)
     }
 
     /**
-      * Checks if precedent player has won.
-      *
-      * @return boolean
+      * Increments the number of pieces captured of the player.
       */
-    private def someoneHasWon(possibleWinner: Player.Value): Boolean = !possibleWinner.equals(Player.None)
+    private def incrementCapturedPieces(player: Player.Value, piecesCaptured: Int): (Int,Int) = player match {
+      case Player.Black => (storySnapshot.last.getNumberCapturedBlacks + piecesCaptured, storySnapshot.last.getNumberCapturedWhites)
+      case Player.White => (storySnapshot.last.getNumberCapturedBlacks , storySnapshot.last.getNumberCapturedWhites + piecesCaptured)
+    }
 
     /**
       * Checks if there was a threefold repetition.
       *
       * @return boolean
       */
-    private def checkThreefoldRepetition(): Boolean = lastNineBoards match {
+    private def checkThreefoldRepetition(): Boolean = storySnapshot.reverse.take(SIZE_DRAW) match {
       case l if l.isEmpty || l.size < SIZE_DRAW => false
       case l if l.head.equals(l(4)) && l(4).equals(l(8)) => true
       case _ => false
     }
+
+    private def incrementCurrentSnapshot(): Unit = if(!showingCurrentSnapshot) currentSnapshot += 1
+
+    private def decrementCurrentSnapshot(): Unit = if(currentSnapshot > 0) currentSnapshot -= 1
+
+    private def showingCurrentSnapshot: Boolean = currentSnapshot == storySnapshot.size - 1
   }
 }

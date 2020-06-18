@@ -16,8 +16,10 @@ object TryIA extends App {
         case h::t if (h.getCoordinate.equals(bordCell.getCoordinate)) => cellsOutput ++ bordCell::t
      }
    }*/
+
    /*
       var trySeq: Seq[BoardCell] = board.cells.filter(c => c.getCoordinate.getY.equals(4))
       println(ev.isSequenceFreeCells(trySeq))*/
+
 }
 

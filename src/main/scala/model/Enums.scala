@@ -53,3 +53,11 @@ object Piece extends Enumeration {
   type PieceType = Value
   val WhitePawn, BlackPawn, WhiteKing, Void = Value
 }
+
+/**
+  * Defines Enumeration for previous, next, first or last snapshot.
+  */
+object Snapshot extends Enumeration {
+  type SnapshotType = Value
+  val Previous, Next, First, Last = Value
+}

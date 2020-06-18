@@ -31,10 +31,11 @@ class  EvaluationFunctionImpl extends EvaluationFunction {
 
    }*/
 
+   /* RULES */
+
   def scorePawnArrangedInSquare(): Double = ???
 
   def scoreCapturePawns(): Double  = ???
-
 
   /* UTILS METHODS */
 
