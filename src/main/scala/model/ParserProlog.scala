@@ -70,6 +70,22 @@ trait ParserProlog {
    */
 
   def copy():ParserProlog
+
+  /**
+   * Return the board
+   *
+   * @return Board.
+   */
+
+  def getActualBoard():Board
+
+  /**
+   * Returns the current player
+   *
+   * @return Board.
+   */
+
+  def getPlayer(): Player.Value
 }
 
 object ParserPrologImpl {
@@ -100,8 +116,11 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   private var variant: Term = new Struct()
 
   def getPlayerToWin:Term = playerToWin
+
   def getPlayerToMove:Term =  playerToMove
+
   def getBoard: Term = board
+
   def getVariant: Term = variant
 
   engine.setTheory(new Theory(new FileInputStream(theory)))
@@ -262,17 +281,37 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    */
   override def copy(): ParserProlog = ParserPrologImpl(theory, playerToWin, playerToMove, board, variant)
 
+  /**
+   * Return the board
+   *
+   * @return Board.
+   */
+
+  override def getActualBoard(): Board = {
+    goalString = replaceBoardString(board)
+    parseBoard(goalString)
+  }
+
+  /**
+   * Returns the current player
+   *
+   * @return Board.
+   */
+
+  override def getPlayer(): Player.Value = {
+    setPlayer(playerToMove.toString)
+  }
 
   override def equals(that: Any): Boolean = that match {
     case that: ParserPrologImpl =>
       that.isInstanceOf[ParserPrologImpl] &&
-      that.variant.isEqualObject(this.variant) &&
-      that.playerToMove.isEqualObject(this.playerToMove) &&
-      that.playerToWin.isEqualObject(this.playerToWin) &&
-      that.board.isEqualObject(this.board)
-
+        that.variant.isEqualObject(this.variant) &&
+        that.playerToMove.isEqualObject(this.playerToMove) &&
+        that.playerToWin.isEqualObject(this.playerToWin) &&
+        that.board.isEqualObject(this.board)
 
     case _ => false
 
   }
+
 }
