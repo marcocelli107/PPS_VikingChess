@@ -4,7 +4,7 @@ import model.{MaxMin, _}
 import utils.BoardGame.BoardCell
 import utils.Coordinate
 
-case class MiniMaxNode(gameState: ParserProlog, score: Option[Int])
+
 
 class MiniMax( level: Int ) {
 
@@ -66,14 +66,14 @@ class MiniMax( level: Int ) {
     parserProlog.copy()
   }
 
-  def pruningAlfaBeta (node: MiniMaxNode, depth: Int, alfa: Int, beta: Int, phase: MaxMin ): Int =  (depth, phase)  match {
+  def pruningAlfaBeta (node: Node, depth: Int, alfa: Int, beta: Int, phase: MaxMin ): Int =  (depth, phase)  match {
     case (_,_)  if(isTerminalNode(node)) => evaluationFunction.score(node.gameState)
     case (0,_)  => ???
     case (_, MaxMin.Max) => maximizationPhase(node, depth, alfa, beta)
     case  _ => minimizationPhase()
   }
 
-  def maximizationPhase(node: MiniMaxNode, depth: Int, alfa: Int, beta: Int):Int = {
+  def maximizationPhase(node: Node, depth: Int, alfa: Int, beta: Int):Int = {
     val v:Int= -100
 
     def movesAllPawn(stateGame: ParserProlog, gameMoves: List[(Coordinate,Coordinate) ], listParser: Game,  tempVal: Int ,depth: Int,  alfa: Int , beta: Int): Int = gameMoves match {
@@ -85,11 +85,9 @@ class MiniMax( level: Int ) {
     v
   }
 
-
-
   def minimizationPhase(): Int = ???
 
-  def isTerminalNode(node:MiniMaxNode):Boolean = ???
+  def isTerminalNode(node:Node):Boolean = ???
 
 
 
