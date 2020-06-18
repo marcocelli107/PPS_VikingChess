@@ -674,8 +674,8 @@ object ViewFactory extends ViewFactory {
       g.setColor(internalColor)
       g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_MULTIPLIER, INTERNAL_ROUNDRECT_MULTIPLIER, ARC_DIMENSION, ARC_DIMENSION)
     }
-
   }
+
   private val basicPawnSizeMultiplier: Double = 1
   private val capturedPawnSizeMultiplier: Double = 0.5
   private def whitePawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getBlackColor, basicPawnSizeMultiplier)
@@ -685,7 +685,7 @@ object ViewFactory extends ViewFactory {
   private def capturedBlackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, capturedPawnSizeMultiplier)
 
   private class LabelPlayer_Winner extends JLabel {
-    private val DIMENSION_FONT: Int = smallerSide * 7 / 100
+    private val DIMENSION_FONT: Int = smallerSide * 5 / 100
     setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
     setForeground(ColorProvider.getPossibleMovesColor)
   }
@@ -701,5 +701,4 @@ object ViewFactory extends ViewFactory {
     setSize(smallerSide, smallerSide)
     setLocationRelativeTo(null)
   }
-
 }

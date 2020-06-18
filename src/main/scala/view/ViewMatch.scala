@@ -59,6 +59,8 @@ object ViewMatch {
         leftPanel, rightPanel: JPanel = _
 
     private var playerOrWinnerLabel: JLabel = _
+    private val playerWhiteLabel: JLabel = ViewFactory.createLabelWhitePlayer
+    private val playerBlackLabel: JLabel = ViewFactory.createLabelBlackPlayer
     private var menuButton, firstMoveButton, nextMoveButton, previousMoveButton, lastMoveButton, undoMoveButton: JButton = _
     private val cells: mutable.HashMap[Coordinate, Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Coordinate] = Seq.empty
@@ -111,7 +113,7 @@ object ViewMatch {
         cells(kingCoordinate.get).resetKingCell()
 
       if(gameSnapshot.getWinner.equals(Player.None))
-        playerOrWinnerLabel.setText(player + " moves")
+        switchPlayerLabel()
       else {
         kingCoordinate = Option(view.findKing())
         setEndGame(gameSnapshot.getWinner)
@@ -131,14 +133,32 @@ object ViewMatch {
       case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
+        playerWhiteLabel.setVisible(true)
+        playerBlackLabel.setVisible(false)
         cells(kingCoordinate.get).setAsKingEscapedCell()
 
       case Player.Black =>
         playerOrWinnerLabel.setForeground(ColorProvider.getBlackColor)
         playerOrWinnerLabel.setText("Black has Won!")
+        playerWhiteLabel.setVisible(false)
+        playerBlackLabel.setVisible(true)
         cells(kingCoordinate.get).setAsKingCapturedCell()
 
       case Player.Draw => playerOrWinnerLabel.setText("Draw!")
+    }
+
+    /**
+      * Switches the player label showed.
+      */
+    private def switchPlayerLabel(): Unit = {
+      playerOrWinnerLabel.setText(player + " moves")
+      if(player.equals(Player.White)) {
+        playerBlackLabel.setVisible(false)
+        playerWhiteLabel.setVisible(true)
+      } else {
+        playerBlackLabel.setVisible(true)
+        playerWhiteLabel.setVisible(false)
+      }
     }
 
     /**
@@ -153,6 +173,9 @@ object ViewMatch {
       lastMoveCells.get._2.setAsLastMoveCell()
     }
 
+    /**
+      * Resets the cells of the last move.
+      */
     private def resetLastMoveCells(): Unit = {
       if(lastMoveCells.nonEmpty) {
         lastMoveCells.get._1.unsetAsLastMoveCell()
@@ -192,20 +215,25 @@ object ViewMatch {
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       menuButton = ViewFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
-      lim.gridx = 1
-      lim.gridy = 0
-      lim.weightx = 1
-      lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.CENTER
-      northPanel.add(menuButton, lim)
-
-      playerOrWinnerLabel = ViewFactory.createLabelPlayerToMoveWinner
       lim.gridx = 0
       lim.gridy = 0
-      lim.weightx = 1
+      lim.weightx = 0
       lim.fill = GridBagConstraints.NONE
       lim.anchor = GridBagConstraints.CENTER
+      playerBlackLabel.setVisible(true)
+      playerWhiteLabel.setVisible(false)
+      northPanel.add(playerBlackLabel, lim)
+      northPanel.add(playerWhiteLabel, lim)
+
+      playerOrWinnerLabel = ViewFactory.createLabelPlayerToMoveWinner
+      lim.gridx = 1
       northPanel.add(playerOrWinnerLabel, lim)
+
+      menuButton = ViewFactory.createGameButton()
+      menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
+      lim.gridx = 2
+      lim.anchor = GridBagConstraints.LINE_END
+      northPanel.add(menuButton, lim)
     }
 
     /**
