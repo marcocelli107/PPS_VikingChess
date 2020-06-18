@@ -2,13 +2,15 @@ package utils
 
 import model.Piece.PieceType
 
+case class Coordinate(x: Int, y: Int)
+
 object BoardGame {
 
   trait BoardCell {
     /**
       * Coordinate of the cell
       */
-    //def coordinates: Pair[Int]
+    //def coordinates: Coordinate
 
     /**
       * Piece in the cell
@@ -23,25 +25,25 @@ object BoardGame {
     /**
       * Gets coordinate of the cell
       */
-    def getCoordinate: Pair[Int]
+    def getCoordinate: Coordinate
   }
 
   object BoardCell {
 
-    def apply(coordinateCell: Pair[Int], piece: PieceType): BoardCell = BoardCellImpl(coordinateCell, piece)
+    def apply(coordinateCell: Coordinate, piece: PieceType): BoardCell = BoardCellImpl(coordinateCell, piece)
 
-    case class BoardCellImpl(coordinateCell: Pair[Int], pieceCell: PieceType) extends BoardCell {
+    case class BoardCellImpl(coordinateCell: Coordinate, pieceCell: PieceType) extends BoardCell {
 
-      //override def coordinates: Pair[Int] = coordinateCell
+      //override def coordinates: Coordinate = coordinateCell
 
       //override def piece: PieceType = pieceCell
-      //private val coordinate: Pair[Int] = coordinateCell
+      //private val coordinate: Coordinate = coordinateCell
 
       //private val piece: PieceType = pieceCell
 
       override def getPiece: PieceType = pieceCell
 
-      override def getCoordinate: Pair[Int] = coordinateCell
+      override def getCoordinate: Coordinate = coordinateCell
     }
   }
 
@@ -59,7 +61,7 @@ object BoardGame {
     /**
       * Gets a cell in the board from a coordinate.
       */
-    def getCell(coordinate: Pair[Int]): BoardCell
+    def getCell(coordinate: Coordinate): BoardCell
   }
 
   object Board {
@@ -72,7 +74,7 @@ object BoardGame {
 
       override def size: Int = Math.sqrt(allCells.length).toInt
 
-      override def getCell(coordinate: Pair[Int]): BoardCell = allCells.filter(_.getCoordinate == coordinate).head
+      override def getCell(coordinate: Coordinate): BoardCell = allCells.filter(_.getCoordinate == coordinate).head
 
       override def equals(obj: Any): Boolean = this.cells.equals(obj.asInstanceOf[Board].cells)
     }

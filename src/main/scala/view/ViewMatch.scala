@@ -5,7 +5,7 @@ import java.awt.{GridBagConstraints, GridBagLayout}
 import javax.swing.{JButton, JLabel, JPanel}
 import model.{GameSnapshot, Piece, Player, Snapshot}
 import utils.BoardGame.{Board, BoardCell}
-import utils.Pair
+import utils.Coordinate
 
 import scala.collection.mutable
 
@@ -60,13 +60,13 @@ object ViewMatch {
 
     private var playerOrWinnerLabel: JLabel = _
     private var menuButton, firstMoveButton, nextMoveButton, previousMoveButton, lastMoveButton, undoMoveButton: JButton = _
-    private val cells: mutable.HashMap[Pair[Int], Cell] = mutable.HashMap.empty
-    private var possibleMoves: Seq[Pair[Int]] = Seq.empty
-    private var selectedCell: Option[Pair[Int]] = Option.empty
+    private val cells: mutable.HashMap[Coordinate, Cell] = mutable.HashMap.empty
+    private var possibleMoves: Seq[Coordinate] = Seq.empty
+    private var selectedCell: Option[Coordinate] = Option.empty
     private var board: Board = _
     private var player: Player.Value = view.getMenuUtils.getPlayer
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
-    private var kingCoordinate: Option[Pair[Int]] = Option.empty
+    private var kingCoordinate: Option[Coordinate] = Option.empty
 
     override def initGamePanel(board: Board): JPanel = {
       this.board = board
@@ -147,7 +147,7 @@ object ViewMatch {
       * @param lastMove
       *                 last move fromCoordinate and toCoordinate
       */
-    private def highlightLastMove(lastMove: (Pair[Int], Pair[Int])): Unit = {
+    private def highlightLastMove(lastMove: (Coordinate, Coordinate)): Unit = {
       lastMoveCells = Option(cells(lastMove._1), cells(lastMove._2))
       lastMoveCells.get._1.setAsLastMoveCell()
       lastMoveCells.get._2.setAsLastMoveCell()
@@ -170,7 +170,7 @@ object ViewMatch {
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       for (i <- 1 to view.getDimension) {
         for (j <- 1 to view.getDimension) {
-          val coordinate: Pair[Int] = Pair(i, j)
+          val coordinate: Coordinate = Coordinate(i, j)
           val cell: Cell = setTypeCell(coordinate)
           cell.addActionListener(_ => actionCell(cell))
           lim.gridx = j
@@ -300,8 +300,8 @@ object ViewMatch {
       *               arrival cell.
       */
     private def actionMovePawn(cell: JButton): Unit = {
-      val coordinateStart: Pair[Int] = selectedCell.get
-      val coordinateArrival: Pair[Int] = getCoordinate(cell)
+      val coordinateStart: Coordinate = selectedCell.get
+      val coordinateArrival: Coordinate = getCoordinate(cell)
       makeMove(coordinateStart, coordinateArrival)
     }
 
@@ -313,7 +313,7 @@ object ViewMatch {
       * @param toCoordinate
       *                 arrival coordinate.
       */
-    private def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
+    private def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
       view.makeMove(fromCoordinate, toCoordinate)
     }
 
@@ -353,7 +353,7 @@ object ViewMatch {
       *
       * @return pair of coordinate
       */
-    private def getCoordinate(cell: JButton): Pair[Int] = {
+    private def getCoordinate(cell: JButton): Coordinate = {
       cells.filter(v => v._2.equals(cell)).head._1
     }
 
@@ -363,7 +363,7 @@ object ViewMatch {
       * @param coordinate
       *               specifies coordinate.
       */
-    private def moveRequest(coordinate: Pair[Int]): Unit = {
+    private def moveRequest(coordinate: Coordinate): Unit = {
       possibleMoves = view.getPossibleMoves(coordinate)
       possibleMoves.foreach(c => cells(c).setAsPossibleMove())
       if(possibleMoves.nonEmpty)
@@ -417,7 +417,7 @@ object ViewMatch {
      * @param cell
      *             cell to be set.
      */
-    private def setTypeCell(cell: Pair[Int]): Cell = cell match {
+    private def setTypeCell(cell: Coordinate): Cell = cell match {
       case coordinate if view.isCornerCell(coordinate) => ViewFactory.createCornerCell()
       case coordinate if view.isCentralCell(coordinate) => ViewFactory.createCenterCell()
       case coordinate if view.isPawnCell(coordinate) => ViewFactory.createPawnCell()

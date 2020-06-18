@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 import controller.ControllerHnefatafl
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
-import utils.Pair
+import utils.Coordinate
 
 import scala.collection.mutable
 
@@ -36,7 +36,7 @@ trait ModelHnefatafl {
    * coordinate of the Cell.
    * @return list buffer of the possible computed moves.
    */
-  def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]]
+  def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
 
   /**
    * Calls parser for making a move from coordinate to coordinate.
@@ -47,7 +47,7 @@ trait ModelHnefatafl {
    * coordinate of the arrival cell.
    * @return updated board.
    */
-  def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit
+  def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -56,7 +56,7 @@ trait ModelHnefatafl {
    * coordinate of the cell to inspect
    * @return boolean.
    */
-  def isCentralCell(coordinate: Pair[Int]): Boolean
+  def isCentralCell(coordinate: Coordinate): Boolean
 
   /**
    * Checks if the cell at the specified coordinate is a corner cell.
@@ -65,7 +65,7 @@ trait ModelHnefatafl {
    * coordinate of the cell to inspect
    * @return boolean.
    */
-  def isCornerCell(coordinate: Pair[Int]): Boolean
+  def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
    * Checks if the cell at the specified coordinate is a init pawn cell.
@@ -74,14 +74,14 @@ trait ModelHnefatafl {
    * coordinate of the cell to inspect
    * @return boolean.
    */
-  def isPawnCell(coordinate: Pair[Int]): Boolean
+  def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
    * Find king coordinate in the current board.
    *
    * @return king coordinate to list.
    */
-  def findKing(): Pair[Int]
+  def findKing(): Coordinate
 
   /**
    * Returns a previous or later state of the current board.
@@ -134,13 +134,13 @@ object ModelHnefatafl {
       (game._3, game._1)
     }
 
-    override def showPossibleCells(cell: Pair[Int]): ListBuffer[Pair[Int]] = {
+    override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
       if (showingCurrentSnapshot)
         parserProlog.showPossibleCells(cell)
       else ListBuffer.empty
     }
 
-    override def makeMove(fromCoordinate: Pair[Int], toCoordinate: Pair[Int]): Unit = {
+    override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
 
       game = parserProlog.makeMove(fromCoordinate, toCoordinate)
 
@@ -157,13 +157,13 @@ object ModelHnefatafl {
       controller.updateView(storySnapshot.last)
     }
 
-    override def isCentralCell(coordinate: Pair[Int]): Boolean = parserProlog.isCentralCell(coordinate)
+    override def isCentralCell(coordinate: Coordinate): Boolean = parserProlog.isCentralCell(coordinate)
 
-    override def isCornerCell(coordinate: Pair[Int]): Boolean = parserProlog.isCornerCell(coordinate)
+    override def isCornerCell(coordinate: Coordinate): Boolean = parserProlog.isCornerCell(coordinate)
 
-    override def isPawnCell(coordinate: Pair[Int]): Boolean = parserProlog.isPawnCell(coordinate)
+    override def isPawnCell(coordinate: Coordinate): Boolean = parserProlog.isPawnCell(coordinate)
 
-    override def findKing(): Pair[Int] = parserProlog.findKing()
+    override def findKing(): Coordinate = parserProlog.findKing()
 
     override def changeSnapshot(previousOrNext: Snapshot.Value): Unit = {
       previousOrNext match {
@@ -178,7 +178,7 @@ object ModelHnefatafl {
 
     override def undoMove(): Unit = {
       if (showingCurrentSnapshot) {
-        val lastMove: Option[(Pair[Int], Pair[Int])] = storySnapshot.last.getLastMove
+        val lastMove: Option[(Coordinate, Coordinate)] = storySnapshot.last.getLastMove
         if (lastMove.nonEmpty) {
           parserProlog.undoMove(lastMove.get._2, lastMove.get._1)
           storySnapshot -= storySnapshot.last

@@ -1,8 +1,7 @@
 package ia
 import model._
 import utils.BoardGame.BoardCell
-import utils.Pair
-
+import utils.Coordinate
 
 class MiniMax(  level: Int ) {
 
@@ -10,7 +9,7 @@ class MiniMax(  level: Int ) {
 
   type Game = List[ParserProlog]
 
-  def createBufferedList(coordinate: Pair[Int], parserProlog: ParserProlog): List[Pair[Int]] = {
+  def createBufferedList(coordinate: Coordinate, parserProlog: ParserProlog): List[Coordinate] = {
   parserProlog.showPossibleCells(coordinate).toList
   }
 
@@ -22,10 +21,10 @@ class MiniMax(  level: Int ) {
   }
 
   def getPlayerAndBoard(parserProlog: ParserProlog ):(Player.Value, List[BoardCell] ) = {
-     (parserProlog.getPlayer(), parserProlog.getActualBoard().cells.toList)
+     (parserProlog.getPlayer, parserProlog.getActualBoard.cells.toList)
   }
 
-  def findPlayerPawns(parserProlog: ParserProlog): List[Pair[Int]] = {
+  def findPlayerPawns(parserProlog: ParserProlog): List[Coordinate] = {
     val (player, boardCells ) = getPlayerAndBoard(parserProlog)
     for {
       cell <- boardCells
@@ -47,19 +46,19 @@ class MiniMax(  level: Int ) {
     case h::t => computeAnyGame(t, levelGames :+allMovesAllPawn(h.copy(), findPlayerPawns(h.copy()), List()))
   }
 
-  def allMovesAllPawn(parserProlog: ParserProlog, listCordPawn: List[Pair[Int]], listParser: Game  ):Game = listCordPawn match {
+  def allMovesAllPawn(parserProlog: ParserProlog, listCordPawn: List[Coordinate], listParser: Game  ):Game = listCordPawn match {
     case Nil => listParser
     case h::t => allMovesAllPawn( parserProlog.copy(), t,
                                   listParser ++ allMovesAnyPawn(parserProlog.copy(), h,
                                   createBufferedList(h, parserProlog.copy()), List()))
   }
 
-  def allMovesAnyPawn(parserProlog: ParserProlog,startCord: Pair[Int], listEndCord: List[Pair[Int]], listParser: Game):Game = listEndCord match {
+  def allMovesAnyPawn(parserProlog: ParserProlog,startCord: Coordinate, listEndCord: List[Coordinate], listParser: Game):Game = listEndCord match {
     case Nil => listParser
     case h::t => allMovesAnyPawn(parserProlog.copy(),startCord, t, listParser :+ moveAnyPawn(parserProlog.copy(), startCord,h))
   }
 
-  def moveAnyPawn(parserProlog: ParserProlog, startCord: Pair[Int], endCord: Pair[Int] ): ParserProlog = {
+  def moveAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, endCord: Coordinate ): ParserProlog = {
     parserProlog.makeMove(startCord,endCord)
     parserProlog.copy()
   }
