@@ -7,14 +7,12 @@ import utils.Coordinate
 
 trait EvaluationFunction{
   def score(gameState: ParserProlog):Int
-
 }
 
 class  EvaluationFunctionImpl extends EvaluationFunction {
 
 
   override def score(gameState: ParserProlog): Int = ???
-
 
 
   /* RULES */
@@ -54,7 +52,7 @@ class  EvaluationFunctionImpl extends EvaluationFunction {
   def getColumn(column:Int, cells:Seq[BoardCell] ): Seq[BoardCell] = cells.filter(cell => cell.getCoordinate.x.equals(column))
 
   def isSequenceFreeCells(seq: Seq[BoardCell] ):Boolean = {
-    seq.filter(boardCell => !boardCell.getPiece.equals(Piece.Void)).size == 0
+    seq.filter(boardCell => !boardCell.getPiece.equals(Piece.Empty)).size == 0
   }
 
   def getCoordCorners(boardSize: Int) = List(Coordinate(1,1),Coordinate(1,boardSize),Coordinate(boardSize,1),Coordinate(boardSize,boardSize))

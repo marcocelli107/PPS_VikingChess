@@ -27,7 +27,7 @@ trait ModelHnefatafl {
    * indicates the variant chosen by the user.
    * @return created board and player to move.
    */
-  def createGame(variant: GameVariant.Val): (Board, Player.Value)
+  def createGame(variant: GameVariant.Val): (Board, Player.Val)
 
   /**
    * Calls parser for the possible moves from a cell.
@@ -115,7 +115,7 @@ object ModelHnefatafl {
     /**
      * Defines status of the current game.
      */
-    private var game: (Player.Value, Player.Value, Board, Int) = _
+    private var game: (Player.Val, Player.Val, Board, Int) = _
 
     private final val SIZE_DRAW: Int = 9
 
@@ -123,7 +123,7 @@ object ModelHnefatafl {
 
     override var mode: GameMode.Value = GameMode.PVP
 
-    override def createGame(newVariant: GameVariant.Val): (Board, Player.Value) = {
+    override def createGame(newVariant: GameVariant.Val): (Board, Player.Val) = {
 
       currentVariant = newVariant
 
@@ -142,10 +142,10 @@ object ModelHnefatafl {
 
     override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
 
-      game = parserProlog.makeMove(fromCoordinate, toCoordinate)
+      game = parserProlog.makeLegitMove(fromCoordinate, toCoordinate)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
-      var winner: Player.Value = game._2
+      var winner: Player.Val = game._2
 
       if (checkThreefoldRepetition())
         winner = Player.Draw
@@ -180,9 +180,9 @@ object ModelHnefatafl {
       if (showingCurrentSnapshot) {
         val lastMove: Option[(Coordinate, Coordinate)] = storySnapshot.last.getLastMove
         if (lastMove.nonEmpty) {
-          parserProlog.undoMove(lastMove.get._2, lastMove.get._1)
           storySnapshot -= storySnapshot.last
           currentSnapshot -= 1
+          parserProlog.undoMove(storySnapshot.last.getBoard)
           controller.updateView(storySnapshot.last)
         }
       }
@@ -191,7 +191,7 @@ object ModelHnefatafl {
     /**
      * Increments the number of pieces captured of the player.
      */
-    private def incrementCapturedPieces(player: Player.Value, piecesCaptured: Int): (Int, Int) = player match {
+    private def incrementCapturedPieces(player: Player.Val, piecesCaptured: Int): (Int, Int) = player match {
       case Player.Black => (storySnapshot.last.getNumberCapturedBlacks + piecesCaptured, storySnapshot.last.getNumberCapturedWhites)
       case Player.White => (storySnapshot.last.getNumberCapturedBlacks, storySnapshot.last.getNumberCapturedWhites + piecesCaptured)
     }

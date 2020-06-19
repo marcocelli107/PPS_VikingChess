@@ -309,6 +309,10 @@ gameBoard((_, _, _, B), B).
 % [gameWinner(+Game, -Winner)
 gameWinner((_, _, W, _), W).
 
+%%% Undoes a move in +CurrentGame resetting player to move, winner and
+%%% board as the specified +OldBoard.
+% [undoMove(+CurrentGame, +OldBoard, -OldGame)]
+undoMove((V, P, _, B), OB, (V, O, n, OB)) :- nextPlayerToMove(P, O).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  				              Possible Moves		                      %%
