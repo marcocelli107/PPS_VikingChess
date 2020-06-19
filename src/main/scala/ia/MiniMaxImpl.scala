@@ -159,6 +159,6 @@ object TryMinMax extends App{
   //  var gameTree: GameTree = GameTree()
   val miniMax = new MiniMaxImpl(  2)
 
-  println( miniMax.computeAllGame(parserProlog.copy,2) )
+  println( parserProlog.hasWinner)
 
 }
