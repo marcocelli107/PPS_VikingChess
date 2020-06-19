@@ -278,7 +278,7 @@ trait ViewFactory {
   /**
     * Generates a sound for the moved piece.
     */
-  def generateASoundForMove()
+  //def generateASoundForMove()
 }
 
 object ViewFactory extends ViewFactory {
@@ -300,7 +300,7 @@ object ViewFactory extends ViewFactory {
   private val advancedIconPath: String =  "src/main/resources/images/iconAdvanced.png"
   private val whitePlayerIconPath: String =  "src/main/resources/images/iconWhitePlayer.jpeg"
   private val blackPlayerIconPath: String =  "src/main/resources/images/iconBlackPlayer.jpeg"
-  private val soundMovedPiece: String =  _//"src/main/resources/sounds/movedPiece.mp3"
+  //private val soundMovedPiece: String =  "src/main/resources/sounds/movedPiece.mp3"
 
   override def getSmallerSide: Int = smallerSide
 
@@ -383,12 +383,14 @@ object ViewFactory extends ViewFactory {
 
   override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
 
-  override def generateASoundForMove(): Unit = playMoveSound()
+  //override def generateASoundForMove(): Unit = playMoveSound()
 
+  /*
   private def playMoveSound(): Unit = {
     val mediaPlayer: MediaPlayer = new MediaPlayer(new Media(soundMovedPiece))
     mediaPlayer.play()
   }
+  */
 
   private class BasicCell(private var defaultBackground: Color) extends Cell {
     private var isAPossibleMove: Boolean = false
@@ -583,7 +585,8 @@ object ViewFactory extends ViewFactory {
   private class MenuButton(s: String) extends EmptyButton(s) {
 
     private val FONT_DIMENSION = smallerSide * 5 / 100
-    private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
+    //private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
+    private val BUTTON_DIMENSION = new Dimension(smallerSide * 4 / 10, smallerSide * 8 / 100)
 
     setPreferredSize(BUTTON_DIMENSION)
     setMaximumSize(getPreferredSize)
@@ -609,7 +612,8 @@ object ViewFactory extends ViewFactory {
   }
 
   private class IconLabel(pathIcon: String) extends JLabel {
-    private val ICON_DIMENSION: Int = smallerSide * 7 / 100
+    //private val ICON_DIMENSION: Int = smallerSide * 7 / 100
+    private val ICON_DIMENSION: Int = smallerSide * 49 / 1000
     this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
     this.setMaximumSize(getPreferredSize)
     val img: BufferedImage = ImageIO.read(new File(pathIcon))
@@ -619,7 +623,8 @@ object ViewFactory extends ViewFactory {
   }
 
   private class SubMenuPanel extends JPanel {
-    private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+    //private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+    private val PANEL_DIMENSION = new Dimension(smallerSide * 7 / 10, smallerSide * 8 / 100)
 
     setPreferredSize(PANEL_DIMENSION)
     setMaximumSize(getPreferredSize)
@@ -739,7 +744,7 @@ object ViewFactory extends ViewFactory {
   private def capturedBlackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, capturedPawnSizeMultiplier)
 
   private class LabelPlayer_Winner extends JLabel {
-    private val DIMENSION_FONT: Int = smallerSide * 5 / 100
+    private val DIMENSION_FONT: Int = smallerSide * 3 / 100
     setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
     setForeground(ColorProvider.getPossibleMovesColor)
   }

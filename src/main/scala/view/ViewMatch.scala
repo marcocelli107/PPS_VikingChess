@@ -227,7 +227,7 @@ object ViewMatch {
       lim.gridx = 1
       subNorthPanel.add(playerOrWinnerLabel, lim)
       northPanel.add(subNorthPanel)
-      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 45/100,ViewFactory.getSmallerSide * 8 / 100)))
+      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 55/100,ViewFactory.getSmallerSide * 8 / 100)))
       menuButton = ViewFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
       northPanel.add(menuButton)

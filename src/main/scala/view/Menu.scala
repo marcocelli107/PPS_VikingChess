@@ -124,7 +124,7 @@ object Menu {
 
       val limits: GridBagConstraints = new java.awt.GridBagConstraints()
       limits.gridy = 0
-      limits.weightx = 1
+      limits.weightx = 0
       limits.fill = GridBagConstraints.NONE
       limits.anchor = GridBagConstraints.LINE_START
 
@@ -185,7 +185,7 @@ object Menu {
 
       val limits: GridBagConstraints = new java.awt.GridBagConstraints()
       limits.gridy = 0
-      limits.weightx = 1
+      limits.weightx = 0
       limits.fill = GridBagConstraints.NONE
       limits.anchor = GridBagConstraints.LINE_START
 
