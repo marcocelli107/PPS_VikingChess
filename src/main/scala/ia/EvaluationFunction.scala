@@ -5,37 +5,51 @@ import model.{ParserProlog, Piece}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
 
+import scala.util.Random
+
 trait EvaluationFunction{
   def score(gameState: ParserProlog):Int
 }
 
-class  EvaluationFunctionImpl extends EvaluationFunction {
+class  EvaluationFunctionImpl() extends EvaluationFunction {
 
 
-  override def score(gameState: ParserProlog): Int = ???
-
+  override def score(gameState: ParserProlog): Int =  ((Random.nextDouble() * 200) -100).intValue()
 
   /* RULES */
 
-  def scoreKingNearCorners(board: Board): Double = {
-    val kingCoord: Coordinate = findKing(board.cells)
-    if( getCoordCorners(board.size).filter(coord => distanceBetweenCells(kingCoord,coord) == 1 ).size == 0 )  0 else 1
-
+  def scoreKingNearCorners(size: Int, kingCoord: Coordinate): Int = kingCoord match {
+    case  Coordinate(1,2) => 10
+    case  Coordinate(2,1) => 10
+    case  Coordinate(1,x) if (size - x) == 1 => 10
+    case  Coordinate(2,x) if size == x => 10
+    case  Coordinate(x,1) if (size - x) == 1 => 10
+    case  Coordinate(x,2) if size == x => 10
+    case  Coordinate(x,y) if ((size-x) == 1  && y == size ) => 10
+    case  Coordinate(x,y) if ((size-y) == 1 && x == size ) => 10
+    case  _ => 0
   }
 
-  def scoreKingIsInFreeRowsOrColumns(cells: Seq[BoardCell]): Double = ??? /*{
-     val coordKing:Coordinate = findKing(cells)
-     val row: Seq[BoardCell] = getRow(coordKing.getX, cells).filter(cell => !cell.getCoordinate.equals(coordKing))
-     val column: Seq[BoardCell] = getRow(coordKing.getY, cells).filter(cell => !cell.getCoordinate.equals(coordKing))
-   }*/
+  def scoreKingIsInFreeRowOrColumn( rowKing : Seq [BoardCell], columnKing: Seq [BoardCell] ): Int = {
+     val rowWhithoutKing = whithoutKing(rowKing)
+     val columnWhithoutKing = whithoutKing(columnKing)
 
-  /* RULES */
+      def _scoreKingIsInFreeRowOrColumn(rowKing : Seq [BoardCell], columnKing: Seq [BoardCell] ): Int =(rowKing,columnKing) match {
+        case (row, _ ) if isSequenceFreeCells(row) => 5
+        case ( _, column ) if isSequenceFreeCells(column) => 5
+        case ( row , column ) if isSequenceFreeCells(row) && isSequenceFreeCells(column)   => 10
+        case _ => 0
+      }
+    _scoreKingIsInFreeRowOrColumn(rowWhithoutKing,columnWhithoutKing)
+  }
 
   def scorePawnArrangedInSquare(): Double = ???
 
   def scoreCapturePawns(): Double  = ???
 
   /* UTILS METHODS */
+
+  def whithoutKing( seq : Seq [BoardCell]): Seq [BoardCell] = seq.filter( cell => !cell.getPiece.equals(Piece.WhiteKing))
 
   def distanceBetweenCells(start: Coordinate, end: Coordinate ): Double= scala.math.sqrt(scala.math.sqrt(start.x - end.y)+scala.math.sqrt(start.y - end.y))
 
