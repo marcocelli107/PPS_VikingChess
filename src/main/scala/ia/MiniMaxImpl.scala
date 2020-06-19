@@ -16,22 +16,21 @@ object MiniMaxImpl {
 
 class MiniMaxImpl(depth: Int ) extends  MiniMax {
 
-
-  var parserHistory: List[ParserProlog] = List()
   var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl()
-
   type Game = List[ParserProlog]
 
 
   override def findBestMove(game: ParserProlog):Coordinate = {
     val gamePossibleMove = getGamePossibleMoves(game, findPlayerPawns(game), List())
 
-    def _findBestMove(game: ParserProlog, gamePossibeMove: List[(Coordinate,Coordinate)] , bestCoord: Coordinate , bestScore: Int ):Coordinate = gamePossibeMove match {
+    def _findBestMove(game: ParserProlog, gamePossibleMove: List[(Coordinate,Coordinate)] , bestCoord: Coordinate , bestScore: Int ):Coordinate = gamePossibleMove match {
       case Nil  => bestCoord
       case h::t => {
                 val makeMove = moveAnyPawn(game.copy(), h._1, h._2)
                 val moveScore = pruningAlfaBeta(makeMove, depth, -100,+100, MaxMin.min )
+                 println ( "OldBestCord " + bestCoord + " OldBestScorec " + moveScore  )
                 val (newBestCoord, newBestScore) = if (bestScore > moveScore ) (bestCoord , bestScore) else (h._2, moveScore)
+                println ( "NewBestCord " + newBestCoord + " NewBestScorec " + newBestScore  )
                _findBestMove( game,t, newBestCoord, newBestScore )
       }
     }
@@ -47,7 +46,7 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
   }
 
   def maximizationPhase(game: ParserProlog, depth: Int, alfa: Int, beta: Int):Int = {
-    val tempVal:Int= -100
+    val tempVal:Int = -100
     val gameMoves: List[(Coordinate,Coordinate)] = getGamePossibleMoves(game,findPlayerPawns(game), List())
 
     def _maximizationPhase(fatherGame: ParserProlog, gameMoves: List[(Coordinate,Coordinate)], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
@@ -57,6 +56,7 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
             val sonGame: ParserProlog = moveAnyPawn(fatherGame.copy(), h._1, h._2)
             val newTempVal = max(tempVal, pruningAlfaBeta(sonGame, depth-1, alfa, beta, MaxMin.min))
             val newAlfa = max(alfa, newTempVal)
+            //println("Max: " + depth)
             _maximizationPhase(fatherGame, t, newTempVal, depth, newAlfa, beta)
       }
     }
@@ -65,7 +65,7 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
   }
 
   def minimizationPhase(game: ParserProlog, depth: Int, alfa: Int, beta: Int): Int = {
-    val tempVal:Int= 100
+    val tempVal:Int = 100
     val gameMoves: List[(Coordinate,Coordinate)] = getGamePossibleMoves(game,findPlayerPawns(game), List())
 
     def _minimizationPhase(fatherGame: ParserProlog, gameMoves: List[(Coordinate,Coordinate)], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
@@ -73,20 +73,14 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
       case _  if beta <= alfa => tempVal
       case h::t =>  {
             val sonGame: ParserProlog = moveAnyPawn(fatherGame.copy(), h._1, h._2)
-            val newTempVal = min(tempVal, pruningAlfaBeta(fatherGame, depth-1, alfa, beta, MaxMin.Max))
-            val newAlfa = min(alfa, newTempVal)
-            _minimizationPhase(fatherGame, t, newTempVal, depth, newAlfa, beta)
+            val newTempVal = min(tempVal, pruningAlfaBeta(sonGame, depth - 1, alfa, beta, MaxMin.Max))
+            val newBeta = min(beta, newTempVal)
+              //println("Min: "+depth)
+            _minimizationPhase(fatherGame, t, newTempVal, depth, alfa, newBeta)
       }
     }
 
     _minimizationPhase(game, gameMoves,tempVal,depth,alfa,beta)
-  }
-
-  def isOwner(pawn:Piece.Value, player: Player.Value): Boolean = ( pawn, player) match {
-    case ( Piece.WhitePawn, Player.White) => true
-    case ( Piece.WhiteKing, Player.White) => true
-    case ( Piece.BlackPawn, Player.Black) => true
-    case _ => false
   }
 
   def getPlayerAndBoard(parserProlog: ParserProlog ):(Player.Value, List[BoardCell] ) = {
@@ -151,13 +145,21 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
 
   def min( x : Int , y: Int): Int = if (x < y ) x else y
 
+  def isOwner(pawn:Piece.Value, player: Player.Value): Boolean = ( pawn, player) match {
+    case ( Piece.WhitePawn, Player.White) => true
+    case ( Piece.WhiteKing, Player.White) => true
+    case ( Piece.BlackPawn, Player.Black) => true
+    case _ => false
+  }
+
 }
 object TryMinMax extends App{
   val THEORY: String = TheoryGame.GameRules.toString
   val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
   val board = parserProlog.createGame(GameVariant.Brandubh.nameVariant.toLowerCase)._3
+  var ef: EvaluationFunction =  EvaluationFunctionImpl()
   //  var gameTree: GameTree = GameTree()
-  val miniMax = new MiniMaxImpl(  2)
+  val miniMax: MiniMaxImpl = new MiniMaxImpl(  2)
 
   println( parserProlog.hasWinner)
 
