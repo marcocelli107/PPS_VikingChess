@@ -90,7 +90,7 @@ trait ParserProlog {
    * @return parser representing the game state.
    */
 
-  def copy: ParserProlog
+  def copy(): ParserProlog
 
   /**
    * Get the Board
