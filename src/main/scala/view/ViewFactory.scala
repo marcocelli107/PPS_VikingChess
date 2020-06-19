@@ -2,6 +2,7 @@ package view
 
 import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent}
+import java.awt.image.BufferedImage
 import java.io.File
 
 import javax.imageio.ImageIO
@@ -231,6 +232,30 @@ trait ViewFactory {
    */
   def setVariantBoardSize(variantBoardSize: Int): Unit
 
+  /**
+    * Creates a sub menu panel.
+    *
+    * @return a panel.
+    */
+  def createSubMenuPanel: JPanel
+
+  /**
+    * Creates a label for each different variant.
+    *
+    * @return a label.
+    */
+  def createLabelBoardHnefatafl: JLabel
+  def createLabelBoardTawlbwrdd: JLabel
+  def createLabelBoardTablut: JLabel
+  def createLabelBoardBrandubh: JLabel
+
+  /**
+    * Creates a label for player white or black.
+    *
+    * @return a label.
+    */
+  def createLabelWhitePlayer: JLabel
+  def createLabelBlackPlayer: JLabel
 }
 
 object ViewFactory extends ViewFactory {
@@ -242,7 +267,12 @@ object ViewFactory extends ViewFactory {
   ge.registerFont(f)
   private val centerCellIconPath: String = "src/main/resources/images/iconThrone.png"
   private val cornerCellIconPath: String =  "src/main/resources/images/iconCellWin.png"
-
+  private val boardHnefataflIconPath: String =  "src/main/resources/images/iconBoardHnefatafl.png"
+  private val boardTawlbwrddIconPath: String =  "src/main/resources/images/iconBoardTawlbwrdd.png"
+  private val boardTablutIconPath: String =  "src/main/resources/images/iconBoardTablut.png"
+  private val boardBrandubhlIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
+  private val whitePlayerIconPath: String =  "src/main/resources/images/iconWhitePlayer.jpeg"
+  private val blackPlayerIconPath: String =  "src/main/resources/images/iconBlackPlayer.jpeg"
 
   override def getSmallerSide: Int = smallerSide
 
@@ -301,6 +331,20 @@ object ViewFactory extends ViewFactory {
   override def createFrame: JFrame = new Frame
 
   override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
+
+  override def createSubMenuPanel: JPanel = new SubMenuPanel
+
+  override def createLabelBoardHnefatafl: JLabel = new IconLabel(boardHnefataflIconPath)
+
+  override def createLabelBoardTawlbwrdd: JLabel = new IconLabel(boardTawlbwrddIconPath)
+
+  override def createLabelBoardTablut: JLabel = new IconLabel(boardTablutIconPath)
+
+  override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhlIconPath)
+
+  override def createLabelWhitePlayer: JLabel = new IconLabel(whitePlayerIconPath)
+
+  override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
 
   private class BasicCell(private var defaultBackground: Color) extends Cell {
     private var isAPossibleMove: Boolean = false
@@ -522,6 +566,29 @@ object ViewFactory extends ViewFactory {
     })
   }
 
+  private class IconLabel(pathIcon: String) extends JLabel {
+    private val ICON_DIMENSION: Int = smallerSide * 7 / 100
+    this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
+    this.setMaximumSize(getPreferredSize)
+    val img: BufferedImage = ImageIO.read(new File(pathIcon))
+    val dimg: Image = img.getScaledInstance(ICON_DIMENSION, ICON_DIMENSION, Image.SCALE_SMOOTH)
+    val imageIcon = new ImageIcon(dimg)
+    this.setIcon(imageIcon)
+  }
+
+  private class SubMenuPanel extends JPanel {
+    private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+
+    setPreferredSize(PANEL_DIMENSION)
+    setMaximumSize(getPreferredSize)
+    setAlignmentX(Component.CENTER_ALIGNMENT)
+    setOpaque(false)
+    setVisible(true)
+
+    val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
+    this.setLayout(gridBagLayout)
+  }
+
   private class GameButton() extends EmptyButton("") {
     private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
     private var image = imageIcon.getImage
@@ -607,8 +674,8 @@ object ViewFactory extends ViewFactory {
       g.setColor(internalColor)
       g.fillRoundRect(X_CENTRE - radius2, Y_CENTRE - radius2, INTERNAL_ROUNDRECT_MULTIPLIER, INTERNAL_ROUNDRECT_MULTIPLIER, ARC_DIMENSION, ARC_DIMENSION)
     }
-
   }
+
   private val basicPawnSizeMultiplier: Double = 1
   private val capturedPawnSizeMultiplier: Double = 0.5
   private def whitePawn(): JLabel = new Pawn(ColorProvider.getWhiteColor, ColorProvider.getBlackColor, basicPawnSizeMultiplier)
@@ -618,7 +685,7 @@ object ViewFactory extends ViewFactory {
   private def capturedBlackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, capturedPawnSizeMultiplier)
 
   private class LabelPlayer_Winner extends JLabel {
-    private val DIMENSION_FONT: Int = smallerSide * 7 / 100
+    private val DIMENSION_FONT: Int = smallerSide * 5 / 100
     setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
     setForeground(ColorProvider.getPossibleMovesColor)
   }
@@ -634,5 +701,4 @@ object ViewFactory extends ViewFactory {
     setSize(smallerSide, smallerSide)
     setLocationRelativeTo(null)
   }
-
 }

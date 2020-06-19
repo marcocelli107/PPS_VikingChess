@@ -1,12 +1,18 @@
 package utils
 
 import model.Piece
-import model.Piece.PieceType
-import utils.BoardGame.{Board, BoardCell}
 
-import scala.collection.mutable.ListBuffer
+/**
+ * Util class representing a 2D coordinate
+ */
 
-case class Coordinate(x: Int, y: Int)
+object Coordinate {
+  val COORD_STRING: String = "coord"
+}
+
+case class Coordinate(x: Int, y: Int)  {
+  override def toString: String = Coordinate.COORD_STRING + "(" + x + "," + y + ")"
+}
 
 object BoardGame {
 
@@ -14,36 +20,42 @@ object BoardGame {
 
     /**
      * Gets piece in the cell
+     *
+     * @return
+     *         the piece type
      */
-    def getPiece: PieceType
+    def getPiece: Piece.Val
 
     /**
      * Gets coordinate of the cell
+     *
+     * @return
+     *         the coordinate
      */
     def getCoordinate: Coordinate
 
+    /**
+     * Returns a string representation of the board
+     *
+     * @return
+     *         a string representation of the board
+     */
     def toString: String
   }
 
   object BoardCell {
 
-    def apply(coordinateCell: Coordinate, piece: PieceType): BoardCell = BoardCellImpl(coordinateCell, piece)
+    val CELL_STRING: String = "cell"
 
-    case class BoardCellImpl(private val coordinateCell: Coordinate, private val pieceCell: PieceType) extends BoardCell {
+    def apply(coordinateCell: Coordinate, piece: Piece.Val): BoardCell = BoardCellImpl(coordinateCell, piece)
 
-      override def getPiece: PieceType = pieceCell
+    case class BoardCellImpl(private val coordinateCell: Coordinate, private val pieceCell: Piece.Val) extends BoardCell {
+
+      override def getPiece: Piece.Val = pieceCell
 
       override def getCoordinate: Coordinate = coordinateCell
 
-      override def toString: String = {
-        var p: String = ""
-        /* TODO USARE ENUM */
-        if (pieceCell.equals(Piece.Void)) p = "e"
-        if (pieceCell.equals(Piece.WhitePawn)) p = "wp"
-        if (pieceCell.equals(Piece.BlackPawn)) p = "bp"
-        if (pieceCell.equals(Piece.WhiteKing)) p = "wk"
-        "cell(coord(" + coordinateCell.x + "," + coordinateCell.y + ")," + p + ")"
-      }
+      override def toString: String = BoardCell.CELL_STRING + "(" + coordinateCell.toString + "," + pieceCell.pieceString + ")"
     }
 
   }
@@ -86,15 +98,4 @@ object BoardGame {
 
   }
 
-}
-
-object prova extends App {
-  var s: ListBuffer[BoardCell] = ListBuffer.empty
-  for (x <- 1 to 11) {
-    for (y <- 1 to 11) {
-      s += BoardCell(Coordinate(x, y), Piece.Void)
-    }
-  }
-  var b: Board = Board(s)
-  println(b.toString)
 }

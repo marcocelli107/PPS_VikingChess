@@ -1,9 +1,10 @@
 package view
 
-import java.awt.Dimension
+import java.awt.{Dimension, GridBagConstraints}
 import java.awt.event.{ActionEvent, ActionListener}
-import javax.swing.{Box, JButton, JPanel}
-import model.{GameMode, GameVariant, Player, Level}
+
+import javax.swing._
+import model.{GameMode, GameVariant, Level, Player}
 
 trait Menu {
 
@@ -12,7 +13,7 @@ trait Menu {
     *
     * @return player
     */
-  def getPlayer: Player.Value
+  def getPlayer: Player.Val
 
   /**
     * Initializes the main menù.
@@ -65,17 +66,22 @@ object Menu {
 
     private final val DIMENSION_PANEL: Dimension =
       new Dimension(ViewFactory.getSmallerSide, ViewFactory.getSmallerSide * 2 / 100)
-    private var menuPanel, variantsPanel, diffPanel, playerChoicePanel, inGameMenuPanel: JPanel = _
+    private var menuPanel, variantsPanel, diffPanel, playerChoicePanel, inGameMenuPanel,
+                panelVariantHnefatafl, panelVariantTawlbwrdd, panelVariantTablut, panelVariantBrandubh,
+                panelChoseWhite, panelChoseBlack: JPanel = _
     private var pvpButton, pveButton, exitButtonMenu, hnefatafl, tawlbwrdd, tablut, brandubh,
       newcomer, amateur, standard, advanced, whiteButton, blackButton, quitGame, returnToMenu,
       returnToGame, restartGame: JButton = _
 
+    private var labelHnefatafl, labelTawlbwrdd, labelTablut, labelBrandubh,
+                labelWhiteChose, labelBlackChose: JLabel = _
+
     private var gameMode: GameMode.Value = _
     private var boardVariant: GameVariant.Val = _
     private var levelIA: Level.Value = _
-    private var player: Player.Value = _
+    private var player: Player.Val = _
 
-    override def getPlayer: Player.Value = player
+    override def getPlayer: Player.Val = player
 
     override def initMenu: JPanel = {
       menuPanel = ViewFactory.createMenuPanel("Choose Mode: ")
@@ -95,25 +101,60 @@ object Menu {
 
     override def initVariantsMenu: JPanel = {
       variantsPanel = ViewFactory.createMenuPanel("Choose Board Variant: ")
+      panelVariantHnefatafl = ViewFactory.createSubMenuPanel
+      panelVariantTawlbwrdd = ViewFactory.createSubMenuPanel
+      panelVariantTablut = ViewFactory.createSubMenuPanel
+      panelVariantBrandubh = ViewFactory.createSubMenuPanel
+
+      val limits: GridBagConstraints = new java.awt.GridBagConstraints()
+      limits.gridy = 0
+      limits.weightx = 1
+      limits.fill = GridBagConstraints.NONE
+      limits.anchor = GridBagConstraints.LINE_START
+
+      labelHnefatafl = ViewFactory.createLabelBoardHnefatafl
+      limits.gridx = 0
+      panelVariantHnefatafl.add(labelHnefatafl, limits)
       hnefatafl = ViewFactory.createMenuButton("Hnefatafl (11 x 11)")
       hnefatafl.addActionListener(chooseVariantListener("Hnefatafl"))
+      limits.gridx = 1
+      panelVariantHnefatafl.add(hnefatafl, limits)
+
+      labelTawlbwrdd = ViewFactory.createLabelBoardTawlbwrdd
+      limits.gridx = 0
+      panelVariantTawlbwrdd.add(labelTawlbwrdd, limits)
       tawlbwrdd = ViewFactory.createMenuButton("Tawlbwrdd (11 x 11)")
       tawlbwrdd.addActionListener(chooseVariantListener("Tawlbwrdd"))
+      limits.gridx = 1
+      panelVariantTawlbwrdd.add(tawlbwrdd, limits)
+
+      labelTablut = ViewFactory.createLabelBoardTablut
+      limits.gridx = 0
+      panelVariantTablut.add(labelTablut, limits)
       tablut = ViewFactory.createMenuButton("Tablut (9 x 9)")
       tablut.addActionListener(chooseVariantListener("Tablut"))
+      limits.gridx = 1
+      panelVariantTablut.add(tablut, limits)
+
+      labelBrandubh = ViewFactory.createLabelBoardBrandubh
+      limits.gridx = 0
+      panelVariantBrandubh.add(labelBrandubh, limits)
       brandubh = ViewFactory.createMenuButton("Brandubh (7 x 7)")
       brandubh.addActionListener(chooseVariantListener("Brandubh"))
+      limits.gridx = 1
+      panelVariantBrandubh.add(brandubh, limits)
 
       returnToMenu = ViewFactory.createMenuButton("Previous Menu")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(variantsPanel, menuPanel))
 
       variantsPanel.add(Box.createRigidArea(DIMENSION_PANEL))
-      variantsPanel.add(hnefatafl)
-      variantsPanel.add(tawlbwrdd)
-      variantsPanel.add(tablut)
-      variantsPanel.add(brandubh)
+      variantsPanel.add(panelVariantHnefatafl)
+      variantsPanel.add(panelVariantTawlbwrdd)
+      variantsPanel.add(panelVariantTablut)
+      variantsPanel.add(panelVariantBrandubh)
       variantsPanel.add(returnToMenu)
       variantsPanel.add(Box.createVerticalGlue)
+
       variantsPanel.setVisible(false)
       variantsPanel
     }
@@ -145,17 +186,38 @@ object Menu {
 
     override def initPlayerChoiceMenu: JPanel = {
       playerChoicePanel = ViewFactory.createMenuPanel("Choose Player: ")
+
+      panelChoseWhite = ViewFactory.createSubMenuPanel
+      panelChoseBlack = ViewFactory.createSubMenuPanel
+
+      val limits: GridBagConstraints = new java.awt.GridBagConstraints()
+      limits.gridy = 0
+      limits.weightx = 0
+      limits.fill = GridBagConstraints.NONE
+      limits.anchor = GridBagConstraints.LINE_START
+
+      labelWhiteChose = ViewFactory.createLabelWhitePlayer
+      limits.gridx = 0
+      panelChoseWhite.add(labelWhiteChose,limits)
       whiteButton = ViewFactory.createMenuButton("White Pawns")
       whiteButton.addActionListener(setPlayer("White"))
+      limits.gridx = 1
+      panelChoseWhite.add(whiteButton,limits)
+
+      labelBlackChose = ViewFactory.createLabelBlackPlayer
+      limits.gridx = 0
+      panelChoseBlack.add(labelBlackChose,limits)
       blackButton = ViewFactory.createMenuButton("Black Pawns")
       blackButton.addActionListener(setPlayer("Black"))
+      limits.gridx = 1
+      panelChoseBlack.add(blackButton,limits)
 
       returnToMenu = ViewFactory.createMenuButton("Previous Menu")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(playerChoicePanel, variantsPanel))
 
       playerChoicePanel.add(Box.createRigidArea(DIMENSION_PANEL))
-      playerChoicePanel.add(whiteButton)
-      playerChoicePanel.add(blackButton)
+      playerChoicePanel.add(panelChoseWhite)
+      playerChoicePanel.add(panelChoseBlack)
       playerChoicePanel.add(returnToMenu)
       playerChoicePanel.add(Box.createVerticalGlue)
       playerChoicePanel.setVisible(false)

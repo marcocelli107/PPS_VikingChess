@@ -16,7 +16,7 @@ trait ParserProlog {
     *
     * @return game as (PlayerToMove, Winner, Board, PiecesCapturedInTurn).
     */
-  def createGame(newVariant: String): (Player.Value, Player.Value, Board, Int)
+  def createGame(newVariant: String): (Player.Val, Player.Val, Board, Int)
 
   /**
     * Gives possible moves from the selected cell.
@@ -34,7 +34,7 @@ trait ParserProlog {
     *                 coordinate of the arrival cell.
     * @return new board.
     */
-  def makeMove(cellStart: Coordinate, cellArrival: Coordinate): (Player.Value, Player.Value, Board, Int)
+  def makeLegitMove(cellStart: Coordinate, cellArrival: Coordinate): (Player.Val, Player.Val, Board, Int)
 
   /**
    * Undoes the last move.
@@ -44,7 +44,7 @@ trait ParserProlog {
    *                 coordinate of the arrival cell.
    * @return new board.
    */
-  def undoMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Value, Player.Value, Board, Int)
+  def makeNonLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int)
 
   /**
     * Finds king on game board.
@@ -96,11 +96,15 @@ trait ParserProlog {
    *
    * @return Board.
    */
-  def getActualBoard(): Board
+  def getActualBoard: Board
 
 
-  def getPlayer(): Player.Value
+  def getPlayer: Player.Val
 
+
+  def hasWinner: Option[Player.Val]
+
+  def undoMove(oldBoard: Board): Unit
 }
 
 object ParserPrologImpl {
@@ -109,7 +113,7 @@ object ParserPrologImpl {
 
   def apply(theory: String,_playerToWin: Term ,_playerToMove: Term , _board: Term, _variant: Term): ParserPrologImpl = {
     val ppi=new ParserPrologImpl(theory)
-    ppi.playerToWin= _playerToWin
+    ppi.winner= _playerToWin
     ppi.playerToMove= _playerToMove
     ppi.board= _board
     ppi.variant= _variant
@@ -125,12 +129,12 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   private val engine = new Prolog()
   private var goal: SolveInfo = _
   private var list: Term = new Struct()
-  private var playerToWin: Term = new Struct()
+  private var winner: Term = new Struct()
   private var playerToMove: Term = new Struct()
   private var board: Term = new Struct()
   private var variant: Term = new Struct()
 
-  def getPlayerToWin:Term = playerToWin
+  def getPlayerToWin:Term = winner
 
   def getPlayerToMove:Term =  playerToMove
 
@@ -140,16 +144,22 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
   engine.setTheory(new Theory(new FileInputStream(theory)))
 
-  override def getActualBoard(): Board = {
+  override def getActualBoard: Board = {
     goalString = replaceBoardString(board)
     parseBoard(goalString)
   }
 
-  override def getPlayer(): Player.Value = {
+  override def getPlayer: Player.Val = {
     setPlayer(playerToMove.toString)
   }
 
-  override def createGame(newVariant: String): (Player.Value, Player.Value, Board, Int) = {
+  override def hasWinner: Option[Player.Val] = setPlayer( winner.toString) match {
+    case Player.Black => Option( Player.Black)
+    case Player.White => Option( Player.White)
+    case _ => Option.empty
+  }
+
+  override def createGame(newVariant: String): (Player.Val, Player.Val, Board, Int) = {
     goal = engine.solve(s"newGame($newVariant,(V,P,W,B)).")
 
     setGameTerms(goal)
@@ -161,7 +171,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
   override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
 
-    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$playerToWin,$board), coord(${cell.x}, ${cell.y}), L).")
+    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$winner,$board), coord(${cell.x}, ${cell.y}), L).")
 
     list = goal.getTerm("L")
 
@@ -170,14 +180,14 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     setListCellsView(goalString)
   }
 
-  override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Value, Player.Value, Board, Int) =
+  override def makeLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int) =
     setMove(fromCoordinate, toCoordinate, "makeLegitMove")
 
-  override def undoMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Value, Player.Value, Board, Int) =
+  override def makeNonLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int) =
     setMove(fromCoordinate, toCoordinate, "makeMove")
 
-  private def setMove(fromCoordinate: Coordinate, toCoordinate: Coordinate, predicate: String): (Player.Value, Player.Value, Board, Int) = {
-    goal = engine.solve(s"$predicate(($variant, $playerToMove, $playerToWin, $board)," +
+  private def setMove(fromCoordinate: Coordinate, toCoordinate: Coordinate, predicate: String): (Player.Val, Player.Val, Board, Int) = {
+    goal = engine.solve(s"$predicate(($variant, $playerToMove, $winner, $board)," +
       s"coord(${fromCoordinate.x},${fromCoordinate.y})," +
       s"coord(${toCoordinate.x},${toCoordinate.y}), L, (V,P,W,B)).")
 
@@ -221,7 +231,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   private def setGameTerms(goal: SolveInfo): Unit = {
     variant = goal.getTerm("V")
     playerToMove = goal.getTerm("P")
-    playerToWin = goal.getTerm("W")
+    winner = goal.getTerm("W")
     board = goal.getTerm("B")
   }
 
@@ -257,18 +267,18 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
     var listCells: ListBuffer[BoardCell] = ListBuffer.empty[BoardCell]
 
-    stringBoard.split("cell").tail.foreach(elem => {
+    stringBoard.split(BoardCell.CELL_STRING).tail.foreach(elem => {
       var coordinateCell: Array[String] = null
-      if (elem.contains("e")) {
+      if (elem.contains(Piece.Empty.pieceString)) {
         coordinateCell = elem.substring(0, elem.length - 2).split(",")
-        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Void)
-      } else if (elem.contains("bp")) {
+        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Empty)
+      } else if (elem.contains(Piece.BlackPawn.pieceString)) {
         coordinateCell = elem.substring(0, elem.length - 3).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.BlackPawn)
-      } else if (elem.contains("wp")) {
+      } else if (elem.contains(Piece.WhitePawn.pieceString)) {
         coordinateCell = elem.substring(0, elem.length - 3).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhitePawn)
-      } else if (elem.contains("wk")) {
+      } else {
         coordinateCell = elem.substring(0, elem.length - 3).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhiteKing)
       }
@@ -288,7 +298,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   private def setListCellsView(stringList: String): ListBuffer[Coordinate] = {
     var listPossibleCoordinates: ListBuffer[Coordinate] = ListBuffer.empty[Coordinate]
 
-    goalString.split("coord").tail.foreach(elem => {
+    goalString.split(Coordinate.COORD_STRING).tail.foreach(elem => {
       var coordinateCells: Array[String] = null
       coordinateCells = elem.split(",")
       listPossibleCoordinates += Coordinate(coordinateCells(0).toInt, coordinateCells(1).toInt)
@@ -304,10 +314,10 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    *
    * @return parsed player.
    */
-  private def setPlayer(stringPlayer: String): Player.Value = stringPlayer match {
-    case "w" => Player.White
-    case "b" => Player.Black
-    case "d" => Player.Draw
+  private def setPlayer(stringPlayer: String): Player.Val = stringPlayer match {
+    case Player.White.playerString => Player.White
+    case Player.Black.playerString => Player.Black
+    case Player.Draw.playerString => Player.Draw
     case _ => Player.None
   }
 
@@ -316,18 +326,22 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    *
    * @return ParserProlog.
    */
-  override def copy(): ParserProlog = ParserPrologImpl(theory, playerToWin, playerToMove, board, variant)
+  override def copy(): ParserProlog = ParserPrologImpl(theory, winner, playerToMove, board, variant)
 
   override def equals(that: Any): Boolean = that match {
     case that: ParserPrologImpl =>
       that.isInstanceOf[ParserPrologImpl] &&
         that.variant.isEqualObject(this.variant) &&
         that.playerToMove.isEqualObject(this.playerToMove) &&
-        that.playerToWin.isEqualObject(this.playerToWin) &&
+        that.winner.isEqualObject(this.winner) &&
         that.board.isEqualObject(this.board)
 
     case _ => false
 
   }
 
+  override def undoMove(oldBoard: Board): Unit = {
+    goal = engine.solve(s"undoMove(($variant,$playerToMove,$winner,$board), $oldBoard, (V, P, W, B)).")
+    setGameTerms(goal)
+  }
 }
