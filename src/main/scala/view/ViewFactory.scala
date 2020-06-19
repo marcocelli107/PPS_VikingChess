@@ -5,6 +5,7 @@ import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.image.BufferedImage
 import java.io.File
 
+import javafx.scene.media.{Media, MediaPlayer}
 import javax.imageio.ImageIO
 import javax.swing._
 import javax.swing.border.LineBorder
@@ -257,12 +258,27 @@ trait ViewFactory {
   def createLabelBoardBrandubh: JLabel
 
   /**
+    * Creates a label for each different level.
+    *
+    * @return a label.
+    */
+  def createLabelNewcomer: JLabel
+  def createLabelAmateur: JLabel
+  def createLabelStandard: JLabel
+  def createLabelAdvanced: JLabel
+
+  /**
     * Creates a label for player white or black.
     *
     * @return a label.
     */
   def createLabelWhitePlayer: JLabel
   def createLabelBlackPlayer: JLabel
+
+  /**
+    * Generates a sound for the moved piece.
+    */
+  def generateASoundForMove()
 }
 
 object ViewFactory extends ViewFactory {
@@ -278,8 +294,13 @@ object ViewFactory extends ViewFactory {
   private val boardTawlbwrddIconPath: String =  "src/main/resources/images/iconBoardTawlbwrdd.png"
   private val boardTablutIconPath: String =  "src/main/resources/images/iconBoardTablut.png"
   private val boardBrandubhlIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
+  private val newcomerIconPath: String =  "src/main/resources/images/iconNewcomer.png"
+  private val amateurIconPath: String =  "src/main/resources/images/iconAmateur.png"
+  private val standardIconPath: String =  "src/main/resources/images/iconStandard.png"
+  private val advancedIconPath: String =  "src/main/resources/images/iconAdvanced.png"
   private val whitePlayerIconPath: String =  "src/main/resources/images/iconWhitePlayer.jpeg"
   private val blackPlayerIconPath: String =  "src/main/resources/images/iconBlackPlayer.jpeg"
+  private val soundMovedPiece: String =  _//"src/main/resources/sounds/movedPiece.mp3"
 
   override def getSmallerSide: Int = smallerSide
 
@@ -351,9 +372,23 @@ object ViewFactory extends ViewFactory {
 
   override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhlIconPath)
 
+
+  override def createLabelNewcomer: JLabel = new IconLabel(newcomerIconPath)
+  override def createLabelAmateur: JLabel = new IconLabel(amateurIconPath)
+  override def createLabelStandard: JLabel = new IconLabel(standardIconPath)
+  override def createLabelAdvanced: JLabel = new IconLabel(advancedIconPath)
+
+
   override def createLabelWhitePlayer: JLabel = new IconLabel(whitePlayerIconPath)
 
   override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
+
+  override def generateASoundForMove(): Unit = playMoveSound()
+
+  private def playMoveSound(): Unit = {
+    val mediaPlayer: MediaPlayer = new MediaPlayer(new Media(soundMovedPiece))
+    mediaPlayer.play()
+  }
 
   private class BasicCell(private var defaultBackground: Color) extends Cell {
     private var isAPossibleMove: Boolean = false

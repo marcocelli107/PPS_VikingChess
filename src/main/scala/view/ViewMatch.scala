@@ -112,10 +112,12 @@ object ViewMatch {
       if(gameSnapshot.getLastMove.nonEmpty)
         highlightLastMove(gameSnapshot.getLastMove.get)
 
-
       boardPanel.repaint()
       boardPanel.validate()
       gamePanel.validate()
+
+      /* TODO NON FUNZIONA */
+      //ViewFactory.generateASoundForMove()
     }
 
     /**
