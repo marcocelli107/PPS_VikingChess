@@ -1,8 +1,8 @@
 package view
 
-import java.awt.{GridBagConstraints, GridBagLayout}
+import java.awt.{Dimension, GridBagConstraints, GridBagLayout}
 
-import javax.swing.{JButton, JLabel, JPanel}
+import javax.swing._
 import model.{GameSnapshot, Piece, Player, Snapshot}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
@@ -40,14 +40,6 @@ trait ViewMatch {
     *                 snapshot to show.
     */
   def update(gameSnapshot: GameSnapshot)
-
-  /**
-    * Sets the end game.
-    *
-    * @param winner
-    *                 winner of the game.
-    */
-  def setEndGame(winner: Player.Val)
 }
 
 object ViewMatch {
@@ -55,7 +47,7 @@ object ViewMatch {
 
   case class ViewMatchImpl(view: ViewHnefatafl) extends ViewMatch {
 
-    private var gamePanel, northPanel, southPanel, boardPanel, boardPlusColumns,
+    private var gamePanel, northPanel, subNorthPanel, southPanel, subSouthPanel, boardPanel, boardPlusColumns,
         leftPanel, rightPanel: JPanel = _
 
     private var playerOrWinnerLabel: JLabel = _
@@ -112,13 +104,10 @@ object ViewMatch {
       if(kingCoordinate.nonEmpty)
         cells(kingCoordinate.get).resetKingCell()
 
-      if(gameSnapshot.getWinner.equals(Player.None))
-        switchPlayerLabel()
-      else {
+      if(!gameSnapshot.getWinner.equals(Player.None))
         kingCoordinate = Option(view.findKing())
-        setEndGame(gameSnapshot.getWinner)
-      }
 
+      setStatusGame(gameSnapshot.getWinner)
       resetLastMoveCells()
       if(gameSnapshot.getLastMove.nonEmpty)
         highlightLastMove(gameSnapshot.getLastMove.get)
@@ -129,7 +118,13 @@ object ViewMatch {
       gamePanel.validate()
     }
 
-    override def setEndGame(winner: Player.Val): Unit = winner match {
+    /**
+      * Sets the end game.
+      *
+      * @param winner
+      *                 winner of the game.
+      */
+    private def setStatusGame(winner: Player.Val): Unit = winner match {
       case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
@@ -145,6 +140,8 @@ object ViewMatch {
         cells(kingCoordinate.get).setAsKingCapturedCell()
 
       case Player.Draw => playerOrWinnerLabel.setText("Draw!")
+
+      case _ => switchPlayerLabel()
     }
 
     /**
@@ -210,30 +207,29 @@ object ViewMatch {
       */
     private def initNorthPanel(): Unit = {
       northPanel = ViewFactory.createTopBottomPanel
-      val layout: GridBagLayout = new java.awt.GridBagLayout()
-      northPanel.setLayout(layout)
+      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 10/100,ViewFactory.getSmallerSide * 8 / 100)))
+      subNorthPanel = ViewFactory.createGameSubMenuPanel
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      menuButton = ViewFactory.createGameButton()
-      menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
       lim.gridx = 0
       lim.gridy = 0
       lim.weightx = 0
       lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.CENTER
+      lim.anchor = GridBagConstraints.LINE_START
+
       playerBlackLabel.setVisible(true)
       playerWhiteLabel.setVisible(false)
-      northPanel.add(playerBlackLabel, lim)
-      northPanel.add(playerWhiteLabel, lim)
+      subNorthPanel.add(playerBlackLabel, lim)
+      subNorthPanel.add(playerWhiteLabel, lim)
 
       playerOrWinnerLabel = ViewFactory.createLabelPlayerToMoveWinner
       lim.gridx = 1
-      northPanel.add(playerOrWinnerLabel, lim)
-
+      subNorthPanel.add(playerOrWinnerLabel, lim)
+      northPanel.add(subNorthPanel)
+      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 45/100,ViewFactory.getSmallerSide * 8 / 100)))
       menuButton = ViewFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
-      lim.gridx = 2
-      lim.anchor = GridBagConstraints.LINE_END
-      northPanel.add(menuButton, lim)
+      northPanel.add(menuButton)
+      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 20/100,ViewFactory.getSmallerSide * 8 / 100)))
     }
 
     /**
@@ -241,8 +237,8 @@ object ViewMatch {
       */
     private def initSouthPanel(): Unit = {
       southPanel = ViewFactory.createTopBottomPanel
-      val layout: GridBagLayout = new java.awt.GridBagLayout()
-      southPanel.setLayout(layout)
+      southPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 30/100, ViewFactory.getSmallerSide * 8 / 100)))
+      subSouthPanel = ViewFactory.createGameSubMenuPanel
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       lim.gridy = 0
       lim.weightx = 1
@@ -252,27 +248,29 @@ object ViewMatch {
       firstMoveButton = ViewFactory.createFirstMoveButton()
       firstMoveButton.addActionListener(_ => changeSnapshot(Snapshot.First))
       lim.gridx = 0
-      southPanel.add(firstMoveButton, lim)
+      subSouthPanel.add(firstMoveButton, lim)
 
       previousMoveButton = ViewFactory.createPreviousMoveButton()
       previousMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Previous))
       lim.gridx = 1
-      southPanel.add(previousMoveButton, lim)
+      subSouthPanel.add(previousMoveButton, lim)
 
       nextMoveButton = ViewFactory.createNextMoveButton()
       nextMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Next))
       lim.gridx = 2
-      southPanel.add(nextMoveButton, lim)
+      subSouthPanel.add(nextMoveButton, lim)
 
       lastMoveButton = ViewFactory.createLastMoveButton()
       lastMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Last))
       lim.gridx = 3
-      southPanel.add(lastMoveButton, lim)
+      subSouthPanel.add(lastMoveButton, lim)
 
       undoMoveButton = ViewFactory.createUndoMoveButton()
       undoMoveButton.addActionListener(_ => undoMove())
       lim.gridx = 4
-      southPanel.add(undoMoveButton, lim)
+      subSouthPanel.add(undoMoveButton, lim)
+      southPanel.add(subSouthPanel)
+      southPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 10/100,ViewFactory.getSmallerSide * 8 / 100)))
     }
 
     /**
@@ -358,6 +356,14 @@ object ViewMatch {
       drawLostPawns(Player.White, nWhiteCaptured)
     }
 
+    /**
+      * Draws the number of captured pieces white or black.
+      *
+      * @param player
+      *                 player to move.
+      * @param length
+      *                 number of captured pieces.
+      */
     private def drawLostPawns(player: Player.Val, length: Int): Unit = {
       val panel: JPanel = if (Player.Black eq player) leftPanel else rightPanel
       panel.removeAll()
@@ -457,8 +463,17 @@ object ViewMatch {
 
     }
 
+    /**
+      * Show next, previous, first or last move.
+      *
+      * @param snapshotToShow
+      *             snapshot to show.
+      */
     private def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = view.changeSnapshot(snapshotToShow)
 
+    /**
+      * Delete last move.
+      */
     private def undoMove(): Unit = view.undoMove()
   }
 }

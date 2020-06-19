@@ -240,6 +240,13 @@ trait ViewFactory {
   def createSubMenuPanel: JPanel
 
   /**
+    * Creates a game sub menu panel.
+    *
+    * @return a panel.
+    */
+  def createGameSubMenuPanel: JPanel
+
+  /**
     * Creates a label for each different variant.
     *
     * @return a label.
@@ -333,6 +340,8 @@ object ViewFactory extends ViewFactory {
   override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
 
   override def createSubMenuPanel: JPanel = new SubMenuPanel
+
+  override def createGameSubMenuPanel: JPanel = new GameSubMenuPanel
 
   override def createLabelBoardHnefatafl: JLabel = new IconLabel(boardHnefataflIconPath)
 
@@ -503,11 +512,9 @@ object ViewFactory extends ViewFactory {
   private class TopBottomPanel extends JPanel {
     private val WIDTH_DIMENSION = smallerSide
     private val HEIGHT_DIMENSION = smallerSide * 8 / 100
-
+    setLayout(new BoxLayout(this, BoxLayout.X_AXIS))
     setBackground(ColorProvider.getLightBrownColor)
     setPreferredSize(new Dimension(WIDTH_DIMENSION, HEIGHT_DIMENSION))
-    setAlignmentX(Component.RIGHT_ALIGNMENT)
-
   }
 
   private class LeftRightPanel(val columns: Int, val rows: Int) extends JPanel {
@@ -582,6 +589,18 @@ object ViewFactory extends ViewFactory {
     setPreferredSize(PANEL_DIMENSION)
     setMaximumSize(getPreferredSize)
     setAlignmentX(Component.CENTER_ALIGNMENT)
+    setOpaque(false)
+    setVisible(true)
+
+    val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
+    this.setLayout(gridBagLayout)
+  }
+
+  private class GameSubMenuPanel extends JPanel {
+    private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+
+    setPreferredSize(PANEL_DIMENSION)
+    setMaximumSize(getPreferredSize)
     setOpaque(false)
     setVisible(true)
 

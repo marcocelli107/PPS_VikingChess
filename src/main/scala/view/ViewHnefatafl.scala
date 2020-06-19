@@ -174,7 +174,7 @@ object ViewHnefatafl {
         viewMatch.restoreGame()
         overlayPanel.remove(gamePanel)
       }
-      val newGame: (Board, Player.Value) = controller.newGame(viewMainMenu.getBoardVariant)
+      val newGame: (Board, Player.Value) = controller.newGame(viewMainMenu.getBoardVariant,viewMainMenu.getGameMode, viewMainMenu.getDifficult)
       board = newGame._1.asInstanceOf[Board]
       dimension = board.size
       initGamePanel(board)
