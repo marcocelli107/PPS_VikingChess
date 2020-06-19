@@ -1,7 +1,7 @@
 package ia
 
 
-import model.{ParserProlog, Piece}
+import model.{ParserProlog, Piece, Player}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
 
@@ -34,10 +34,10 @@ class  EvaluationFunctionImpl() extends EvaluationFunction {
      val rowWhithoutKing = whithoutKing(rowKing)
      val columnWhithoutKing = whithoutKing(columnKing)
 
-      def _scoreKingIsInFreeRowOrColumn(rowKing : Seq [BoardCell], columnKing: Seq [BoardCell] ): Int =(rowKing,columnKing) match {
+      def _scoreKingIsInFreeRowOrColumn(rowKing : Seq [BoardCell], columnKing: Seq [BoardCell] ): Int = (rowKing,columnKing) match {
+        case ( row , column ) if isSequenceFreeCells(row) && isSequenceFreeCells(column)   => 10
         case (row, _ ) if isSequenceFreeCells(row) => 5
         case ( _, column ) if isSequenceFreeCells(column) => 5
-        case ( row , column ) if isSequenceFreeCells(row) && isSequenceFreeCells(column)   => 10
         case _ => 0
       }
     _scoreKingIsInFreeRowOrColumn(rowWhithoutKing,columnWhithoutKing)
@@ -45,7 +45,12 @@ class  EvaluationFunctionImpl() extends EvaluationFunction {
 
   def scorePawnArrangedInSquare(): Double = ???
 
-  def scoreCapturePawns(): Double  = ???
+  def scoreWinner(game: ParserProlog): Int  = game.hasWinner match {
+    case Some( Player.Black) => 100
+    case Some( Player.White) => -100
+    case _ => 0
+
+  }
 
   /* UTILS METHODS */
 
