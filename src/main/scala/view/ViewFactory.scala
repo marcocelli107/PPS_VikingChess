@@ -5,6 +5,7 @@ import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.image.BufferedImage
 import java.io.File
 
+import javafx.scene.media.{Media, MediaPlayer}
 import javax.imageio.ImageIO
 import javax.swing._
 import javax.swing.border.LineBorder
@@ -240,6 +241,13 @@ trait ViewFactory {
   def createSubMenuPanel: JPanel
 
   /**
+    * Creates a game sub menu panel.
+    *
+    * @return a panel.
+    */
+  def createGameSubMenuPanel: JPanel
+
+  /**
     * Creates a label for each different variant.
     *
     * @return a label.
@@ -250,12 +258,27 @@ trait ViewFactory {
   def createLabelBoardBrandubh: JLabel
 
   /**
+    * Creates a label for each different level.
+    *
+    * @return a label.
+    */
+  def createLabelNewcomer: JLabel
+  def createLabelAmateur: JLabel
+  def createLabelStandard: JLabel
+  def createLabelAdvanced: JLabel
+
+  /**
     * Creates a label for player white or black.
     *
     * @return a label.
     */
   def createLabelWhitePlayer: JLabel
   def createLabelBlackPlayer: JLabel
+
+  /**
+    * Generates a sound for the moved piece.
+    */
+  //def generateASoundForMove()
 }
 
 object ViewFactory extends ViewFactory {
@@ -271,8 +294,13 @@ object ViewFactory extends ViewFactory {
   private val boardTawlbwrddIconPath: String =  "src/main/resources/images/iconBoardTawlbwrdd.png"
   private val boardTablutIconPath: String =  "src/main/resources/images/iconBoardTablut.png"
   private val boardBrandubhlIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
+  private val newcomerIconPath: String =  "src/main/resources/images/iconNewcomer.png"
+  private val amateurIconPath: String =  "src/main/resources/images/iconAmateur.png"
+  private val standardIconPath: String =  "src/main/resources/images/iconStandard.png"
+  private val advancedIconPath: String =  "src/main/resources/images/iconAdvanced.png"
   private val whitePlayerIconPath: String =  "src/main/resources/images/iconWhitePlayer.jpeg"
   private val blackPlayerIconPath: String =  "src/main/resources/images/iconBlackPlayer.jpeg"
+  //private val soundMovedPiece: String =  "src/main/resources/sounds/movedPiece.mp3"
 
   override def getSmallerSide: Int = smallerSide
 
@@ -334,6 +362,8 @@ object ViewFactory extends ViewFactory {
 
   override def createSubMenuPanel: JPanel = new SubMenuPanel
 
+  override def createGameSubMenuPanel: JPanel = new GameSubMenuPanel
+
   override def createLabelBoardHnefatafl: JLabel = new IconLabel(boardHnefataflIconPath)
 
   override def createLabelBoardTawlbwrdd: JLabel = new IconLabel(boardTawlbwrddIconPath)
@@ -342,9 +372,25 @@ object ViewFactory extends ViewFactory {
 
   override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhlIconPath)
 
+
+  override def createLabelNewcomer: JLabel = new IconLabel(newcomerIconPath)
+  override def createLabelAmateur: JLabel = new IconLabel(amateurIconPath)
+  override def createLabelStandard: JLabel = new IconLabel(standardIconPath)
+  override def createLabelAdvanced: JLabel = new IconLabel(advancedIconPath)
+
+
   override def createLabelWhitePlayer: JLabel = new IconLabel(whitePlayerIconPath)
 
   override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
+
+  //override def generateASoundForMove(): Unit = playMoveSound()
+
+  /*
+  private def playMoveSound(): Unit = {
+    val mediaPlayer: MediaPlayer = new MediaPlayer(new Media(soundMovedPiece))
+    mediaPlayer.play()
+  }
+  */
 
   private class BasicCell(private var defaultBackground: Color) extends Cell {
     private var isAPossibleMove: Boolean = false
@@ -503,11 +549,9 @@ object ViewFactory extends ViewFactory {
   private class TopBottomPanel extends JPanel {
     private val WIDTH_DIMENSION = smallerSide
     private val HEIGHT_DIMENSION = smallerSide * 8 / 100
-
+    setLayout(new BoxLayout(this, BoxLayout.X_AXIS))
     setBackground(ColorProvider.getLightBrownColor)
     setPreferredSize(new Dimension(WIDTH_DIMENSION, HEIGHT_DIMENSION))
-    setAlignmentX(Component.RIGHT_ALIGNMENT)
-
   }
 
   private class LeftRightPanel(val columns: Int, val rows: Int) extends JPanel {
@@ -541,7 +585,8 @@ object ViewFactory extends ViewFactory {
   private class MenuButton(s: String) extends EmptyButton(s) {
 
     private val FONT_DIMENSION = smallerSide * 5 / 100
-    private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
+    //private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
+    private val BUTTON_DIMENSION = new Dimension(smallerSide * 4 / 10, smallerSide * 8 / 100)
 
     setPreferredSize(BUTTON_DIMENSION)
     setMaximumSize(getPreferredSize)
@@ -567,7 +612,8 @@ object ViewFactory extends ViewFactory {
   }
 
   private class IconLabel(pathIcon: String) extends JLabel {
-    private val ICON_DIMENSION: Int = smallerSide * 7 / 100
+    //private val ICON_DIMENSION: Int = smallerSide * 7 / 100
+    private val ICON_DIMENSION: Int = smallerSide * 49 / 1000
     this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
     this.setMaximumSize(getPreferredSize)
     val img: BufferedImage = ImageIO.read(new File(pathIcon))
@@ -577,11 +623,24 @@ object ViewFactory extends ViewFactory {
   }
 
   private class SubMenuPanel extends JPanel {
-    private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+    //private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+    private val PANEL_DIMENSION = new Dimension(smallerSide * 7 / 10, smallerSide * 8 / 100)
 
     setPreferredSize(PANEL_DIMENSION)
     setMaximumSize(getPreferredSize)
     setAlignmentX(Component.CENTER_ALIGNMENT)
+    setOpaque(false)
+    setVisible(true)
+
+    val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
+    this.setLayout(gridBagLayout)
+  }
+
+  private class GameSubMenuPanel extends JPanel {
+    private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
+
+    setPreferredSize(PANEL_DIMENSION)
+    setMaximumSize(getPreferredSize)
     setOpaque(false)
     setVisible(true)
 
@@ -685,7 +744,7 @@ object ViewFactory extends ViewFactory {
   private def capturedBlackPawn(): JLabel = new Pawn(ColorProvider.getBlackColor, ColorProvider.getWhiteColor, capturedPawnSizeMultiplier)
 
   private class LabelPlayer_Winner extends JLabel {
-    private val DIMENSION_FONT: Int = smallerSide * 5 / 100
+    private val DIMENSION_FONT: Int = smallerSide * 3 / 100
     setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
     setForeground(ColorProvider.getPossibleMovesColor)
   }
