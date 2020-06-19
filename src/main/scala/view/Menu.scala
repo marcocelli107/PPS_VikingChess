@@ -51,6 +51,20 @@ trait Menu {
   def getBoardVariant: GameVariant.Val
 
   /**
+    * Gets the game mode chosen.
+    *
+    * @return game mode
+    */
+  def getGameMode: GameMode.Value
+
+  /**
+    * Gets the level of difficult chosen.
+    *
+    * @return level
+    */
+  def getDifficult: Level.Value
+
+  /**
     * Initializes the game menù.
     *
     * @return panel
@@ -225,6 +239,10 @@ object Menu {
     }
 
     override def getBoardVariant: GameVariant.Val = boardVariant
+
+    override def getGameMode: GameMode.Value = gameMode
+
+    override def getDifficult: Level.Value = levelIA
 
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = ViewFactory.createMenuPanel("Choose Option: ")

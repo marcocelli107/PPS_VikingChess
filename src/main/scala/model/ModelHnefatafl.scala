@@ -11,29 +11,18 @@ import scala.collection.mutable
 trait ModelHnefatafl {
 
   /**
-   * Defines the game variant.
-   */
-  var currentVariant: GameVariant.Val
-
-  /**
-   * Defines the chosen mode.
-   */
-  var mode: GameMode.Value
-
-  /**
    * Calls parser for a new Game.
    *
-   * @param variant
-   * indicates the variant chosen by the user.
    * @return created board and player to move.
    */
-  def createGame(variant: GameVariant.Val): (Board, Player.Val)
+  def createGame(): (Board, Player.Val)
 
   /**
    * Calls parser for the possible moves from a cell.
    *
    * @param cell
-   * coordinate of the Cell.
+   *                  coordinate of the Cell.
+   *
    * @return list buffer of the possible computed moves.
    */
   def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
@@ -42,9 +31,10 @@ trait ModelHnefatafl {
    * Calls parser for making a move from coordinate to coordinate.
    *
    * @param fromCoordinate
-   * coordinate of the starting cell.
+   *                    coordinate of the starting cell.
    * @param toCoordinate
-   * coordinate of the arrival cell.
+   *                    coordinate of the arrival cell.
+   *
    * @return updated board.
    */
   def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit
@@ -53,7 +43,8 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is the central cell.
    *
    * @param coordinate
-   * coordinate of the cell to inspect
+   *                      coordinate of the cell to inspect
+   *
    * @return boolean.
    */
   def isCentralCell(coordinate: Coordinate): Boolean
@@ -62,7 +53,8 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is a corner cell.
    *
    * @param coordinate
-   * coordinate of the cell to inspect
+   *                        coordinate of the cell to inspect
+   *
    * @return boolean.
    */
   def isCornerCell(coordinate: Coordinate): Boolean
@@ -71,7 +63,8 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is a init pawn cell.
    *
    * @param coordinate
-   * coordinate of the cell to inspect
+   *                        coordinate of the cell to inspect
+   *
    * @return boolean.
    */
   def isPawnCell(coordinate: Coordinate): Boolean
@@ -87,7 +80,8 @@ trait ModelHnefatafl {
    * Returns a previous or later state of the current board.
    *
    * @param snapshotToShow
-   * indicates snapshot to show.
+   *                        indicates snapshot to show.
+   *
    * @return required board
    */
   def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
@@ -100,9 +94,9 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
-  def apply(controller: ControllerHnefatafl): ModelHnefatafl = ModelHnefataflImpl(controller)
+  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Value): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA)
 
-  case class ModelHnefataflImpl(controller: ControllerHnefatafl) extends ModelHnefatafl {
+  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Value) extends ModelHnefatafl {
 
     /**
      * Inits the parser prolog and set the file of the prolog rules.
@@ -119,13 +113,22 @@ object ModelHnefatafl {
 
     private final val SIZE_DRAW: Int = 9
 
-    override var currentVariant: GameVariant.Val = _
+    /**
+      * Defines the game variant.
+      */
+    private val currentVariant: GameVariant.Val = newVariant
 
-    override var mode: GameMode.Value = GameMode.PVP
+    /**
+      * Defines the chosen mode.
+      */
+    private val mode: GameMode.Value = gameMode
 
-    override def createGame(newVariant: GameVariant.Val): (Board, Player.Val) = {
+    /**
+      * Defines the chosen level of IA.
+      */
+    private val levelIA: Level.Value = level
 
-      currentVariant = newVariant
+    override def createGame(): (Board, Player.Val) = {
 
       game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
 
@@ -194,6 +197,7 @@ object ModelHnefatafl {
     private def incrementCapturedPieces(player: Player.Val, piecesCaptured: Int): (Int, Int) = player match {
       case Player.Black => (storySnapshot.last.getNumberCapturedBlacks + piecesCaptured, storySnapshot.last.getNumberCapturedWhites)
       case Player.White => (storySnapshot.last.getNumberCapturedBlacks, storySnapshot.last.getNumberCapturedWhites + piecesCaptured)
+      case _ => null
     }
 
     /**

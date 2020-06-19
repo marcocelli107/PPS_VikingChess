@@ -1,6 +1,6 @@
 package controller
 
-import model.{GameSnapshot, GameVariant, ModelHnefatafl, Player, Snapshot}
+import model._
 import view.ViewHnefatafl
 import utils.BoardGame.Board
 import utils.Coordinate
@@ -12,7 +12,7 @@ trait ControllerHnefatafl {
     *
     * @return board and player to move.
     */
-  def newGame(variant: GameVariant.Val): (Board, Player.Value)
+  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Value): (Board, Player.Value)
 
   /**
     * Calls model for the possible moves from a specified coordinate.
@@ -96,9 +96,9 @@ object ControllerHnefatafl {
     private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val): (Board, Player.Value) = {
-      modelGame = ModelHnefatafl(this)
-      modelGame.createGame(variant)
+    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Value): (Board, Player.Value) = {
+      modelGame = ModelHnefatafl(this, variant, gameMode, levelIA)
+      modelGame.createGame()
     }
 
     override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = modelGame.showPossibleCells(coordinate)
