@@ -7,6 +7,7 @@ import utils.BoardGame.Board.BoardImpl
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait ParserProlog {
@@ -86,25 +87,52 @@ trait ParserProlog {
   /**
    * Copy himself.
    *
-   * @return ParserProlog.
+   * @return parser representing the game state.
    */
 
-  def copy():ParserProlog
+  def copy(): ParserProlog
 
   /**
    * Get the Board
    *
-   * @return Board.
+   * @return the actual board state.
    */
   def getActualBoard: Board
 
 
+  /**
+    * Player turn to move
+    *
+    * @return Player.Value.
+    */
   def getPlayer: Player.Val
 
 
+  /**
+    * Checks if game state has a winner.
+    *
+    * @return Option[Player.Val].
+    */
+
   def hasWinner: Option[Player.Val]
 
+  /**
+    * Undo some player move.
+    *
+    * @param oldBoard
+    *                 Board before changes
+    *
+    * @return Unit.
+    */
   def undoMove(oldBoard: Board): Unit
+
+  /**
+    * Takes all the possible moves of a player from a game state
+    *
+    * @return List of coordinates tuples
+    */
+  def gamePossibleMoves(): List[(Coordinate, Coordinate)]
+
 }
 
 object ParserPrologImpl {
@@ -306,6 +334,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     listPossibleCoordinates
   }
 
+
   /**
    * Parses the string player in a enum.
    *
@@ -321,12 +350,9 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     case _ => Player.None
   }
 
-  /**
-   * Copy himself.
-   *
-   * @return ParserProlog.
-   */
+
   override def copy(): ParserProlog = ParserPrologImpl(theory, winner, playerToMove, board, variant)
+
 
   override def equals(that: Any): Boolean = that match {
     case that: ParserPrologImpl =>
@@ -335,13 +361,25 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
         that.playerToMove.isEqualObject(this.playerToMove) &&
         that.winner.isEqualObject(this.winner) &&
         that.board.isEqualObject(this.board)
-
     case _ => false
 
   }
+
 
   override def undoMove(oldBoard: Board): Unit = {
     goal = engine.solve(s"undoMove(($variant,$playerToMove,$winner,$board), $oldBoard, (V, P, W, B)).")
     setGameTerms(goal)
   }
+
+
+  override def gamePossibleMoves(): List[(Coordinate, Coordinate)] = {
+    goal = engine.solve(s"gamePossibleMoves(($variant,$playerToMove,$winner,$board), L).")
+
+    list = goal.getTerm("L")
+
+    goalString = replaceListCellsString(list)
+
+    setListCellsView(goalString).grouped(2).toList.map(listBuffer => (listBuffer(0), listBuffer(1)))
+  }
+
 }
