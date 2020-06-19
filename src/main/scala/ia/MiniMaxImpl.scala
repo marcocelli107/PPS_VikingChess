@@ -90,7 +90,7 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
   }
 
   def getPlayerAndBoard(parserProlog: ParserProlog ):(Player.Value, List[BoardCell] ) = {
-    (parserProlog.getPlayer(), parserProlog.getActualBoard().cells.toList)
+    (parserProlog.getPlayer, parserProlog.getActualBoard.cells.toList)
   }
 
   def findPlayerPawns(parserProlog: ParserProlog): List[Coordinate] = {
@@ -128,11 +128,11 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
   }
 
   def moveAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, endCord: Coordinate ): ParserProlog = {
-    parserProlog.makeMove(startCord,endCord)
+    parserProlog.makeLegitMove(startCord,endCord)
     parserProlog.copy()
   }
 
-  def isTerminalNode(game:ParserProlog):Boolean = game.hasWinner().nonEmpty
+  def isTerminalNode(game:ParserProlog):Boolean = game.hasWinner.nonEmpty
 
   def getGamePossibleMoves(parserProlog: ParserProlog, pawnsPlayer: List[Coordinate], gamePossibleMoves: List[(Coordinate,Coordinate) ] ) : List[(Coordinate,Coordinate) ] = pawnsPlayer match {
     case Nil => gamePossibleMoves

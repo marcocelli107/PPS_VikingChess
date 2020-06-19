@@ -47,7 +47,7 @@ trait ViewMatch {
     * @param winner
     *                 winner of the game.
     */
-  def setEndGame(winner: Player.Value)
+  def setEndGame(winner: Player.Val)
 }
 
 object ViewMatch {
@@ -66,7 +66,7 @@ object ViewMatch {
     private var possibleMoves: Seq[Coordinate] = Seq.empty
     private var selectedCell: Option[Coordinate] = Option.empty
     private var board: Board = _
-    private var player: Player.Value = view.getMenuUtils.getPlayer
+    private var player: Player.Val = view.getMenuUtils.getPlayer
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
     private var kingCoordinate: Option[Coordinate] = Option.empty
 
@@ -129,7 +129,7 @@ object ViewMatch {
       gamePanel.validate()
     }
 
-    override def setEndGame(winner: Player.Value): Unit = winner match {
+    override def setEndGame(winner: Player.Val): Unit = winner match {
       case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
@@ -199,7 +199,7 @@ object ViewMatch {
           lim.gridx = j
           lim.gridy = i
           layout.setConstraints(cell, lim)
-          cells.put(coordinate, cell)
+          cells += coordinate -> cell
           boardPanel.add(cell)
         }
       }
@@ -354,11 +354,15 @@ object ViewMatch {
       *                 number of captured pieces white.
       */
     private def addLostPawns(nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
-      val length: Int = if (player eq Player.Black) nBlackCaptured else nWhiteCaptured
+      drawLostPawns(Player.Black, nBlackCaptured)
+      drawLostPawns(Player.White, nWhiteCaptured)
+    }
+
+    private def drawLostPawns(player: Player.Val, length: Int): Unit = {
       val panel: JPanel = if (Player.Black eq player) leftPanel else rightPanel
       panel.removeAll()
       for (_ <- 0 until length) {
-        panel.add(createLostPawn)
+        panel.add(createLostPawn(player))
       }
       panel.repaint()
     }
@@ -368,7 +372,7 @@ object ViewMatch {
       *
       * @return label
       */
-    private def createLostPawn: JLabel = player match {
+    private def createLostPawn(player: Player.Val): JLabel = player match {
       case Player.Black => ViewFactory.createLostBlackPawn
       case _ => ViewFactory.createLostWhitePawn
     }
@@ -429,7 +433,7 @@ object ViewMatch {
       *             cell to be set.
       */
     private def pawnChoice(cell: BoardCell): Unit = {
-      val piece: Piece.Value = cell.getPiece
+      val piece: Piece.Val = cell.getPiece
       val button: JButton = cells(cell.getCoordinate)
       piece match {
         case Piece.WhitePawn => button.add(ViewFactory.createWhitePawn)

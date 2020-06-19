@@ -1,61 +1,89 @@
 package utils
 
-import model.Piece.PieceType
+import model.Piece
 
 /**
-  * Utils class that using coordinates of the cell as tuples of int.
-  */
-case class Coordinate(x: Int, y: Int)
+ * Util class representing a 2D coordinate
+ */
+
+object Coordinate {
+  val COORD_STRING: String = "coord"
+}
+
+case class Coordinate(x: Int, y: Int)  {
+  override def toString: String = Coordinate.COORD_STRING + "(" + x + "," + y + ")"
+}
 
 object BoardGame {
 
   trait BoardCell {
 
     /**
-      * Gets piece in the cell
-      */
-    def getPiece: PieceType
+     * Gets piece in the cell
+     *
+     * @return
+     *         the piece type
+     */
+    def getPiece: Piece.Val
 
     /**
-      * Gets coordinate of the cell
-      */
+     * Gets coordinate of the cell
+     *
+     * @return
+     *         the coordinate
+     */
     def getCoordinate: Coordinate
+
+    /**
+     * Returns a string representation of the board
+     *
+     * @return
+     *         a string representation of the board
+     */
+    def toString: String
   }
 
   object BoardCell {
 
-    def apply(coordinateCell: Coordinate, piece: PieceType): BoardCell = BoardCellImpl(coordinateCell, piece)
+    val CELL_STRING: String = "cell"
 
-    case class BoardCellImpl(coordinateCell: Coordinate, pieceCell: PieceType) extends BoardCell {
+    def apply(coordinateCell: Coordinate, piece: Piece.Val): BoardCell = BoardCellImpl(coordinateCell, piece)
 
-      override def getPiece: PieceType = pieceCell
+    case class BoardCellImpl(private val coordinateCell: Coordinate, private val pieceCell: Piece.Val) extends BoardCell {
+
+      override def getPiece: Piece.Val = pieceCell
 
       override def getCoordinate: Coordinate = coordinateCell
+
+      override def toString: String = BoardCell.CELL_STRING + "(" + coordinateCell.toString + "," + pieceCell.pieceString + ")"
     }
+
   }
 
   trait Board {
     /**
-      * Defines board's cells list.
-      */
+     * Defines board's cells list.
+     */
     def cells: Seq[BoardCell]
 
     /**
-      * Defines size of board's side.
-      */
+     * Defines size of board's side.
+     */
     def size: Int
 
     /**
-      * Gets a cell in the board from a coordinate.
-      */
+     * Gets a cell in the board from a coordinate.
+     */
     def getCell(coordinate: Coordinate): BoardCell
+
+    def toString: String
   }
 
   object Board {
 
     def apply(cells: Seq[BoardCell]): Board = BoardImpl(cells)
 
-    case class BoardImpl(allCells: Seq[BoardCell]) extends Board {
+    case class BoardImpl(private val allCells: Seq[BoardCell]) extends Board {
 
       override def cells: Seq[BoardCell] = allCells
 
@@ -64,6 +92,10 @@ object BoardGame {
       override def getCell(coordinate: Coordinate): BoardCell = allCells.filter(_.getCoordinate == coordinate).head
 
       override def equals(obj: Any): Boolean = this.cells.equals(obj.asInstanceOf[Board].cells)
+
+      override def toString: String = cells.map(_.toString).grouped(size).toList.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
     }
+
   }
+
 }
