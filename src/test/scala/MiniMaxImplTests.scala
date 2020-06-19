@@ -20,7 +20,7 @@ class MiniMaxImplTests extends FunSuite with MockFactory with Matchers{
       startCell= board.cells.filter(c => c.getCoordinate.equals(Coordinate(1,4))).head
     }
     assert(endCell.getPiece.equals( Piece.BlackPawn))
-    assert(startCell.getPiece.equals( Piece.Void))
+    assert(startCell.getPiece.equals( Piece.Empty))
   }
 
   test("Tests calculation of a set of moves of a pawn."){

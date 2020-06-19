@@ -13,7 +13,7 @@ trait Menu {
     *
     * @return player
     */
-  def getPlayer: Player.Value
+  def getPlayer: Player.Val
 
   /**
     * Initializes the main menù.
@@ -79,9 +79,9 @@ object Menu {
     private var gameMode: GameMode.Value = _
     private var boardVariant: GameVariant.Val = _
     private var levelIA: Level.Value = _
-    private var player: Player.Value = _
+    private var player: Player.Val = _
 
-    override def getPlayer: Player.Value = player
+    override def getPlayer: Player.Val = player
 
     override def initMenu: JPanel = {
       menuPanel = ViewFactory.createMenuPanel("Choose Mode: ")
