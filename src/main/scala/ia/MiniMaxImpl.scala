@@ -28,7 +28,7 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
       case h::t => {
                 val makeMove = moveAnyPawn(game.copy(), h._1, h._2)
                 val moveScore = pruningAlfaBeta(makeMove, depth, -100,+100, MaxMin.min )
-                 println ( "OldBestCord " + bestCoord + " OldBestScorec " + moveScore  )
+                println ( "OldBestCord " + bestCoord + " OldBestScorec " + moveScore  )
                 val (newBestCoord, newBestScore) = if (bestScore > moveScore ) (bestCoord , bestScore) else (h._2, moveScore)
                 println ( "NewBestCord " + newBestCoord + " NewBestScorec " + newBestScore  )
                _findBestMove( game,t, newBestCoord, newBestScore )
