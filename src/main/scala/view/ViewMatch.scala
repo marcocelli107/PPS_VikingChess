@@ -40,6 +40,25 @@ trait ViewMatch {
     *                 snapshot to show.
     */
   def update(gameSnapshot: GameSnapshot)
+
+  /**
+    * Actives/Disables next and last move.
+    */
+  def activeNextLast()
+  def disableNextLast()
+
+  /**
+    * Actives/Disables previous and first move.
+    */
+  def activeFirstPrevious()
+  def disableFirstPrevious()
+
+  /**
+    * Actives/Disables undo move.
+    */
+  def activeUndo()
+  def disableUndo()
+
 }
 
 object ViewMatch {
@@ -119,6 +138,31 @@ object ViewMatch {
       /* TODO NON FUNZIONA */
       //ViewFactory.generateASoundForMove()
     }
+
+    override def activeNextLast(): Unit = {
+      nextMoveButton.setEnabled(true)
+      lastMoveButton.setEnabled(true)
+    }
+
+    override def disableNextLast(): Unit = {
+      nextMoveButton.setEnabled(false)
+      lastMoveButton.setEnabled(false)
+      undoMoveButton.setEnabled(true)
+    }
+
+    override def activeFirstPrevious(): Unit = {
+      previousMoveButton.setEnabled(true)
+      firstMoveButton.setEnabled(true)
+    }
+
+    override def disableFirstPrevious(): Unit = {
+      previousMoveButton.setEnabled(false)
+      firstMoveButton.setEnabled(false)
+    }
+
+    override def activeUndo(): Unit = undoMoveButton.setEnabled(true)
+
+    override def disableUndo(): Unit = undoMoveButton.setEnabled(false)
 
     /**
       * Sets the end game.

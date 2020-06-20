@@ -125,6 +125,24 @@ trait ViewHnefatafl {
    * Undoes last move.
    */
   def undoMove(): Unit
+
+  /**
+    * Actives/Disables next and last move.
+    */
+  def activeNextLast()
+  def disableNextLast()
+
+  /**
+    * Actives/Disables previous and first move.
+    */
+  def activeFirstPrevious()
+  def disableFirstPrevious()
+
+  /**
+    * Actives/Disables undo move.
+    */
+  def activeUndo()
+  def disableUndo()
 }
 
 object ViewHnefatafl {
@@ -204,6 +222,18 @@ object ViewHnefatafl {
     override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = controller.changeSnapshot(snapshotToShow)
 
     override def undoMove(): Unit = controller.undoMove()
+
+    override def disableNextLast(): Unit = viewMatch.disableNextLast()
+
+    override def disableFirstPrevious(): Unit = viewMatch.disableFirstPrevious()
+
+    override def activeUndo(): Unit = viewMatch.activeUndo()
+
+    override def disableUndo(): Unit = viewMatch.disableUndo()
+
+    override def activeNextLast(): Unit = viewMatch.activeNextLast()
+
+    override def activeFirstPrevious(): Unit = viewMatch.activeFirstPrevious()
 
     /**
       * Initializes the main menù.

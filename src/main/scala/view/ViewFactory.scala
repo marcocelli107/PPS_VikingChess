@@ -666,6 +666,7 @@ object ViewFactory extends ViewFactory {
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setEnabled(true)
     setToolTipText(hoverText)
     setBorderPainted(false)
     setOpaque(false)
