@@ -102,9 +102,11 @@ object ModelHnefatafl {
      * Inits the parser prolog and set the file of the prolog rules.
      */
     private val THEORY: String = TheoryGame.GameRules.toString
+    private var CONSECUTIVE_UNDO_MOVE: Int = 3
     private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
+    private var currentNumberUndoMove: Int = 0
 
     /**
      * Defines status of the current game.
@@ -157,6 +159,7 @@ object ModelHnefatafl {
 
       currentSnapshot += 1
 
+      controller.activeFirstPrevious()
       controller.updateView(storySnapshot.last)
     }
 
@@ -172,8 +175,8 @@ object ModelHnefatafl {
       previousOrNext match {
         case Snapshot.Previous => decrementCurrentSnapshot()
         case Snapshot.Next => incrementCurrentSnapshot()
-        case Snapshot.First => currentSnapshot = 0
-        case Snapshot.Last => currentSnapshot = storySnapshot.size - 1
+        case Snapshot.First => currentSnapshot = 0; controller.disableFirstPrevious(); controller.activeNextLast()
+        case Snapshot.Last => currentSnapshot = storySnapshot.size - 1; controller.disableNextLast(); controller.activeFirstPrevious()
       }
       val gameSnapshot = storySnapshot(currentSnapshot)
       controller.updateView(gameSnapshot)
@@ -184,6 +187,7 @@ object ModelHnefatafl {
         val lastMove: Option[(Coordinate, Coordinate)] = storySnapshot.last.getLastMove
         if (lastMove.nonEmpty) {
           storySnapshot -= storySnapshot.last
+          controller.activeFirstPrevious()
           currentSnapshot -= 1
           parserProlog.undoMove(storySnapshot.last.getBoard)
           controller.updateView(storySnapshot.last)
@@ -211,11 +215,22 @@ object ModelHnefatafl {
       case _ => false
     }
 
-    private def incrementCurrentSnapshot(): Unit = if (!showingCurrentSnapshot) currentSnapshot += 1
+    private def incrementCurrentSnapshot(): Unit = {
+      if(!showingCurrentSnapshot) {
+        currentSnapshot += 1
+        controller.activeFirstPrevious()
+      }
+      if(showingCurrentSnapshot) controller.disableNextLast()
+    }
 
-    private def decrementCurrentSnapshot(): Unit = if (currentSnapshot > 0) currentSnapshot -= 1
+    private def decrementCurrentSnapshot(): Unit = {
+      if(currentSnapshot > 0) {
+        currentSnapshot -= 1
+        controller.activeNextLast()
+      }
+      if(currentSnapshot == 0) controller.disableFirstPrevious()
+    }
 
     private def showingCurrentSnapshot: Boolean = currentSnapshot == storySnapshot.size - 1
   }
-
 }

@@ -85,6 +85,24 @@ trait ControllerHnefatafl {
    * Undoes last move.
    */
   def undoMove(): Unit
+
+  /**
+    * Actives/Disables next and last move.
+    */
+  def activeNextLast()
+  def disableNextLast()
+
+  /**
+    * Actives/Disables previous and first move.
+    */
+  def activeFirstPrevious()
+  def disableFirstPrevious()
+
+  /**
+    * Actives/Disables undo move.
+    */
+  def activeUndo()
+  def disableUndo()
 }
 
 object ControllerHnefatafl {
@@ -120,6 +138,20 @@ object ControllerHnefatafl {
     override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = modelGame.changeSnapshot(snapshotToShow)
 
     override def undoMove(): Unit = modelGame.undoMove()
+
+
+    override def disableNextLast(): Unit = viewGame.disableNextLast()
+
+    override def disableFirstPrevious(): Unit = viewGame.disableFirstPrevious()
+
+    override def activeUndo(): Unit = viewGame.activeUndo()
+
+    override def disableUndo(): Unit = viewGame.disableUndo()
+
+    override def activeNextLast(): Unit = viewGame.activeNextLast()
+
+    override def activeFirstPrevious(): Unit = viewGame.activeFirstPrevious()
+
   }
 }
 

@@ -5,7 +5,7 @@ import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.image.BufferedImage
 import java.io.File
 
-import javafx.scene.media.{Media, MediaPlayer}
+//import javafx.scene.media.{Media, MediaPlayer}
 import javax.imageio.ImageIO
 import javax.swing._
 import javax.swing.border.LineBorder
@@ -666,6 +666,7 @@ object ViewFactory extends ViewFactory {
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setEnabled(true)
     setToolTipText(hoverText)
     setBorderPainted(false)
     setOpaque(false)
