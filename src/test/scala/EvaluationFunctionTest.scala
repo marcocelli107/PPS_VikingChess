@@ -11,7 +11,8 @@ class EvaluationFunctionTest extends FunSuite{
 
   val prolog: Prolog = new Prolog()
   val theory: Theory = new Theory(new FileInputStream(TheoryGame.GameRules.toString))
-  val ef: EvaluationFunctionImpl =  new EvaluationFunctionImpl()
+  val ef11: EvaluationFunctionImpl =  new EvaluationFunctionImpl(11)
+  val ef7: EvaluationFunctionImpl =  new EvaluationFunctionImpl(7)
 
   test("Tests if King is near corners."){
     val c1:Coordinate = Coordinate(1,2)
@@ -22,14 +23,14 @@ class EvaluationFunctionTest extends FunSuite{
     val c6:Coordinate = Coordinate(10,11)
     val c7:Coordinate = Coordinate(6,7)
     val c8:Coordinate = Coordinate(6,6)
-    assert(ef.scoreKingNearCorners(11, c1) != 0 )
-    assert(ef.scoreKingNearCorners(11, c2) != 0 )
-    assert(ef.scoreKingNearCorners(11, c3) != 0 )
-    assert(ef.scoreKingNearCorners(11, c4) != 0 )
-    assert(ef.scoreKingNearCorners(11, c5) != 0 )
-    assert(ef.scoreKingNearCorners(11, c6) != 0 )
-    assert(ef.scoreKingNearCorners(7, c7) != 0 )
-    assert(ef.scoreKingNearCorners(11, c8) == 0 )
+    assert(ef11.scoreKingNearCorners(c1) != 0 )
+    assert(ef11.scoreKingNearCorners( c2) != 0 )
+    assert(ef11.scoreKingNearCorners( c3) != 0 )
+    assert(ef11.scoreKingNearCorners(c4) != 0 )
+    assert(ef11.scoreKingNearCorners( c5) != 0 )
+    assert(ef11.scoreKingNearCorners( c6) != 0 )
+    assert(ef7.scoreKingNearCorners(c7) != 0 )
+    assert(ef11.scoreKingNearCorners(c8) == 0 )
   }
 
   test("Test Sequence of Free Cells"){
@@ -38,8 +39,8 @@ class EvaluationFunctionTest extends FunSuite{
       seqEmpty = seqEmpty :+ BoardCell( Coordinate(i,3),Piece.Empty )
     }
     val seqWithPiece = seqEmpty:+ BoardCell( Coordinate(11,3), Piece.WhiteKing )
-    assert(ef.isSequenceFreeCells(seqEmpty))
-    assert(!ef.isSequenceFreeCells(seqWithPiece))
+    assert(ef11.isSequenceFreeCells(seqEmpty))
+    assert(!ef11.isSequenceFreeCells(seqWithPiece))
   }
 
 
@@ -54,10 +55,10 @@ class EvaluationFunctionTest extends FunSuite{
     val seqKingFreeRoworColumn = seq1 :+ BoardCell(Coordinate(11,3), Piece.WhiteKing )
     val seqKingNotFreeRoworColumn = seq2 :+ BoardCell(Coordinate(11,3), Piece.WhiteKing  )
 
-      assert( ef.scoreKingIsInFreeRowOrColumn(seqKingNotFreeRoworColumn, seqKingNotFreeRoworColumn)  == 0)
-      assert( ef.scoreKingIsInFreeRowOrColumn(seqKingNotFreeRoworColumn, seqKingFreeRoworColumn) != 0)
-      assert( ef.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) != 0)
-      assert( ef.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) < ef.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingFreeRoworColumn))
+      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingNotFreeRoworColumn, seqKingNotFreeRoworColumn)  == 0)
+      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingNotFreeRoworColumn, seqKingFreeRoworColumn) != 0)
+      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) != 0)
+      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) < ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingFreeRoworColumn))
 
   }
 

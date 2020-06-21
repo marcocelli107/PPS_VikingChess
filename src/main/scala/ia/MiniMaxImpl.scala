@@ -10,27 +10,33 @@ trait MiniMax {
 }
 
 object MiniMaxImpl {
-  def apply(depth: Int): MiniMaxImpl = new MiniMaxImpl(depth)
+  def apply(depth: Int, sizeBoard: Int): MiniMaxImpl = new MiniMaxImpl(depth, sizeBoard)
 }
 
 
-class MiniMaxImpl(depth: Int ) extends  MiniMax {
+class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
 
-  var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl()
+  var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl(sizeBoard)
   type Game = List[ParserProlog]
 
 
+
   override def findBestMove(game: ParserProlog):Coordinate = {
-    val gamePossibleMove = getGamePossibleMoves(game, findPlayerPawns(game), List())
+    val startTime = System.currentTimeMillis()
+    val gamePossibleMove = getGamePossibleMoves(game)
+    val endTime = System.currentTimeMillis() - startTime
+
+    val startTime1 = System.currentTimeMillis()
+    val gamePossibleMove2 = getGamePossibleMoves(game, findPlayerPawns(game), List())
+    val endTime2 = System.currentTimeMillis() - startTime1
+
 
     def _findBestMove(game: ParserProlog, gamePossibleMove: List[(Coordinate,Coordinate)] , bestCoord: Coordinate , bestScore: Int ):Coordinate = gamePossibleMove match {
       case Nil  => bestCoord
       case h::t => {
                 val makeMove = moveAnyPawn(game.copy(), h._1, h._2)
                 val moveScore = pruningAlfaBeta(makeMove, depth, -100,+100, MaxMin.min )
-                println ( "OldBestCord " + bestCoord + " OldBestScorec " + moveScore  )
                 val (newBestCoord, newBestScore) = if (bestScore > moveScore ) (bestCoord , bestScore) else (h._2, moveScore)
-                println ( "NewBestCord " + newBestCoord + " NewBestScorec " + newBestScore  )
                _findBestMove( game,t, newBestCoord, newBestScore )
       }
     }
@@ -47,7 +53,8 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
 
   def maximizationPhase(game: ParserProlog, depth: Int, alfa: Int, beta: Int):Int = {
     val tempVal:Int = -100
-    val gameMoves: List[(Coordinate,Coordinate)] = getGamePossibleMoves(game,findPlayerPawns(game), List())
+    val gameMoves: List[(Coordinate,Coordinate)] = getGamePossibleMoves(game)
+
 
     def _maximizationPhase(fatherGame: ParserProlog, gameMoves: List[(Coordinate,Coordinate)], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
       case Nil => tempVal
@@ -66,7 +73,8 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
 
   def minimizationPhase(game: ParserProlog, depth: Int, alfa: Int, beta: Int): Int = {
     val tempVal:Int = 100
-    val gameMoves: List[(Coordinate,Coordinate)] = getGamePossibleMoves(game,findPlayerPawns(game), List())
+    val gameMoves: List[(Coordinate,Coordinate)] = getGamePossibleMoves(game)
+
 
     def _minimizationPhase(fatherGame: ParserProlog, gameMoves: List[(Coordinate,Coordinate)], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
       case Nil => tempVal
@@ -137,6 +145,8 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
     getPawnPossibleMove(pawnCord, parserProlog).map( endCord => (pawnCord,endCord ))
   }
 
+  def getGamePossibleMoves(parserProlog: ParserProlog): List[(Coordinate,Coordinate)] = parserProlog.gamePossibleMoves()
+
   def getPawnPossibleMove(coordinate: Coordinate, parserProlog: ParserProlog): List[Coordinate] = {
     parserProlog.showPossibleCells(coordinate).toList
   }
@@ -156,11 +166,20 @@ class MiniMaxImpl(depth: Int ) extends  MiniMax {
 object TryMinMax extends App{
   val THEORY: String = TheoryGame.GameRules.toString
   val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
-  val board = parserProlog.createGame(GameVariant.Brandubh.nameVariant.toLowerCase)._3
-  var ef: EvaluationFunction =  EvaluationFunctionImpl()
-  //  var gameTree: GameTree = GameTree()
-  val miniMax: MiniMaxImpl = new MiniMaxImpl(  2)
+  val board = parserProlog.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)._3
+  var ef: EvaluationFunctionImpl = new  EvaluationFunctionImpl(11)
 
-  println( parserProlog.hasWinner)
+  val t= parserProlog.getActualBoard
+  val miniMax: MiniMaxImpl = new MiniMaxImpl(  1, 11 )
+  val seq = ef.getSeqRows(t).seq
+
+  println(ef.spltMatrixInFourPart(seq).foreach(x => println(x)))
+ // println( ef.spltMatrixInFourPart( ef.getSeqRows( parserProlog.getActualBoard ).toSeq))
+  //println( miniMax.findBestMove(parserProlog))
+
+  /*val startTime = System.currentTimeMillis()
+  println( miniMax.pruningAlfaBeta(parserProlog, 1, -100,+100, MaxMin.Max))
+  val endTime = System.currentTimeMillis() - startTime
+  println(endTime)*/
 
 }

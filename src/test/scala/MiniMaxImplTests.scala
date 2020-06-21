@@ -1,11 +1,8 @@
-import ia.MiniMaxImpl
-import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, TheoryGame}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
-import utils.{BoardGame, Coordinate}
 class MiniMaxImplTests extends FunSuite with MockFactory with Matchers{
 
-  val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
+ /* val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
 
   val minmax: MiniMaxImpl = new MiniMaxImpl(3)
   var board: BoardGame.Board = null
@@ -49,7 +46,7 @@ class MiniMaxImplTests extends FunSuite with MockFactory with Matchers{
     assert( listParser.size == 116 )
     listParser.foreach( parserSon =>  assert( !parserSon.equals(parser)))
 
-  }
+  }*/
 
 
 
