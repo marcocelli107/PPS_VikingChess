@@ -108,13 +108,40 @@ trait ViewFactory {
   def createBoardPlusColumnsPanel: JPanel
 
   /**
-   * Creates a menù button.
+   * Creates a button in main menu.
    *
-   * @param string
-   * name of button.
+   * @param text
+   *            text of button.
    * @return a button.
    */
-  def createMenuButton(string: String): JButton
+  def createMainButton(text: String): JButton
+
+  /**
+    * Creates a button in level menu.
+    *
+    * @param text
+    *            text of button.
+    * @return a button.
+    */
+  def createLevelButton(text: String): JButton
+
+  /**
+    * Creates a button in variant menu.
+    *
+    * @param text
+    *            text of button.
+    * @return a button.
+    */
+  def createVariantButton(text: String): JButton
+
+  /**
+    * Creates a button in player menu.
+    *
+    * @param text
+    *            text of button.
+    * @return a button.
+    */
+  def createPlayerButton(text: String): JButton
 
   /**
    * Creates a popup menù.
@@ -227,18 +254,31 @@ trait ViewFactory {
    * Sets the current board size to correctly define the dimension
    * of the cells.
    *
-   * @author Luca Nannini
    * @param variantBoardSize
-   * variant board size
+   *              variant board size
    */
   def setVariantBoardSize(variantBoardSize: Int): Unit
 
   /**
-    * Creates a sub menu panel.
+    * Creates a sub menu player panel.
     *
     * @return a panel.
     */
-  def createSubMenuPanel: JPanel
+  def createSubMenuPlayerPanel: JPanel
+
+  /**
+    * Creates a sub menu variant panel.
+    *
+    * @return a panel.
+    */
+  def createSubMenuVariantPanel: JPanel
+
+  /**
+    * Creates a sub menu level panel.
+    *
+    * @return a panel.
+    */
+  def createSubMenuLevelPanel: JPanel
 
   /**
     * Creates a game sub menu panel.
@@ -326,7 +366,17 @@ object ViewFactory extends ViewFactory {
 
   override def createBoardPlusColumnsPanel: JPanel = new BoardPlusColumns
 
-  override def createMenuButton(s: String): JButton = new MenuButton(s)
+
+  override def createMainButton(s: String): JButton = mainButton(s)
+
+  override def createLevelButton(s: String): JButton = levelButton(s)
+
+  override def createVariantButton(s: String): JButton = variantButton(s)
+
+  override def createPlayerButton(s: String): JButton = playerButton(s)
+
+
+
 
   override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
 
@@ -360,7 +410,11 @@ object ViewFactory extends ViewFactory {
 
   override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
 
-  override def createSubMenuPanel: JPanel = new SubMenuPanel
+  override def createSubMenuPlayerPanel: JPanel = subMenuPlayerPanel()
+
+  override def createSubMenuVariantPanel: JPanel = subMenuVariantPanel()
+
+  override def createSubMenuLevelPanel: JPanel = subMenuLevelPanel()
 
   override def createGameSubMenuPanel: JPanel = new GameSubMenuPanel
 
@@ -582,11 +636,11 @@ object ViewFactory extends ViewFactory {
     setText(s)
   }
 
-  private class MenuButton(s: String) extends EmptyButton(s) {
+  private class MenuButton(s: String, sizePercentageWidth: Int, sizePercentageHeight: Int) extends EmptyButton(s) {
 
     private val FONT_DIMENSION = smallerSide * 5 / 100
     //private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
-    private val BUTTON_DIMENSION = new Dimension(smallerSide * 4 / 10, smallerSide * 8 / 100)
+    private val BUTTON_DIMENSION = new Dimension(sizePercentageWidth, sizePercentageHeight)
 
     setPreferredSize(BUTTON_DIMENSION)
     setMaximumSize(getPreferredSize)
@@ -611,9 +665,14 @@ object ViewFactory extends ViewFactory {
     })
   }
 
+  private val HEIGHT_COMPONENT_MENU_DIMENSION: Int = smallerSide * 8 / 100
+  private def mainButton(text: String): JButton = new MenuButton(text, smallerSide * 60 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def levelButton(text: String): JButton = new MenuButton(text, smallerSide * 25 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def variantButton(text: String): JButton = new MenuButton(text, smallerSide * 40 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def playerButton(text: String): JButton = new MenuButton(text, smallerSide * 29 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
+
   private class IconLabel(pathIcon: String) extends JLabel {
-    //private val ICON_DIMENSION: Int = smallerSide * 7 / 100
-    private val ICON_DIMENSION: Int = smallerSide * 49 / 1000
+    private val ICON_DIMENSION: Int = smallerSide * 7 / 100
     this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
     this.setMaximumSize(getPreferredSize)
     val img: BufferedImage = ImageIO.read(new File(pathIcon))
@@ -622,19 +681,22 @@ object ViewFactory extends ViewFactory {
     this.setIcon(imageIcon)
   }
 
-  private class SubMenuPanel extends JPanel {
-    //private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
-    private val PANEL_DIMENSION = new Dimension(smallerSide * 7 / 10, smallerSide * 8 / 100)
+  private class SubMenuPanel(sizePercentageWidth: Int, sizePercentageHeight: Int) extends JPanel {
+    private val SUB_PANEL_DIMENSION = new Dimension(sizePercentageWidth, sizePercentageHeight)
 
-    setPreferredSize(PANEL_DIMENSION)
+    setPreferredSize(SUB_PANEL_DIMENSION)
     setMaximumSize(getPreferredSize)
     setAlignmentX(Component.CENTER_ALIGNMENT)
     setOpaque(false)
     setVisible(true)
-
     val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
-    this.setLayout(gridBagLayout)
+    setLayout(gridBagLayout)
+
   }
+
+  private def subMenuPlayerPanel(): JPanel = new SubMenuPanel(smallerSide * 40/100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def subMenuVariantPanel(): JPanel = new SubMenuPanel(smallerSide * 70/100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def subMenuLevelPanel(): JPanel = new SubMenuPanel(smallerSide * 50/100, HEIGHT_COMPONENT_MENU_DIMENSION)
 
   private class GameSubMenuPanel extends JPanel {
     private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)

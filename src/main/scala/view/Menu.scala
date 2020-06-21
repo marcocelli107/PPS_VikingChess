@@ -100,11 +100,11 @@ object Menu {
 
     override def initMenu: JPanel = {
       menuPanel = ViewFactory.createMenuPanel("Choose Mode: ")
-      pveButton = ViewFactory.createMenuButton(" Player Vs Computer")
+      pveButton = ViewFactory.createMainButton(" Player Vs Computer")
       pveButton.addActionListener(chooseGameModeListener("PVE"))
-      pvpButton = ViewFactory.createMenuButton("Player Vs Player")
+      pvpButton = ViewFactory.createMainButton("Player Vs Player")
       pvpButton.addActionListener(chooseGameModeListener("PVP"))
-      exitButtonMenu = ViewFactory.createMenuButton("Exit")
+      exitButtonMenu = ViewFactory.createMainButton("Exit")
       exitButtonMenu.addActionListener(_ => System.exit(0))
       menuPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       menuPanel.add(pveButton)
@@ -117,10 +117,10 @@ object Menu {
     override def initVariantsMenu: JPanel = {
       variantsPanel = ViewFactory.createMenuPanel("Choose Board Variant: ")
 
-      panelVariantHnefatafl = ViewFactory.createSubMenuPanel
-      panelVariantTawlbwrdd = ViewFactory.createSubMenuPanel
-      panelVariantTablut = ViewFactory.createSubMenuPanel
-      panelVariantBrandubh = ViewFactory.createSubMenuPanel
+      panelVariantHnefatafl = ViewFactory.createSubMenuVariantPanel
+      panelVariantTawlbwrdd = ViewFactory.createSubMenuVariantPanel
+      panelVariantTablut = ViewFactory.createSubMenuVariantPanel
+      panelVariantBrandubh = ViewFactory.createSubMenuVariantPanel
 
       val limits: GridBagConstraints = new java.awt.GridBagConstraints()
       limits.gridy = 0
@@ -131,7 +131,7 @@ object Menu {
       labelHnefatafl = ViewFactory.createLabelBoardHnefatafl
       limits.gridx = 0
       panelVariantHnefatafl.add(labelHnefatafl, limits)
-      hnefatafl = ViewFactory.createMenuButton("Hnefatafl (11 x 11)")
+      hnefatafl = ViewFactory.createVariantButton("Hnefatafl (11 x 11)")
       hnefatafl.addActionListener(chooseVariantListener("Hnefatafl"))
       limits.gridx = 1
       panelVariantHnefatafl.add(hnefatafl, limits)
@@ -139,7 +139,7 @@ object Menu {
       labelTawlbwrdd = ViewFactory.createLabelBoardTawlbwrdd
       limits.gridx = 0
       panelVariantTawlbwrdd.add(labelTawlbwrdd, limits)
-      tawlbwrdd = ViewFactory.createMenuButton("Tawlbwrdd (11 x 11)")
+      tawlbwrdd = ViewFactory.createVariantButton("Tawlbwrdd (11 x 11)")
       tawlbwrdd.addActionListener(chooseVariantListener("Tawlbwrdd"))
       limits.gridx = 1
       panelVariantTawlbwrdd.add(tawlbwrdd, limits)
@@ -147,7 +147,7 @@ object Menu {
       labelTablut = ViewFactory.createLabelBoardTablut
       limits.gridx = 0
       panelVariantTablut.add(labelTablut, limits)
-      tablut = ViewFactory.createMenuButton("Tablut (9 x 9)")
+      tablut = ViewFactory.createVariantButton("Tablut (9 x 9)")
       tablut.addActionListener(chooseVariantListener("Tablut"))
       limits.gridx = 1
       panelVariantTablut.add(tablut, limits)
@@ -155,12 +155,12 @@ object Menu {
       labelBrandubh = ViewFactory.createLabelBoardBrandubh
       limits.gridx = 0
       panelVariantBrandubh.add(labelBrandubh, limits)
-      brandubh = ViewFactory.createMenuButton("Brandubh (7 x 7)")
+      brandubh = ViewFactory.createVariantButton("Brandubh (7 x 7)")
       brandubh.addActionListener(chooseVariantListener("Brandubh"))
       limits.gridx = 1
       panelVariantBrandubh.add(brandubh, limits)
 
-      returnToMenu = ViewFactory.createMenuButton("Previous Menu")
+      returnToMenu = ViewFactory.createMainButton("Previous Menu")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(variantsPanel, menuPanel))
 
       variantsPanel.add(Box.createRigidArea(DIMENSION_PANEL))
@@ -178,10 +178,10 @@ object Menu {
     override def initDiffMenu: JPanel = {
       diffPanel = ViewFactory.createMenuPanel("Choose Difficulty: ")
 
-      panelLevelNewcomer = ViewFactory.createSubMenuPanel
-      panelLevelAmateur = ViewFactory.createSubMenuPanel
-      panelLevelStandard = ViewFactory.createSubMenuPanel
-      panelLevelAdvanced = ViewFactory.createSubMenuPanel
+      panelLevelNewcomer = ViewFactory.createSubMenuLevelPanel
+      panelLevelAmateur = ViewFactory.createSubMenuLevelPanel
+      panelLevelStandard = ViewFactory.createSubMenuLevelPanel
+      panelLevelAdvanced = ViewFactory.createSubMenuLevelPanel
 
       val limits: GridBagConstraints = new java.awt.GridBagConstraints()
       limits.gridy = 0
@@ -192,7 +192,7 @@ object Menu {
       labelNewcomer = ViewFactory.createLabelNewcomer
       limits.gridx = 0
       panelLevelNewcomer.add(labelNewcomer, limits)
-      newcomer = ViewFactory.createMenuButton("Newcomer")
+      newcomer = ViewFactory.createLevelButton("Newcomer")
       newcomer.addActionListener(chooseLevelIAListener("Newcomer"))
       limits.gridx = 1
       panelLevelNewcomer.add(newcomer, limits)
@@ -200,7 +200,7 @@ object Menu {
       labelAmateur = ViewFactory.createLabelAmateur
       limits.gridx = 0
       panelLevelAmateur.add(labelAmateur, limits)
-      amateur = ViewFactory.createMenuButton("Amateur")
+      amateur = ViewFactory.createLevelButton("Amateur")
       amateur.addActionListener(chooseLevelIAListener("Amateur"))
       limits.gridx = 1
       panelLevelAmateur.add(amateur, limits)
@@ -208,7 +208,7 @@ object Menu {
       labelStandard = ViewFactory.createLabelStandard
       limits.gridx = 0
       panelLevelStandard.add(labelStandard, limits)
-      standard = ViewFactory.createMenuButton("Standard")
+      standard = ViewFactory.createLevelButton("Standard")
       standard.addActionListener(chooseLevelIAListener("Standard"))
       limits.gridx = 1
       panelLevelStandard.add(standard, limits)
@@ -216,12 +216,12 @@ object Menu {
       labelAdvanced = ViewFactory.createLabelAdvanced
       limits.gridx = 0
       panelLevelAdvanced.add(labelAdvanced, limits)
-      advanced = ViewFactory.createMenuButton("Advanced")
+      advanced = ViewFactory.createLevelButton("Advanced")
       advanced.addActionListener(chooseLevelIAListener("Advanced"))
       limits.gridx = 1
       panelLevelAdvanced.add(advanced, limits)
 
-      returnToMenu = ViewFactory.createMenuButton("Previous Menu")
+      returnToMenu = ViewFactory.createMainButton("Previous Menu")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(diffPanel, variantsPanel))
 
       diffPanel.add(Box.createRigidArea(DIMENSION_PANEL))
@@ -238,8 +238,8 @@ object Menu {
     override def initPlayerChoiceMenu: JPanel = {
       playerChoicePanel = ViewFactory.createMenuPanel("Choose Player: ")
 
-      panelChoseWhite = ViewFactory.createSubMenuPanel
-      panelChoseBlack = ViewFactory.createSubMenuPanel
+      panelChoseWhite = ViewFactory.createSubMenuPlayerPanel
+      panelChoseBlack = ViewFactory.createSubMenuPlayerPanel
 
       val limits: GridBagConstraints = new java.awt.GridBagConstraints()
       limits.gridy = 0
@@ -250,7 +250,7 @@ object Menu {
       labelWhiteChose = ViewFactory.createLabelWhitePlayer
       limits.gridx = 0
       panelChoseWhite.add(labelWhiteChose,limits)
-      whiteButton = ViewFactory.createMenuButton("White Pawns")
+      whiteButton = ViewFactory.createPlayerButton("White Pawns")
       whiteButton.addActionListener(setPlayer("White"))
       limits.gridx = 1
       panelChoseWhite.add(whiteButton,limits)
@@ -258,12 +258,12 @@ object Menu {
       labelBlackChose = ViewFactory.createLabelBlackPlayer
       limits.gridx = 0
       panelChoseBlack.add(labelBlackChose,limits)
-      blackButton = ViewFactory.createMenuButton("Black Pawns")
+      blackButton = ViewFactory.createPlayerButton("Black Pawns")
       blackButton.addActionListener(setPlayer("Black"))
       limits.gridx = 1
       panelChoseBlack.add(blackButton,limits)
 
-      returnToMenu = ViewFactory.createMenuButton("Previous Menu")
+      returnToMenu = ViewFactory.createMainButton("Previous Menu")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(playerChoicePanel, variantsPanel))
 
       playerChoicePanel.add(Box.createRigidArea(DIMENSION_PANEL))
@@ -283,15 +283,15 @@ object Menu {
 
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = ViewFactory.createMenuPanel("Choose Option: ")
-      returnToGame = ViewFactory.createMenuButton("Return to Game")
+      returnToGame = ViewFactory.createMainButton("Return to Game")
       returnToGame.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, view.getGamePanel))
 
-      restartGame = ViewFactory.createMenuButton("Restart Match")
+      restartGame = ViewFactory.createMainButton("Restart Match")
       restartGame.addActionListener((_: ActionEvent) => {view.initOrRestoreGUI(); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
 
-      returnToMenu = ViewFactory.createMenuButton("Leave Match")
+      returnToMenu = ViewFactory.createMainButton("Leave Match")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, menuPanel))
-      quitGame = ViewFactory.createMenuButton("Quit Game")
+      quitGame = ViewFactory.createMainButton("Quit Game")
       quitGame.addActionListener((_: ActionEvent) => System.exit(0))
       inGameMenuPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       inGameMenuPanel.add(returnToGame)
