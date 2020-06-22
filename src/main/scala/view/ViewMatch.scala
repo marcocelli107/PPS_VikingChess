@@ -70,8 +70,8 @@ object ViewMatch {
         leftPanel, rightPanel: JPanel = _
 
     private var playerOrWinnerLabel: JLabel = _
-    private val playerWhiteLabel: JLabel = ViewFactory.createLabelWhitePlayer
-    private val playerBlackLabel: JLabel = ViewFactory.createLabelBlackPlayer
+    private val playerWhiteLabel: JLabel = MenuFactory.createLabelWhitePlayer
+    private val playerBlackLabel: JLabel = MenuFactory.createLabelBlackPlayer
     private var menuButton, firstMoveButton, nextMoveButton, previousMoveButton, lastMoveButton, undoMoveButton: JButton = _
     private val cells: mutable.HashMap[Coordinate, Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Coordinate] = Seq.empty
@@ -84,7 +84,7 @@ object ViewMatch {
     override def initGamePanel(board: Board): JPanel = {
       this.board = board
 
-      ViewFactory.setVariantBoardSize(this.view.getDimension)
+      GameFactory.setVariantBoardSize(this.view.getDimension)
 
       initNorthPanel()
       initSouthPanel()
@@ -92,10 +92,10 @@ object ViewMatch {
       initBoard()
       drawPawns(board.cells)
 
-      gamePanel = ViewFactory.createGamePanel
+      gamePanel = GameFactory.createGamePanel
       gamePanel.add(northPanel)
 
-      boardPlusColumns = ViewFactory.createBoardPlusColumnsPanel
+      boardPlusColumns = GameFactory.createBoardPlusColumnsPanel
       boardPlusColumns.add(leftPanel)
       boardPlusColumns.add(boardPanel)
       boardPlusColumns.add(rightPanel)
@@ -230,7 +230,7 @@ object ViewMatch {
       * Initializes the board panel.
       */
     private def initBoard(): Unit = {
-      boardPanel = ViewFactory.createBoardPanel
+      boardPanel = GameFactory.createBoardPanel
       val layout: GridBagLayout = new java.awt.GridBagLayout()
       boardPanel.setLayout(layout)
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
@@ -252,9 +252,9 @@ object ViewMatch {
       * Initializes the north panel.
       */
     private def initNorthPanel(): Unit = {
-      northPanel = ViewFactory.createTopBottomPanel
-      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 10/100,ViewFactory.getSmallerSide * 8 / 100)))
-      subNorthPanel = ViewFactory.createGameSubMenuPanel
+      northPanel = GameFactory.createTopBottomPanel
+      northPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 10/100,GameFactory.getSmallerSide * 8 / 100)))
+      subNorthPanel = GameFactory.createGameSubMenuPanel
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       lim.gridx = 0
       lim.gridy = 0
@@ -267,64 +267,64 @@ object ViewMatch {
       subNorthPanel.add(playerBlackLabel, lim)
       subNorthPanel.add(playerWhiteLabel, lim)
 
-      playerOrWinnerLabel = ViewFactory.createLabelPlayerToMoveWinner
+      playerOrWinnerLabel = GameFactory.createLabelPlayerToMoveWinner
       lim.gridx = 1
       subNorthPanel.add(playerOrWinnerLabel, lim)
       northPanel.add(subNorthPanel)
-      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 55/100,ViewFactory.getSmallerSide * 8 / 100)))
-      menuButton = ViewFactory.createGameButton()
+      northPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 55/100,GameFactory.getSmallerSide * 8 / 100)))
+      menuButton = GameFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
       northPanel.add(menuButton)
-      northPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 20/100,ViewFactory.getSmallerSide * 8 / 100)))
+      northPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 20/100,GameFactory.getSmallerSide * 8 / 100)))
     }
 
     /**
       * Initializes the south panel.
       */
     private def initSouthPanel(): Unit = {
-      southPanel = ViewFactory.createTopBottomPanel
-      southPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 30/100, ViewFactory.getSmallerSide * 8 / 100)))
-      subSouthPanel = ViewFactory.createGameSubMenuPanel
+      southPanel = GameFactory.createTopBottomPanel
+      southPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 30/100, GameFactory.getSmallerSide * 8 / 100)))
+      subSouthPanel = GameFactory.createGameSubMenuPanel
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       lim.gridy = 0
       lim.weightx = 1
       lim.fill = GridBagConstraints.NONE
       lim.anchor = GridBagConstraints.CENTER
 
-      firstMoveButton = ViewFactory.createFirstMoveButton()
+      firstMoveButton = GameFactory.createFirstMoveButton()
       firstMoveButton.addActionListener(_ => changeSnapshot(Snapshot.First))
       lim.gridx = 0
       subSouthPanel.add(firstMoveButton, lim)
 
-      previousMoveButton = ViewFactory.createPreviousMoveButton()
+      previousMoveButton = GameFactory.createPreviousMoveButton()
       previousMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Previous))
       lim.gridx = 1
       subSouthPanel.add(previousMoveButton, lim)
 
-      nextMoveButton = ViewFactory.createNextMoveButton()
+      nextMoveButton = GameFactory.createNextMoveButton()
       nextMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Next))
       lim.gridx = 2
       subSouthPanel.add(nextMoveButton, lim)
 
-      lastMoveButton = ViewFactory.createLastMoveButton()
+      lastMoveButton = GameFactory.createLastMoveButton()
       lastMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Last))
       lim.gridx = 3
       subSouthPanel.add(lastMoveButton, lim)
 
-      undoMoveButton = ViewFactory.createUndoMoveButton()
+      undoMoveButton = GameFactory.createUndoMoveButton()
       undoMoveButton.addActionListener(_ => undoMove())
       lim.gridx = 4
       subSouthPanel.add(undoMoveButton, lim)
       southPanel.add(subSouthPanel)
-      southPanel.add(Box.createRigidArea(new Dimension(ViewFactory.getSmallerSide * 10/100,ViewFactory.getSmallerSide * 8 / 100)))
+      southPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 10/100,GameFactory.getSmallerSide * 8 / 100)))
     }
 
     /**
       * Initializes the panels of captures.
       */
     private def initLeftRightPanel(): Unit = {
-      leftPanel = ViewFactory.createLeftRightPanel(1, view.getDimension)
-      rightPanel = ViewFactory.createLeftRightPanel(1, view.getDimension)
+      leftPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
+      rightPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
     }
 
     /**
@@ -425,8 +425,8 @@ object ViewMatch {
       * @return label
       */
     private def createLostPawn(player: Player.Val): JLabel = player match {
-      case Player.Black => ViewFactory.createLostBlackPawn
-      case _ => ViewFactory.createLostWhitePawn
+      case Player.Black => GameFactory.createLostBlackPawn
+      case _ => GameFactory.createLostWhitePawn
     }
 
     /**
@@ -488,9 +488,9 @@ object ViewMatch {
       val piece: Piece.Val = cell.getPiece
       val button: JButton = cells(cell.getCoordinate)
       piece match {
-        case Piece.WhitePawn => button.add(ViewFactory.createWhitePawn)
-        case Piece.BlackPawn => button.add(ViewFactory.createBlackPawn)
-        case Piece.WhiteKing => button.add(ViewFactory.createWhiteKing)
+        case Piece.WhitePawn => button.add(GameFactory.createWhitePawn)
+        case Piece.BlackPawn => button.add(GameFactory.createBlackPawn)
+        case Piece.WhiteKing => button.add(GameFactory.createWhiteKing)
         case _ =>
       }
     }
@@ -502,10 +502,10 @@ object ViewMatch {
      *             cell to be set.
      */
     private def setTypeCell(cell: Coordinate): Cell = cell match {
-      case coordinate if view.isCornerCell(coordinate) => ViewFactory.createCornerCell()
-      case coordinate if view.isCentralCell(coordinate) => ViewFactory.createCenterCell()
-      case coordinate if view.isPawnCell(coordinate) => ViewFactory.createPawnCell()
-      case _ => ViewFactory.createNormalCell()
+      case coordinate if view.isCornerCell(coordinate) => GameFactory.createCornerCell()
+      case coordinate if view.isCentralCell(coordinate) => GameFactory.createCenterCell()
+      case coordinate if view.isPawnCell(coordinate) => GameFactory.createPawnCell()
+      case _ => GameFactory.createNormalCell()
 
     }
 
