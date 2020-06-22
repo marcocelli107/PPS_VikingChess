@@ -2,15 +2,14 @@ package view
 
 import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent}
-import java.awt.image.BufferedImage
 import java.io.File
 
 //import javafx.scene.media.{Media, MediaPlayer}
-import javax.imageio.ImageIO
+
 import javax.swing._
 import javax.swing.border.LineBorder
 
-trait ViewFactory {
+trait GameFactory {
 
   /**
    * Gets the smaller side of the monitor.
@@ -58,15 +57,6 @@ trait ViewFactory {
   def createBoardPanel: JPanel
 
   /**
-   * Creates a new MenuPanel.
-   *
-   * @param string
-   * text of the menù panel.
-   * @return a new MenuPanel.
-   */
-  def createMenuPanel(string: String): JPanel
-
-  /**
    * Creates top or bottom panel with FlowLayout.
    *
    * @return top or bottom panel.
@@ -106,31 +96,6 @@ trait ViewFactory {
    * @return a panel.
    */
   def createBoardPlusColumnsPanel: JPanel
-
-  /**
-   * Creates a menù button.
-   *
-   * @param string
-   * name of button.
-   * @return a button.
-   */
-  def createMenuButton(string: String): JButton
-
-  /**
-   * Creates a popup menù.
-   *
-   * @return a popup.
-   */
-  def createPopUpMenu: JPopupMenu
-
-  /**
-   * Creates an item for popup menù.
-   *
-   * @param text
-   * text of the item.
-   * @return an item.
-   */
-  def createJMenuItem(text: String): JMenuItem
 
   /**
    * Creates a game button.
@@ -227,18 +192,10 @@ trait ViewFactory {
    * Sets the current board size to correctly define the dimension
    * of the cells.
    *
-   * @author Luca Nannini
    * @param variantBoardSize
-   * variant board size
+   *              variant board size
    */
   def setVariantBoardSize(variantBoardSize: Int): Unit
-
-  /**
-    * Creates a sub menu panel.
-    *
-    * @return a panel.
-    */
-  def createSubMenuPanel: JPanel
 
   /**
     * Creates a game sub menu panel.
@@ -248,40 +205,12 @@ trait ViewFactory {
   def createGameSubMenuPanel: JPanel
 
   /**
-    * Creates a label for each different variant.
-    *
-    * @return a label.
-    */
-  def createLabelBoardHnefatafl: JLabel
-  def createLabelBoardTawlbwrdd: JLabel
-  def createLabelBoardTablut: JLabel
-  def createLabelBoardBrandubh: JLabel
-
-  /**
-    * Creates a label for each different level.
-    *
-    * @return a label.
-    */
-  def createLabelNewcomer: JLabel
-  def createLabelAmateur: JLabel
-  def createLabelStandard: JLabel
-  def createLabelAdvanced: JLabel
-
-  /**
-    * Creates a label for player white or black.
-    *
-    * @return a label.
-    */
-  def createLabelWhitePlayer: JLabel
-  def createLabelBlackPlayer: JLabel
-
-  /**
     * Generates a sound for the moved piece.
     */
   //def generateASoundForMove()
 }
 
-object ViewFactory extends ViewFactory {
+object GameFactory extends GameFactory {
 
   private var cellDimension = 0
   private val smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
@@ -290,16 +219,6 @@ object ViewFactory extends ViewFactory {
   ge.registerFont(f)
   private val centerCellIconPath: String = "src/main/resources/images/iconThrone.png"
   private val cornerCellIconPath: String =  "src/main/resources/images/iconCellWin.png"
-  private val boardHnefataflIconPath: String =  "src/main/resources/images/iconBoardHnefatafl.png"
-  private val boardTawlbwrddIconPath: String =  "src/main/resources/images/iconBoardTawlbwrdd.png"
-  private val boardTablutIconPath: String =  "src/main/resources/images/iconBoardTablut.png"
-  private val boardBrandubhlIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
-  private val newcomerIconPath: String =  "src/main/resources/images/iconNewcomer.png"
-  private val amateurIconPath: String =  "src/main/resources/images/iconAmateur.png"
-  private val standardIconPath: String =  "src/main/resources/images/iconStandard.png"
-  private val advancedIconPath: String =  "src/main/resources/images/iconAdvanced.png"
-  private val whitePlayerIconPath: String =  "src/main/resources/images/iconWhitePlayer.jpeg"
-  private val blackPlayerIconPath: String =  "src/main/resources/images/iconBlackPlayer.jpeg"
   //private val soundMovedPiece: String =  "src/main/resources/sounds/movedPiece.mp3"
 
   override def getSmallerSide: Int = smallerSide
@@ -314,8 +233,6 @@ object ViewFactory extends ViewFactory {
 
   override def createBoardPanel: JPanel = new BoardPanel()
 
-  override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
-
   override def createTopBottomPanel: JPanel = new TopBottomPanel
 
   override def createLeftRightPanel(columns: Int, rows: Int): JPanel = new LeftRightPanel(columns, rows)
@@ -325,12 +242,6 @@ object ViewFactory extends ViewFactory {
   override def createGamePanel: JPanel = new GamePanel
 
   override def createBoardPlusColumnsPanel: JPanel = new BoardPlusColumns
-
-  override def createMenuButton(s: String): JButton = new MenuButton(s)
-
-  override def createJMenuItem(text: String): JMenuItem = new MenuItem(text)
-
-  override def createPopUpMenu: JPopupMenu = new JPopupMenu
 
   override def createWhitePawn: JLabel = whitePawn()
 
@@ -360,28 +271,7 @@ object ViewFactory extends ViewFactory {
 
   override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
 
-  override def createSubMenuPanel: JPanel = new SubMenuPanel
-
   override def createGameSubMenuPanel: JPanel = new GameSubMenuPanel
-
-  override def createLabelBoardHnefatafl: JLabel = new IconLabel(boardHnefataflIconPath)
-
-  override def createLabelBoardTawlbwrdd: JLabel = new IconLabel(boardTawlbwrddIconPath)
-
-  override def createLabelBoardTablut: JLabel = new IconLabel(boardTablutIconPath)
-
-  override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhlIconPath)
-
-
-  override def createLabelNewcomer: JLabel = new IconLabel(newcomerIconPath)
-  override def createLabelAmateur: JLabel = new IconLabel(amateurIconPath)
-  override def createLabelStandard: JLabel = new IconLabel(standardIconPath)
-  override def createLabelAdvanced: JLabel = new IconLabel(advancedIconPath)
-
-
-  override def createLabelWhitePlayer: JLabel = new IconLabel(whitePlayerIconPath)
-
-  override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
 
   //override def generateASoundForMove(): Unit = playMoveSound()
 
@@ -512,40 +402,6 @@ object ViewFactory extends ViewFactory {
     this.setBackground(ColorProvider.getLightBrownColor)
   }
 
-  private class MenuPanel(string: String) extends JPanel {
-
-    private val menuLabel = new JLabel()
-
-    private val chooseLabel = new JLabel()
-
-    private val image = ImageIO.read(new File("src/main/resources/images/Cornice.png"))
-
-    private val imageScaled = image.getScaledInstance(smallerSide, smallerSide * 98 / 100, Image.SCALE_DEFAULT)
-
-    private val img = new ImageIcon("src/main/resources/images/logo.png")
-
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
-    menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 25 / 100))
-    menuLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
-    menuLabel.setIcon(img)
-    chooseLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 6 / 100))
-    chooseLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
-    chooseLabel.setFont(new Font(f.getFontName, Font.BOLD, smallerSide * 6 / 100))
-    chooseLabel.setText(string)
-    chooseLabel.setForeground(ColorProvider.getWhiteColor)
-    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 5 / 100)))
-    add(menuLabel)
-    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
-    add(chooseLabel)
-    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
-
-
-    override protected def paintComponent(g: Graphics): Unit = {
-      super.paintComponent(g)
-      g.drawImage(imageScaled, 0, 0, null)
-    }
-  }
-
   private class TopBottomPanel extends JPanel {
     private val WIDTH_DIMENSION = smallerSide
     private val HEIGHT_DIMENSION = smallerSide * 8 / 100
@@ -576,66 +432,6 @@ object ViewFactory extends ViewFactory {
     setLayout(new BoxLayout(this, BoxLayout.X_AXIS))
   }
 
-  abstract private class EmptyButton(val s: String) extends JButton {
-    setCursor(new Cursor(Cursor.HAND_CURSOR))
-    setHorizontalAlignment(SwingConstants.CENTER)
-    setText(s)
-  }
-
-  private class MenuButton(s: String) extends EmptyButton(s) {
-
-    private val FONT_DIMENSION = smallerSide * 5 / 100
-    //private val BUTTON_DIMENSION = new Dimension(smallerSide * 60 / 100, smallerSide * 8 / 100)
-    private val BUTTON_DIMENSION = new Dimension(smallerSide * 4 / 10, smallerSide * 8 / 100)
-
-    setPreferredSize(BUTTON_DIMENSION)
-    setMaximumSize(getPreferredSize)
-    setAlignmentX(Component.CENTER_ALIGNMENT)
-
-    setOpaque(false)
-    setContentAreaFilled(false)
-    setBorderPainted(false)
-
-    setFont(new Font(f.getFontName, Font.BOLD, FONT_DIMENSION))
-    setForeground(ColorProvider.getWhiteColor)
-    setBorderPainted(false)
-
-    addMouseListener(new MouseAdapter() {
-      override def mouseEntered(e: MouseEvent): Unit = {
-        setForeground(ColorProvider.getNormalCellColor)
-      }
-
-      override def mouseExited(e: MouseEvent): Unit = {
-        setForeground(ColorProvider.getWhiteColor)
-      }
-    })
-  }
-
-  private class IconLabel(pathIcon: String) extends JLabel {
-    //private val ICON_DIMENSION: Int = smallerSide * 7 / 100
-    private val ICON_DIMENSION: Int = smallerSide * 49 / 1000
-    this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
-    this.setMaximumSize(getPreferredSize)
-    val img: BufferedImage = ImageIO.read(new File(pathIcon))
-    val dimg: Image = img.getScaledInstance(ICON_DIMENSION, ICON_DIMENSION, Image.SCALE_SMOOTH)
-    val imageIcon = new ImageIcon(dimg)
-    this.setIcon(imageIcon)
-  }
-
-  private class SubMenuPanel extends JPanel {
-    //private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
-    private val PANEL_DIMENSION = new Dimension(smallerSide * 7 / 10, smallerSide * 8 / 100)
-
-    setPreferredSize(PANEL_DIMENSION)
-    setMaximumSize(getPreferredSize)
-    setAlignmentX(Component.CENTER_ALIGNMENT)
-    setOpaque(false)
-    setVisible(true)
-
-    val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
-    this.setLayout(gridBagLayout)
-  }
-
   private class GameSubMenuPanel extends JPanel {
     private val PANEL_DIMENSION = new Dimension(smallerSide * 45 / 100, smallerSide * 8 / 100)
 
@@ -648,24 +444,28 @@ object ViewFactory extends ViewFactory {
     this.setLayout(gridBagLayout)
   }
 
-  private class GameButton() extends EmptyButton("") {
+  private class GameButton() extends JButton {
     private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 7 / 100, smallerSide * 7 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setCursor(new Cursor(Cursor.HAND_CURSOR))
+    setHorizontalAlignment(SwingConstants.CENTER)
     setToolTipText("Game Menu")
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
   }
 
-  private class SnapshotButton(private val iconPath: String, private val hoverText: String) extends EmptyButton("") {
+  private class SnapshotButton(private val iconPath: String, private val hoverText: String) extends JButton {
     private var imageIcon = new ImageIcon(iconPath)
     private var image = imageIcon.getImage
     image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
     imageIcon = new ImageIcon(image)
     setIcon(imageIcon)
+    setCursor(new Cursor(Cursor.HAND_CURSOR))
+    setHorizontalAlignment(SwingConstants.CENTER)
     setEnabled(true)
     setToolTipText(hoverText)
     setBorderPainted(false)
@@ -692,27 +492,6 @@ object ViewFactory extends ViewFactory {
   private val undoMoveButtonPath: String = "src/main/resources/images/iconUndoMove.png"
   private val undoMoveButtonHoverText: String = "Turn Back"
   private def undoMoveButton(): JButton = new SnapshotButton(undoMoveButtonPath, undoMoveButtonHoverText)
-
-  private class PopUpMenu extends JPopupMenu {
-
-    private val FONT_DIMENSION = smallerSide * 3 / 100
-    setCursor(new Cursor(Cursor.HAND_CURSOR))
-    setFont(new Font(f.getFontName, Font.PLAIN, FONT_DIMENSION))
-
-  }
-
-  private class MenuItem(text: String) extends JMenuItem {
-
-    private val colorSide = ColorProvider.getBrownColor
-    private val FONT_DIMENSION = smallerSide * 3 / 100
-
-    setText(text)
-    setFont(new Font(f.getFontName, Font.PLAIN, FONT_DIMENSION))
-    setForeground(Color.WHITE)
-    setBackground(colorSide)
-    setOpaque(true)
-
-  }
 
   private class Pawn(private val internalColor: Color, private val externalColor: Color,
               private val sizeMultiplier: Double) extends JLabel {

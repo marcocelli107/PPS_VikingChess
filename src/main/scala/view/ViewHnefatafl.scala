@@ -156,9 +156,9 @@ object ViewHnefatafl {
     private var board: Board = _
     private val viewMainMenu: Menu = Menu(this)
     private val viewMatch: ViewMatch = ViewMatch(this)
-    private val frame: JFrame = ViewFactory.createFrame
-    private val overlayPanel: JPanel = ViewFactory.createOverlayLayoutPanel
-    private var gamePanel: JPanel = ViewFactory.createGamePanel
+    private val frame: JFrame = GameFactory.createFrame
+    private val overlayPanel: JPanel = GameFactory.createOverlayLayoutPanel
+    private var gamePanel: JPanel = GameFactory.createGamePanel
 
     initMainMenu()
     overlayPanel.add(menuPanel)
