@@ -66,20 +66,30 @@ object ViewMatch {
 
   case class ViewMatchImpl(view: ViewHnefatafl) extends ViewMatch {
 
+    private val HEIGHT_DIMENSION = GameFactory.getSmallerSide * 8 / 100
+    private val SMALL_WIDTH_DIMENSION = GameFactory.getSmallerSide * 10 / 100
+    private val MEDIUM_WIDTH_DIMENSION = GameFactory.getSmallerSide * 20 / 100
+    private val BIG_WIDTH_DIMENSION = GameFactory.getSmallerSide * 30 / 100
+    private val BETWEEN_COMPONENTS_DIMENSION = GameFactory.getSmallerSide * 55 / 100
+
     private var gamePanel, northPanel, subNorthPanel, southPanel, subSouthPanel, boardPanel, boardPlusColumns,
         leftPanel, rightPanel: JPanel = _
+
+    private var menuButton, firstMoveButton, nextMoveButton, previousMoveButton, lastMoveButton, undoMoveButton: JButton = _
 
     private var playerOrWinnerLabel: JLabel = _
     private val playerWhiteLabel: JLabel = MenuFactory.createLabelWhitePlayer
     private val playerBlackLabel: JLabel = MenuFactory.createLabelBlackPlayer
-    private var menuButton, firstMoveButton, nextMoveButton, previousMoveButton, lastMoveButton, undoMoveButton: JButton = _
+
+    private var board: Board = _
+
     private val cells: mutable.HashMap[Coordinate, Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Coordinate] = Seq.empty
     private var selectedCell: Option[Coordinate] = Option.empty
-    private var board: Board = _
-    private var player: Player.Val = view.getMenuUtils.getPlayer
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
     private var kingCoordinate: Option[Coordinate] = Option.empty
+
+    private var player: Player.Val = view.getMenuUtils.getPlayer
 
     override def initGamePanel(board: Board): JPanel = {
       this.board = board
@@ -253,7 +263,7 @@ object ViewMatch {
       */
     private def initNorthPanel(): Unit = {
       northPanel = GameFactory.createTopBottomPanel
-      northPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 10/100,GameFactory.getSmallerSide * 8 / 100)))
+      northPanel.add(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
       subNorthPanel = GameFactory.createGameSubMenuPanel
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       lim.gridx = 0
@@ -271,11 +281,11 @@ object ViewMatch {
       lim.gridx = 1
       subNorthPanel.add(playerOrWinnerLabel, lim)
       northPanel.add(subNorthPanel)
-      northPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 55/100,GameFactory.getSmallerSide * 8 / 100)))
+      northPanel.add(Box.createRigidArea(new Dimension(BETWEEN_COMPONENTS_DIMENSION, HEIGHT_DIMENSION)))
       menuButton = GameFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
       northPanel.add(menuButton)
-      northPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 20/100,GameFactory.getSmallerSide * 8 / 100)))
+      northPanel.add(Box.createRigidArea(new Dimension(MEDIUM_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
     }
 
     /**
@@ -283,7 +293,7 @@ object ViewMatch {
       */
     private def initSouthPanel(): Unit = {
       southPanel = GameFactory.createTopBottomPanel
-      southPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 30/100, GameFactory.getSmallerSide * 8 / 100)))
+      southPanel.add(Box.createRigidArea(new Dimension(BIG_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
       subSouthPanel = GameFactory.createGameSubMenuPanel
       val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       lim.gridy = 0
@@ -316,7 +326,7 @@ object ViewMatch {
       lim.gridx = 4
       subSouthPanel.add(undoMoveButton, lim)
       southPanel.add(subSouthPanel)
-      southPanel.add(Box.createRigidArea(new Dimension(GameFactory.getSmallerSide * 10/100,GameFactory.getSmallerSide * 8 / 100)))
+      southPanel.add(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
     }
 
     /**
