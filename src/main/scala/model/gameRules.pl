@@ -80,6 +80,11 @@ initBoard(
     ]
 ).
 
+%%% Returns if the specified +Coordinate corresponds to an initial pawn cell.
+% [isInitialPawnCoord(+GameVariant, +Coordinate)]
+isInitialPawnCoord(V, coord(X, Y)) :-
+	initBoard(V, B), ithElem(X, B, R), ithElem(Y, R, cell(C, P)), isPawn(P).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  					         	List Utils			               		  %%
@@ -87,7 +92,7 @@ initBoard(
 
 
 %%% Puts +Element in last position of +List.
-% addLast(+List, +Element, -OutputList)
+% [addLast(+List, +Element, -OutputList)]
 addLast([], X, [X]).
 addLast([X|Xs], Y, [X|L]) :- addLast(Xs, Y, L).
 
@@ -168,7 +173,7 @@ cornerCellCoord(S, coord(S, S)).
 centralCellCoord(S, coord(X, X)) :- X is (S // 2) + 1.
 
 %%% Returns all corner cells of spiecified +BoardSize.
-% [centerCell(+BoardSize, -ListCornerCells)]
+% [allCornerCells(+BoardSize, -ListCornerCells)]
 allCornerCells(S, L) :- findall(C, cornerCellCoord(S, C), L).
 
 %%% Returns corner cells and center cell in a board of the specified +BoardSize.
@@ -304,6 +309,10 @@ gameBoard((_, _, _, B), B).
 % [gameWinner(+Game, -Winner)
 gameWinner((_, _, W, _), W).
 
+%%% Undoes a move in +CurrentGame resetting player to move, winner and
+%%% board as the specified +OldBoard.
+% [undoMove(+CurrentGame, +OldBoard, -OldGame)]
+undoMove((V, P, _, B), OB, (V, O, n, OB)) :- nextPlayerToMove(P, O).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  				              Possible Moves		                      %%
@@ -351,12 +360,12 @@ findAnyMoveRow(G, [_|T]) :- findAnyMoveRow(G, T).
 %%% (NB: only for PlayerToMove pieces, see Game example above).
 %%% ListOfPossibleMoves ex.: [(ToCoord), ...]
 % [getCoordPossibleMoves(+Game, +FromCoord, -ListOfPossibleMoves)]
-getCoordPossibleMoves((V, P, W, B), FromCoord, O) :-
+getCoordPossibleMoves((V, P, n, B), FromCoord, O) :-
 		getCell(B, FromCoord, C),
 		cellOwner(C, P),
 		possibleMoves((V, P, W, B), C, M),
 		only_ToMove(M, O), !.
-% Other cases: non player to move piece or empty
+% Other cases: non player to move piece, empty or game has ended
 getCoordPossibleMoves((_, _, _, _), _, []).
 
 %%% Maps a list of moves expressed like (FromCoordinate, ToCoordinate) as (ToCoordinate).
