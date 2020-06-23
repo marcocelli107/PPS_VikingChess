@@ -7,7 +7,7 @@ import model.Piece
  */
 
 object Coordinate {
-  val COORD_STRING: String = "coord"
+  val COORD_STRING: String = "p"
 }
 
 case class Coordinate(x: Int, y: Int)  {
@@ -45,7 +45,7 @@ object BoardGame {
 
   object BoardCell {
 
-    val CELL_STRING: String = "cell"
+    val CELL_STRING: String = "c"
 
     def apply(coordinateCell: Coordinate, piece: Piece.Val): BoardCell = BoardCellImpl(coordinateCell, piece)
 

@@ -52,9 +52,9 @@ object GameVariant extends Enumeration {
   */
 object Piece extends Enumeration {
   case class Val(pieceString: String) extends super.Val
-  val WhitePawn: Val = Val("wp")
-  val BlackPawn: Val = Val("bp")
-  val WhiteKing : Val= Val("wk")
+  val WhitePawn: Val = Val("w")
+  val BlackPawn: Val = Val("b")
+  val WhiteKing : Val= Val("k")
   val Empty: Val = Val("e")
 }
 
