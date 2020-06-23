@@ -13,8 +13,9 @@ case class MiniMaxAlghoritm() extends Actor {
 
     case event: Alfa_Beta if event.phase.equals(MaxMin.Max) => {
 
-      val maxActor = context.actorOf(Props(MaximizationActor(event.game, event.depth, event.alfa, event.beta, EvaluationFunctionImpl(7), self)))
-      maxActor ! PruningAlfaBetaMsg()
+      event.game.gamePossibleMoves().foreach(move =>
+                context.actorOf(Props(MaximizationActor(event.game, event.depth, event.alfa, event.beta, move, EvaluationFunctionImpl(7), self))) ! PruningAlfaBetaMsg())
+
     }
     case event: MaxMinValueMsg => context.children.foreach(child => context.stop(child));
       println(event.value);
@@ -32,12 +33,7 @@ object TryMiniMax extends App{
   val board = game.createGame(GameVariant.Brandubh.nameVariant.toLowerCase)._3
   var ef: EvaluationFunctionImpl = new  EvaluationFunctionImpl(11)
 
-
-
   root! Alfa_Beta(game, 2, -100, 100, MaxMin.Max, Player.Black  )
-
-
-
 
 
 }

@@ -1,6 +1,6 @@
 package actor_ia
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef, Props}
 import ia.EvaluationFunction
 import model.{ParserProlog, Piece, Player}
 import utils.BoardGame.BoardCell
@@ -14,7 +14,9 @@ case class PruningAlfaBetaMsg()
 
 case class TempValMsg(temp:Int)
 
-abstract class MiniMax(game: ParserProlog, depth: Int, alfa: Int, beta: Int, evaluationFunction: EvaluationFunction)  extends Actor {
+abstract class MiniMax(game: ParserProlog, depth: Int, alfa: Int, beta: Int, move: (Coordinate, Coordinate), evaluationFunction: EvaluationFunction)  extends Actor {
+
+  var numberOfChildren: Int = _
 
   def receive(): Receive = {
 
@@ -26,7 +28,33 @@ abstract class MiniMax(game: ParserProlog, depth: Int, alfa: Int, beta: Int, eva
 
   }
 
-  def analyzeMyChildren() : Unit
+  def createChild(game: ParserProlog, pawnMove: (Coordinate, Coordinate)): Props
+
+  def analyzeMyChildren() : Unit = {
+
+    val sonGame: ParserProlog = moveAnyPawn(game, move._1, move._2)
+
+    val gamePossibleMove = game.gamePossibleMoves()
+
+    numberOfChildren = gamePossibleMove.size
+
+    var listSonRef:List[ActorRef] = List()
+
+    for(pawnMove <- gamePossibleMove ){
+
+        val sonActor = createChild(sonGame, pawnMove)
+        val sonRef =  context.actorOf(sonActor)
+        listSonRef = listSonRef :+ sonRef
+
+
+    }
+
+    println("Min: " + listSonRef.size + " Depth " + depth )
+
+
+    listSonRef.foreach(ref => ref!PruningAlfaBetaMsg())
+
+  }
 
   def miniMax(score: Int) : Unit
 
