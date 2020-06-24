@@ -1,12 +1,12 @@
 package model
 
-import scala.collection.mutable.ListBuffer
 import controller.ControllerHnefatafl
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
 import utils.Coordinate
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 trait ModelHnefatafl {
 

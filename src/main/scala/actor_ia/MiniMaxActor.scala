@@ -20,6 +20,7 @@ abstract class MiniMaxActor (game: ParserProlog, depth:Int, move: (Coordinate,Co
   var myAlfa: Int = _
   var myBeta: Int = _
   var fatherGame: ParserProlog = game
+  var gamePossibleMove : List[(Coordinate,Coordinate)] = List()
 
   override def receive: Receive = {
     case event: ValueSonMsg => miniMax(event.score)
@@ -37,12 +38,19 @@ abstract class MiniMaxActor (game: ParserProlog, depth:Int, move: (Coordinate,Co
 
   def analyzeMyChildren():Unit = {
 
+    try {
+      if(move != null) {
+        fatherGame = moveAnyPawn(game, move._1, move._2)
+      }
+      gamePossibleMove = fatherGame.gamePossibleMoves()
 
-    if(move != null) {
-      fatherGame = moveAnyPawn(game, move._1, move._2)
+    }catch {
+      case _ => println(" father game " + fatherGame.getActualBoard + " coord " + move)
     }
 
-    val gamePossibleMove = fatherGame.gamePossibleMoves()
+    //println(copy.equals(fatherGame))
+
+
 
     numberOfChildren = gamePossibleMove.size
 
@@ -54,7 +62,7 @@ abstract class MiniMaxActor (game: ParserProlog, depth:Int, move: (Coordinate,Co
         listSonRef = listSonRef :+ sonRef
     }
 
-    //println("Number of children: " + gamePossibleMove.size)
+   // println("Number of children: " + gamePossibleMove.size)
     listSonRef.foreach( x => x ! StartMsg())
 
   }
@@ -82,11 +90,10 @@ abstract class MiniMaxActor (game: ParserProlog, depth:Int, move: (Coordinate,Co
 }
 
 
-
 object tryProva extends App {
   val THEORY: String = TheoryGame.GameRules.toString
   val game: ParserProlog = ParserPrologImpl(THEORY)
-  val board = game.createGame(GameVariant.Brandubh.nameVariant.toLowerCase)._3
+  val board = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)._3
   val system: ActorSystem = ActorSystem()
   val firstMove = game.gamePossibleMoves()
 
@@ -98,7 +105,9 @@ object tryProva extends App {
   case class FatherActor() extends Actor{
 
     override def receive: Receive = {
+
       case event: ValueSonMsg => println(event.score)
+
       case _: StartMsg => system.actorOf( Props(MaxActor(game, 3, -100, 100, null, self))) ! FirstMsg()
     }
   }
