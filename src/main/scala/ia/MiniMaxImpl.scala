@@ -92,7 +92,7 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
   }
 
   def getPlayerAndBoard(parserProlog: ParserProlog ):(Player.Value, List[BoardCell] ) = {
-    (parserProlog.getPlayer, parserProlog.getActualBoard.cells.toList)
+    (parserProlog.getPlayer, parserProlog.getActualBoard.cells.flatten.toList)
   }
 
   def findPlayerPawns(parserProlog: ParserProlog): List[Coordinate] = {
