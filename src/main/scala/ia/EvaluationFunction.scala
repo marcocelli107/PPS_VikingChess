@@ -166,8 +166,9 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
     _getCloserCorner(coord, getCoordCorners(), null, 20)
   }
 
+  // TODO INUTILE ORA
   def getSeqRows(board: Board): Seq[Seq[BoardCell]] = {
-    board.cells.grouped(boardSize).toSeq
+    board.cells
   }
 
   def getSeqColumns(board: Board): Seq[Seq[BoardCell]] = {

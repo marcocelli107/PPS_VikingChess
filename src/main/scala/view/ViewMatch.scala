@@ -100,7 +100,7 @@ object ViewMatch {
       initSouthPanel()
       initLeftRightPanel()
       initBoard()
-      drawPawns(board.cells)
+      drawPawns(board)
 
       gamePanel = GameFactory.createGamePanel
       gamePanel.add(northPanel)
@@ -125,7 +125,7 @@ object ViewMatch {
     override def update(gameSnapshot: GameSnapshot): Unit = {
       player = gameSnapshot.getPlayerToMove
       addLostPawns(gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites)
-      drawPawns(gameSnapshot.getBoard.cells)
+      drawPawns(gameSnapshot.getBoard)
 
       possibleMoves.foreach(c => cells(c).unsetAsPossibleMove())
       deselectCell()
@@ -195,7 +195,8 @@ object ViewMatch {
         playerBlackLabel.setVisible(true)
         cells(kingCoordinate.get).setAsKingCapturedCell()
 
-      case Player.Draw => playerOrWinnerLabel.setText("Draw!")
+      case Player.Draw =>
+        playerOrWinnerLabel.setText("Draw!")
 
       case _ => switchPlayerLabel()
     }
@@ -477,15 +478,20 @@ object ViewMatch {
     /**
       * Sets pieces in the board.
       *
-      * @param positions
-      *             positions sequence of the cell.
+      * @param board
+      *             board.
       */
-    private def drawPawns(positions: Seq[BoardCell]): Unit = {
-      for (p <- positions) {
+    private def drawPawns(board: Board): Unit = {
+      board.cells.foreach(_.foreach(c => {
+        val button: JButton = cells(c.getCoordinate)
+        if (button.getComponentCount > 0) button.removeAll()
+        pawnChoice(c)
+      }))
+      /*for (p <- positions) {
         val button: JButton = cells(p.getCoordinate)
         if (button.getComponentCount > 0) button.removeAll()
         pawnChoice(p)
-      }
+      }*/
     }
 
     /**

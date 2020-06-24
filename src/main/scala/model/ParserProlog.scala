@@ -225,7 +225,9 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
     goalString = replaceBoardString(board)
 
-    (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), goal.getTerm("L").toString.toInt)
+    (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString),
+      parseBoard(goalString),
+      goal.getTerm("L").toString.toInt)
   }
 
   override def findKing(): Coordinate = {
@@ -274,7 +276,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    * @return board to string.
    */
   private def replaceBoardString(board: Term): String = board.toString.replace("[", "").replace("]", "")
-    .replace("(", "").replace(")", "").replace("p", "")
+    .replace("(", "").replace(")", "").replace(Coordinate.COORD_STRING, "")
 
   /**
    * Cleans the pieces captured list returned in output.
@@ -314,7 +316,12 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
       }
     })
 
-    BoardImpl(listCells)
+    BoardImpl(listCells.grouped(getBoardSize).toSeq.map(_.toSeq))
+  }
+
+  private def getBoardSize: Int = {
+    val goal: SolveInfo = engine.solve(s"boardSize($variant,S).")
+    goal.getTerm("S").toString.toInt
   }
 
   /**

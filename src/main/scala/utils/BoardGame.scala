@@ -1,6 +1,9 @@
 package utils
 
 import model.Piece
+import utils.BoardGame.{Board, BoardCell}
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * Util class representing a 2D coordinate
@@ -64,7 +67,7 @@ object BoardGame {
     /**
      * Defines board's cells list.
      */
-    def cells: Seq[BoardCell]
+    def cells: Seq[Seq[BoardCell]]
 
     /**
      * Defines size of board's side.
@@ -81,21 +84,32 @@ object BoardGame {
 
   object Board {
 
-    def apply(cells: Seq[BoardCell]): Board = BoardImpl(cells)
+    def apply(cells: Seq[Seq[BoardCell]]): Board = BoardImpl(cells)
 
-    case class BoardImpl(private val allCells: Seq[BoardCell]) extends Board {
+    case class BoardImpl(private val allCells: Seq[Seq[BoardCell]]) extends Board {
 
-      override def cells: Seq[BoardCell] = allCells
+      override def cells: Seq[Seq[BoardCell]] = allCells
 
-      override def size: Int = Math.sqrt(allCells.length).toInt
+      override def size: Int = allCells.length
 
-      override def getCell(coordinate: Coordinate): BoardCell = allCells.filter(_.getCoordinate == coordinate).head
+      override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x) (coordinate.y)
 
       override def equals(obj: Any): Boolean = this.cells.equals(obj.asInstanceOf[Board].cells)
 
-      override def toString: String = cells.map(_.toString).grouped(size).toList.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
+      override def toString: String = cells.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
     }
 
   }
 
+}
+
+object prova extends App {
+  var cellList: ListBuffer[ListBuffer[BoardCell]] = ListBuffer.empty
+  for(x <- 1 to 11) {
+    var row: ListBuffer[BoardCell] = ListBuffer.empty
+    for (y <- 1 to 11)
+      row += BoardCell(Coordinate(x, y), Piece.Empty)
+    cellList += row
+  }
+  println(Board(cellList))
 }
