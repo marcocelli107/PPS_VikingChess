@@ -1,9 +1,6 @@
 package utils
 
 import model.Piece
-import utils.BoardGame.{Board, BoardCell}
-
-import scala.collection.mutable.ListBuffer
 
 /**
  * Util class representing a 2D coordinate
@@ -67,7 +64,7 @@ object BoardGame {
     /**
      * Defines board's cells list.
      */
-    def cells: Seq[Seq[BoardCell]]
+    def rows: Seq[Seq[BoardCell]]
 
     /**
      * Defines size of board's side.
@@ -88,28 +85,17 @@ object BoardGame {
 
     case class BoardImpl(private val allCells: Seq[Seq[BoardCell]]) extends Board {
 
-      override def cells: Seq[Seq[BoardCell]] = allCells
+      override def rows: Seq[Seq[BoardCell]] = allCells
 
       override def size: Int = allCells.length
 
       override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x) (coordinate.y)
 
-      override def equals(obj: Any): Boolean = this.cells.equals(obj.asInstanceOf[Board].cells)
+      override def equals(obj: Any): Boolean = this.rows.equals(obj.asInstanceOf[Board].rows)
 
-      override def toString: String = cells.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
+      override def toString: String = rows.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
     }
 
   }
 
-}
-
-object prova extends App {
-  var cellList: ListBuffer[ListBuffer[BoardCell]] = ListBuffer.empty
-  for(x <- 1 to 11) {
-    var row: ListBuffer[BoardCell] = ListBuffer.empty
-    for (y <- 1 to 11)
-      row += BoardCell(Coordinate(x, y), Piece.Empty)
-    cellList += row
-  }
-  println(Board(cellList))
 }

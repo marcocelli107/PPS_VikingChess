@@ -76,7 +76,7 @@ abstract class MiniMax(game: ParserProlog, depth: Int, alfa: Int, beta: Int, mov
   }
 
   def getPlayerAndBoard(parserProlog: ParserProlog ):(Player.Value, List[BoardCell] ) = {
-    (parserProlog.getPlayer, parserProlog.getActualBoard.cells.flatten.toList)
+    (parserProlog.getPlayer, parserProlog.getActualBoard.rows.flatten.toList)
   }
 
   def isOwner(pawn:Piece.Value, player: Player.Value): Boolean = ( pawn, player) match {
