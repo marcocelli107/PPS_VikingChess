@@ -160,6 +160,7 @@ object ModelHnefatafl {
       currentSnapshot += 1
 
       controller.activeFirstPrevious()
+      controller.activeUndo()
       controller.updateView(storySnapshot.last)
     }
 
@@ -192,6 +193,11 @@ object ModelHnefatafl {
           parserProlog.undoMove(storySnapshot.last.getBoard)
           controller.updateView(storySnapshot.last)
         }
+      }
+      if(storySnapshot.size == 1) {
+        controller.disableNextLast()
+        controller.disableFirstPrevious()
+        controller.disableUndo()
       }
     }
 

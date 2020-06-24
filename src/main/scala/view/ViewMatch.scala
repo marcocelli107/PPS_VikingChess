@@ -89,8 +89,6 @@ object ViewMatch {
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
     private var kingCoordinate: Option[Coordinate] = Option.empty
 
-    private var player: Player.Val = view.getMenuUtils.getPlayer
-
     override def initGamePanel(board: Board): JPanel = {
       this.board = board
 
@@ -123,7 +121,6 @@ object ViewMatch {
     override def getLabelPlayer: JLabel = playerOrWinnerLabel
 
     override def update(gameSnapshot: GameSnapshot): Unit = {
-      player = gameSnapshot.getPlayerToMove
       addLostPawns(gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites)
       drawPawns(gameSnapshot.getBoard)
 
@@ -136,7 +133,7 @@ object ViewMatch {
       if(!gameSnapshot.getWinner.equals(Player.None))
         kingCoordinate = Option(view.findKing())
 
-      setStatusGame(gameSnapshot.getWinner)
+      setStatusGame(gameSnapshot.getWinner, gameSnapshot.getPlayerToMove)
       resetLastMoveCells()
       if(gameSnapshot.getLastMove.nonEmpty)
         highlightLastMove(gameSnapshot.getLastMove.get)
@@ -152,6 +149,7 @@ object ViewMatch {
     override def activeNextLast(): Unit = {
       nextMoveButton.setEnabled(true)
       lastMoveButton.setEnabled(true)
+      undoMoveButton.setEnabled(false)
     }
 
     override def disableNextLast(): Unit = {
@@ -180,13 +178,14 @@ object ViewMatch {
       * @param winner
       *                 winner of the game.
       */
-    private def setStatusGame(winner: Player.Val): Unit = winner match {
+    private def setStatusGame(winner: Player.Val, playerToMove: Player.Val): Unit = winner match {
       case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
         playerWhiteLabel.setVisible(true)
         playerBlackLabel.setVisible(false)
         cells(kingCoordinate.get).setAsKingEscapedCell()
+        resetListeners()
 
       case Player.Black =>
         playerOrWinnerLabel.setForeground(ColorProvider.getBlackColor)
@@ -194,19 +193,23 @@ object ViewMatch {
         playerWhiteLabel.setVisible(false)
         playerBlackLabel.setVisible(true)
         cells(kingCoordinate.get).setAsKingCapturedCell()
+        resetListeners()
 
       case Player.Draw =>
         playerOrWinnerLabel.setText("Draw!")
+        resetListeners()
 
-      case _ => switchPlayerLabel()
+      case _ => switchPlayerLabel(playerToMove)
     }
+
+    private def resetListeners(): Unit = cells.values.foreach(c => c.getActionListeners.foreach(c.removeActionListener))
 
     /**
       * Switches the player label showed.
       */
-    private def switchPlayerLabel(): Unit = {
-      playerOrWinnerLabel.setText(player + " moves")
-      if(player.equals(Player.White)) {
+    private def switchPlayerLabel(playerToMove: Player.Val): Unit = {
+      playerOrWinnerLabel.setText(playerToMove + " moves")
+      if(playerToMove.equals(Player.White)) {
         playerBlackLabel.setVisible(false)
         playerWhiteLabel.setVisible(true)
       } else {
@@ -534,8 +537,10 @@ object ViewMatch {
     private def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = view.changeSnapshot(snapshotToShow)
 
     /**
-      * Delete last move.
+      * Delete last move and reset winnerStatus.
       */
-    private def undoMove(): Unit = view.undoMove()
+    private def undoMove(): Unit = {
+      view.undoMove()
+    }
   }
 }

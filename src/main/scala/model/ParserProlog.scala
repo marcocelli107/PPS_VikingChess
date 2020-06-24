@@ -7,7 +7,6 @@ import utils.BoardGame.Board.BoardImpl
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait ParserProlog {
@@ -302,16 +301,16 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     stringBoard.split(BoardCell.CELL_STRING).tail.foreach(elem => {
       var coordinateCell: Array[String] = null
       if (elem.contains(Piece.Empty.pieceString)) {
-        coordinateCell = elem.substring(0, elem.length - 2).split(",")
+        coordinateCell = elem.substring(0, elem.length - Piece.Empty.pieceString.length - 1).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Empty)
       } else if (elem.contains(Piece.BlackPawn.pieceString)) {
-        coordinateCell = elem.substring(0, elem.length - 3).split(",")
+        coordinateCell = elem.substring(0, elem.length - Piece.BlackPawn.pieceString.length - 1).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.BlackPawn)
       } else if (elem.contains(Piece.WhitePawn.pieceString)) {
-        coordinateCell = elem.substring(0, elem.length - 3).split(",")
+        coordinateCell = elem.substring(0, elem.length - Piece.WhitePawn.pieceString.length - 1).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhitePawn)
       } else {
-        coordinateCell = elem.substring(0, elem.length - 3).split(",")
+        coordinateCell = elem.substring(0, elem.length - Piece.WhiteKing.pieceString.length - 1).split(",")
         listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhiteKing)
       }
     })
@@ -388,7 +387,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
     goalString = replaceListCellsString(list)
 
-    setListCellsView(goalString).grouped(2).toList.map(listBuffer => (listBuffer(0), listBuffer(1)))
+    setListCellsView(goalString).grouped(2).toList.map(listBuffer => (listBuffer.head, listBuffer(1)))
   }
 
 }
