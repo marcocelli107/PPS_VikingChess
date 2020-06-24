@@ -41,6 +41,7 @@ object BoardGame {
      *         a string representation of the board
      */
     def toString: String
+
   }
 
   object BoardCell {
@@ -77,6 +78,10 @@ object BoardGame {
     def getCell(coordinate: Coordinate): BoardCell
 
     def toString: String
+
+    def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]]
+
+    def specialCoordinates: List[Coordinate]
   }
 
   object Board {
@@ -89,11 +94,31 @@ object BoardGame {
 
       override def size: Int = allCells.length
 
-      override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x) (coordinate.y)
+      override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x - 1) (coordinate.y - 1)
 
       override def equals(obj: Any): Boolean = this.rows.equals(obj.asInstanceOf[Board].rows)
 
       override def toString: String = rows.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
+
+      override def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]] =
+        List(upCells(coordinate), rightCells(coordinate), downCells(coordinate), leftCells(coordinate))
+
+      private def upCells(coordinate: Coordinate): List[BoardCell] =
+        (1 until coordinate.x).toList.map(x => getCell(Coordinate(x, coordinate.y))).reverse
+
+      private def rightCells(coordinate: Coordinate): List[BoardCell] =
+        rows(coordinate.x - 1).takeRight(size - coordinate.y).toList
+
+      private def downCells(coordinate: Coordinate): List[BoardCell] =
+        (coordinate.x + 1 to size).toList.map(x => getCell(Coordinate(x, coordinate.y)))
+
+      private def leftCells(coordinate: Coordinate): List[BoardCell] =
+        rows(coordinate.x - 1).take(coordinate.y - 1).toList.reverse
+
+      override def specialCoordinates: List[Coordinate] =
+        List(Coordinate(1, 1), Coordinate(1, size), Coordinate(size, 1),
+          Coordinate(size, size), Coordinate(size / 2 + 1, size / 2 + 1))
+
     }
 
   }
