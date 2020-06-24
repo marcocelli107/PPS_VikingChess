@@ -168,7 +168,7 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
 
   // TODO INUTILE ORA
   def getSeqRows(board: Board): Seq[Seq[BoardCell]] = {
-    board.cells
+    board.rows
   }
 
   def getSeqColumns(board: Board): Seq[Seq[BoardCell]] = {

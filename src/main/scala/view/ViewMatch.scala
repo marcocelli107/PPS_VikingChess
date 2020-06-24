@@ -485,7 +485,7 @@ object ViewMatch {
       *             board.
       */
     private def drawPawns(board: Board): Unit = {
-      board.cells.foreach(_.foreach(c => {
+      board.rows.foreach(_.foreach(c => {
         val button: JButton = cells(c.getCoordinate)
         if (button.getComponentCount > 0) button.removeAll()
         pawnChoice(c)
