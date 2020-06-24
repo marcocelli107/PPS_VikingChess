@@ -14,6 +14,7 @@ trait EvaluationFunction{
 class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
 
 
+
   override def score(gameState: ParserProlog): Int =  ((Random.nextDouble() * 200) -100).intValue()
 
   /* RULES */
@@ -43,8 +44,23 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
     _scoreKingIsInFreeRowOrColumn(rowWhithoutKing,columnWhithoutKing)
   }
 
-  // Positive score the white opening in opposite side of black Blockade
-  def scoreWhiteOpeningOnOppositeSideOfBlackBlockade(whiteCoord: Coordinate): Int = ???
+  // Positive score if king moves ta a free corner.
+  // The score is inversely proportional to the concentration of black pawns in the king's quadrant.
+  def scoreKingMovesToAFreeCorner(kingCoord: Coordinate, quadrants:Seq[Seq[BoardCell]] ): Int = {
+    val quadranKing = findQuadrant(kingCoord, quadrants)
+    val numberBlackPieceInKingQuadrant = quadranKing.filter(cell => cell.getPiece.equals(Piece.BlackPawn)).size
+    val score: Int  = 10 * 1 / numberBlackPieceInKingQuadrant
+    score
+  }
+
+  // Positive score if the white opening in opposite side of black Blockade
+  def scoreWhiteOpeningOnOppositeSideOfBlackBlockade(whiteCoord: Coordinate, rows:Seq[Seq[BoardCell]]): Int = {
+    val quadrants = splitMatrixInFourPart(rows)
+    val oppositeQuadrant: Seq[BoardCell] = findQuadrant(whiteCoord: Coordinate, quadrants, true)
+    val numberBlackPieceInOppositeKingQuadrant: Int = oppositeQuadrant.filter( cell => cell.getPiece.equals( Piece.BlackPawn)).size
+    val score: Int = numberBlackPieceInOppositeKingQuadrant * 2
+    score
+  }
 
   /*
   * Black positive score
@@ -52,7 +68,7 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
 
   //Positive score if the black pieces protect the corners - 	black barricade
   def scoreBlackPawnProtectTheCorner( pawnBlackCoord: Coordinate): Int =  {
-    val closerCorner = getCloserCorner(pawnBlackCoord)
+    val closerCorner = findCloserCorner(pawnBlackCoord)
     val score: Int =  20 * 1 / quadraticDistanceBetweenCells(closerCorner, pawnBlackCoord )
     score
   }
@@ -65,12 +81,7 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
   }
 
   //Positive score if the pawn is diagonal alignment with other pawns
-  def scorePawnDiagonalAlignment(pawnCell: BoardCell, closeCell: Seq[BoardCell], score: Int = 0): Int = closeCell match {
-    case Nil => score
-    case h::t  if h.getPiece.equals(pawnCell.getPiece) &&
-                  quadraticDistanceBetweenCells(h.getCoordinate,pawnCell.getCoordinate  ) == 2 => scorePawnDiagonalAlignment(pawnCell, t, score + 5 )
-  }
-
+  def scorePawnDiagonalAlignment(pawnCell: BoardCell, closeCell: Seq[BoardCell], score: Int = 0): Int = ???
 
   /*
   * Jolly rules
@@ -85,20 +96,44 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
     case _ => 0
   }
 
+
+
+
   /* UTILS METHODS */
 
-  def areAlignedDiagonally(pawnCell: BoardCell, cells: Seq[BoardCell]):Boolean = {
-    var mapCells:Seq[(BoardCell,BoardCell)] = cells.sliding(2).toList.map(listBuffer => (listBuffer(0), listBuffer(1)))
 
-    def _areAlignedDiagonally(pawnCell: BoardCell, mapCells: Seq[(BoardCell,BoardCell)] ):Boolean = mapCells match {
-      case Nil => true
-      case h::_ if quadraticDistanceBetweenCells(h._1.getCoordinate, h._2.getCoordinate) == 2 &&
-                    pawnCell.getPiece.equals()=> ???
+  def findQuadrant(coord: Coordinate, quadrants: Seq[Seq[BoardCell]], oppositQuadrant: Boolean = false): Seq[BoardCell] = {
 
+    def getQuadrant(coord: Coordinate ): Int = {
+      if (isInRange(coord,(1, boardSize/2),(1, boardSize/2) ))                  0
+      else if (isInRange(coord,(boardSize/2+1, boardSize),(1, boardSize/2) ))   1
+      else if (isInRange(coord,( boardSize/2 +1, boardSize),(1, boardSize/2) )) 2
+      else                                                                      3
     }
 
-    _areAlignedDiagonally(pawnCell,mapCells)
+    def opposite(indexQuadrant: Int):Int = indexQuadrant match {
+      case 0 => 3
+      case 3 => 0
+      case 1 => 2
+      case _ => 1
+    }
+
+    def _findQuadrant( index:Int, quadrants: Seq[Seq[BoardCell]], oppositQuadrant: Boolean ): Seq[BoardCell] = oppositQuadrant match {
+      case false => quadrants(index)
+      case  _ => quadrants( opposite(index))
+    }
+
+    _findQuadrant( getQuadrant(coord), quadrants, oppositQuadrant )
+
   }
+
+
+
+  def isInRange( coordinate: Coordinate, rangeX: (Int,Int), rangeY: (Int,Int) ): Boolean =  coordinate match {
+    case Coordinate(x,y) if x>= rangeX._1 && x<= rangeX._2 && y>= rangeY._1 && y<= rangeY._2 => true
+    case _ => false
+  }
+
 
   def isItDistantFromCornerOf(coord:Coordinate, distance: Int):Boolean = {
 
@@ -119,7 +154,7 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
   //Quadratic distance
   def quadraticDistanceBetweenCells(start: Coordinate, end: Coordinate ): Int =  (scala.math.pow(start.x - end.x,2)+scala.math.pow(start.y - end.y,2)).toInt
 
-  def getCloserCorner(coord:Coordinate):Coordinate = {
+  def findCloserCorner(coord:Coordinate):Coordinate = {
     def _getCloserCorner(coord:Coordinate, cornerCoord: List[Coordinate], closerCornerCord: Coordinate, closerDist: Int ): Coordinate = cornerCoord match {
       case Nil => closerCornerCord
       case h::t => {
@@ -140,7 +175,7 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
   }
 
   // Split a rows sequence in dials sequence
-  def spltMatrixInFourPart(seqRows:Seq[Seq[BoardCell]]): Seq[Seq[BoardCell]] = {
+  def splitMatrixInFourPart(seqRows:Seq[Seq[BoardCell]]): Seq[Seq[BoardCell]] = {
     val sizeSplit:Int = boardSize / 2
     val northAndSouth = seqRows.toList.splitAt(sizeSplit)
 
@@ -151,6 +186,7 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
         }
         case _  => westSeq ++ estSeq
       }
+
       val firstAndSecond = splitList(northAndSouth._1, Seq(), Seq())
       val thirdAndQuart = splitList(northAndSouth._2, Seq(), Seq())
 
@@ -172,7 +208,6 @@ class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
     board.filter(cell=> cell.getPiece.equals( Piece.WhiteKing))
       .map(cell=> cell.getCoordinate)
       .head}
-
 }
 
 object EvaluationFunctionImpl {

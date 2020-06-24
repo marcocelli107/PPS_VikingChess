@@ -199,7 +199,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
 
   override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
 
-    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$winner,$board), coord(${cell.x}, ${cell.y}), L).")
+    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$winner,$board), p(${cell.x}, ${cell.y}), L).")
 
     list = goal.getTerm("L")
 
@@ -209,15 +209,17 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   }
 
   override def makeLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int) =
-    setMove(fromCoordinate, toCoordinate, "makeLegitMove")
+    this.synchronized {
+      setMove(fromCoordinate, toCoordinate, "makeLegitMove")
+    }
 
   override def makeNonLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int) =
     setMove(fromCoordinate, toCoordinate, "makeMove")
 
   private def setMove(fromCoordinate: Coordinate, toCoordinate: Coordinate, predicate: String): (Player.Val, Player.Val, Board, Int) = {
     goal = engine.solve(s"$predicate(($variant, $playerToMove, $winner, $board)," +
-      s"coord(${fromCoordinate.x},${fromCoordinate.y})," +
-      s"coord(${toCoordinate.x},${toCoordinate.y}), L, (V,P,W,B)).")
+      s"p(${fromCoordinate.x},${fromCoordinate.y})," +
+      s"p(${toCoordinate.x},${toCoordinate.y}), L, (V,P,W,B)).")
 
     setGameTerms(goal)
 
@@ -236,19 +238,19 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   }
 
   override def isCentralCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, coord(${coordinate.x},${coordinate.y})).")
+    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, p(${coordinate.x},${coordinate.y})).")
 
     goal.isSuccess
   }
 
   override def isCornerCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, coord(${coordinate.x},${coordinate.y})).")
+    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, p(${coordinate.x},${coordinate.y})).")
 
     goal.isSuccess
   }
 
   override def isPawnCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"isInitialPawnCoord($variant, coord(${coordinate.x},${coordinate.y})).")
+    goal = engine.solve(s"isInitialPawnCoord($variant, p(${coordinate.x},${coordinate.y})).")
 
     goal.isSuccess
   }
@@ -272,7 +274,7 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
    * @return board to string.
    */
   private def replaceBoardString(board: Term): String = board.toString.replace("[", "").replace("]", "")
-    .replace("(", "").replace(")", "").replace("coord", "")
+    .replace("(", "").replace(")", "").replace("p", "")
 
   /**
    * Cleans the pieces captured list returned in output.

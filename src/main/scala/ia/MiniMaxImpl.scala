@@ -173,9 +173,10 @@ object TryMinMax extends App{
   val miniMax: MiniMaxImpl = new MiniMaxImpl(  1, 11 )
   val seq = ef.getSeqRows(t).seq
 
-  println(ef.spltMatrixInFourPart(seq).foreach(x => println(x)))
+
+  //println(ef.splitMatrixInFourPart(seq).foreach(x => println(x)))
  // println( ef.spltMatrixInFourPart( ef.getSeqRows( parserProlog.getActualBoard ).toSeq))
-  //println( miniMax.findBestMove(parserProlog))
+  println( miniMax.findBestMove(parserProlog))
 
   /*val startTime = System.currentTimeMillis()
   println( miniMax.pruningAlfaBeta(parserProlog, 1, -100,+100, MaxMin.Max))
