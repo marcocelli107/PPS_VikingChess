@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import ia.EvaluationFunction
 import model.{ParserProlog, Piece, Player}
 import utils.BoardGame.BoardCell
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 case class HeuristicValueMsg(score:Int)
 
@@ -103,7 +103,7 @@ abstract class MiniMax(game: ParserProlog, depth: Int, alfa: Int, beta: Int, mov
 
   def  moveAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, endCord: Coordinate ): ParserProlog = {
       val copy = parserProlog.copy()
-      copy.makeLegitMove(startCord,endCord)
+      copy.makeLegitMove(Move(startCord,endCord))
       copy
   }
 

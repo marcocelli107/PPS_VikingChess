@@ -14,6 +14,10 @@ case class Coordinate(x: Int, y: Int)  {
   override def toString: String = Coordinate.COORD_STRING + "(" + x + "," + y + ")"
 }
 
+case class Move(from: Coordinate, to: Coordinate) {
+  override def toString: String = "move(from(" + from + ", to(" + to + "))"
+}
+
 object BoardGame {
 
   trait BoardCell {
@@ -82,19 +86,24 @@ object BoardGame {
     def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]]
 
     def specialCoordinates: List[Coordinate]
+
+    def setCell(cell: BoardCell)
   }
 
   object Board {
 
     def apply(cells: Seq[Seq[BoardCell]]): Board = BoardImpl(cells)
 
-    case class BoardImpl(private val allCells: Seq[Seq[BoardCell]]) extends Board {
+    case class BoardImpl(private var allCells: Seq[Seq[BoardCell]]) extends Board {
 
       override def rows: Seq[Seq[BoardCell]] = allCells
 
       override def size: Int = allCells.length
 
       override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x - 1) (coordinate.y - 1)
+
+      override def setCell(cell: BoardCell): Unit =
+        allCells = allCells.map(_.map(c => if(c.getCoordinate.equals(cell.getCoordinate)) cell else c))
 
       override def equals(obj: Any): Boolean = this.rows.equals(obj.asInstanceOf[Board].rows)
 

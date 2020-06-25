@@ -3,7 +3,7 @@ package actor_ia
 import model.GameSnapshot.GameSnapshotImpl
 import model.{GameSnapshot, GameVariant, ParserProlog, ParserPrologImpl, Piece, Player, TheoryGame}
 import utils.BoardGame.BoardCell
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 object MoveGenerator {
 
@@ -50,12 +50,17 @@ object daicheva extends App {
   println(prova.gamePossibleMoves(snap).size)*/
 
   /* re deve fare 35*/
-  game = parserProlog.makeLegitMove(Coordinate(2, 4), Coordinate(2, 7))
-  game = parserProlog.makeLegitMove(Coordinate(3, 4), Coordinate(3, 7))
-  game = parserProlog.makeLegitMove(Coordinate(1, 4), Coordinate(1, 6))
-  game = parserProlog.makeLegitMove(Coordinate(4, 4), Coordinate(1, 4))
-  game = parserProlog.makeLegitMove(Coordinate(4, 6), Coordinate(2, 6))
+  game = parserProlog.makeLegitMove(Move(Coordinate(2, 4), Coordinate(2, 7)))
+  game = parserProlog.makeLegitMove(Move(Coordinate(3, 4), Coordinate(3, 7)))
+  game = parserProlog.makeLegitMove(Move(Coordinate(1, 4), Coordinate(1, 6)))
+  game = parserProlog.makeLegitMove(Move(Coordinate(4, 4), Coordinate(1, 4)))
+  game = parserProlog.makeLegitMove(Move(Coordinate(4, 6), Coordinate(2, 6)))
   var snap = GameSnapshotImpl(variant, game._1, game._2, game._3, Option.empty, 0, 0)
   println(MoveGenerator.gamePossibleMoves(snap).size)
+
+  var b = snap.getBoard
+  b.setCell(BoardCell(Coordinate(2,6), Piece.Empty))
+  println(b.getCell(Coordinate(2,6)))
+
 
 }

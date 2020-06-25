@@ -1,7 +1,7 @@
 package ia
 import model._
 import utils.BoardGame.BoardCell
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 trait MiniMax {
 
@@ -130,7 +130,7 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
   }
 
   def moveAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, endCord: Coordinate ): ParserProlog = {
-    parserProlog.makeLegitMove(startCord,endCord)
+    parserProlog.makeLegitMove(Move(startCord,endCord))
     parserProlog.copy()
   }
 

@@ -5,7 +5,7 @@ import java.awt.{Dimension, GridBagConstraints, GridBagLayout}
 import javax.swing._
 import model.{GameSnapshot, Piece, Player, Snapshot}
 import utils.BoardGame.{Board, BoardCell}
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 import scala.collection.mutable
 
@@ -224,8 +224,8 @@ object ViewMatch {
       * @param lastMove
       *                 last move fromCoordinate and toCoordinate
       */
-    private def highlightLastMove(lastMove: (Coordinate, Coordinate)): Unit = {
-      lastMoveCells = Option(cells(lastMove._1), cells(lastMove._2))
+    private def highlightLastMove(lastMove: Move): Unit = {
+      lastMoveCells = Option(cells(lastMove.from), cells(lastMove.to))
       lastMoveCells.get._1.setAsLastMoveCell()
       lastMoveCells.get._2.setAsLastMoveCell()
     }
@@ -386,21 +386,7 @@ object ViewMatch {
       *               arrival cell.
       */
     private def actionMovePawn(cell: JButton): Unit = {
-      val coordinateStart: Coordinate = selectedCell.get
-      val coordinateArrival: Coordinate = getCoordinate(cell)
-      makeMove(coordinateStart, coordinateArrival)
-    }
-
-    /**
-      * Calls game view for make the move.
-      *
-      * @param fromCoordinate
-      *                 starting coordinate.
-      * @param toCoordinate
-      *                 arrival coordinate.
-      */
-    private def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
-      view.makeMove(fromCoordinate, toCoordinate)
+      view.makeMove(Move(selectedCell.get, getCoordinate(cell)))
     }
 
     /**
@@ -490,11 +476,6 @@ object ViewMatch {
         if (button.getComponentCount > 0) button.removeAll()
         pawnChoice(c)
       }))
-      /*for (p <- positions) {
-        val button: JButton = cells(p.getCoordinate)
-        if (button.getComponentCount > 0) button.removeAll()
-        pawnChoice(p)
-      }*/
     }
 
     /**
@@ -540,6 +521,7 @@ object ViewMatch {
       * Delete last move and reset winnerStatus.
       */
     private def undoMove(): Unit = {
+      cells.values.foreach(c => if(c.getActionListeners.length == 0) c.addActionListener(_ => actionCell(c)))
       view.undoMove()
     }
   }

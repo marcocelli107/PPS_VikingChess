@@ -3,7 +3,7 @@ package model
 import controller.ControllerHnefatafl
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -30,14 +30,12 @@ trait ModelHnefatafl {
   /**
    * Calls parser for making a move from coordinate to coordinate.
    *
-   * @param fromCoordinate
-   *                    coordinate of the starting cell.
-   * @param toCoordinate
-   *                    coordinate of the arrival cell.
+   * @param move
+   *                    move to make
    *
    * @return updated board.
    */
-  def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit
+  def makeMove(move: Move): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -145,9 +143,9 @@ object ModelHnefatafl {
       else ListBuffer.empty
     }
 
-    override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
+    override def makeMove(move: Move): Unit = {
 
-      game = parserProlog.makeLegitMove(fromCoordinate, toCoordinate)
+      game = parserProlog.makeLegitMove(move)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
       var winner: Player.Val = game._2
@@ -155,7 +153,7 @@ object ModelHnefatafl {
       if (checkThreefoldRepetition())
         winner = Player.Draw
 
-      storySnapshot += GameSnapshot(currentVariant, game._1, winner, game._3, Option(fromCoordinate, toCoordinate), pieceCaptured._1, pieceCaptured._2)
+      storySnapshot += GameSnapshot(currentVariant, game._1, winner, game._3, Option(move), pieceCaptured._1, pieceCaptured._2)
 
       currentSnapshot += 1
 
@@ -185,8 +183,7 @@ object ModelHnefatafl {
 
     override def undoMove(): Unit = {
       if (showingCurrentSnapshot) {
-        val lastMove: Option[(Coordinate, Coordinate)] = storySnapshot.last.getLastMove
-        if (lastMove.nonEmpty) {
+        if (storySnapshot.last.getLastMove.nonEmpty) {
           storySnapshot -= storySnapshot.last
           controller.activeFirstPrevious()
           currentSnapshot -= 1
