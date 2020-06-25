@@ -64,7 +64,7 @@ class BoardTests extends FunSuite {
   }
 
   test("Compares if is a special cell.") {
-    goal = prolog.solve("testIsSpecialCell.")
+    goal = prolog.solve("testIsSpecialCoord.")
     assert(goal.isSuccess)
   }
 

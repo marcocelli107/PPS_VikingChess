@@ -5,7 +5,7 @@ import java.io.FileInputStream
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
 import utils.BoardGame.Board.BoardImpl
 import utils.BoardGame.{Board, BoardCell}
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 import scala.collection.mutable.ListBuffer
 
@@ -28,23 +28,19 @@ trait ParserProlog {
 
   /**
     * Sets player move if it's legit.
-    * @param cellStart
-    *                 coordinate of the starting cell.
-    * @param cellArrival
-    *                 coordinate of the arrival cell.
+    * @param move
+   *                   move to make
     * @return new board.
     */
-  def makeLegitMove(cellStart: Coordinate, cellArrival: Coordinate): (Player.Val, Player.Val, Board, Int)
+  def makeLegitMove(move: Move): (Player.Val, Player.Val, Board, Int)
 
   /**
    * Undoes the last move.
-   * @param fromCoordinate
-   *                 coordinate of the starting cell.
-   * @param toCoordinate
-   *                 coordinate of the arrival cell.
+   * @param move
+   *                  move to undo
    * @return new board.
    */
-  def makeNonLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int)
+  def makeNonLegitMove(move: Move): (Player.Val, Player.Val, Board, Int)
 
   /**
     * Finds king on game board.
@@ -207,18 +203,18 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     setListCellsView(goalString)
   }
 
-  override def makeLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int) =
+  override def makeLegitMove(move: Move): (Player.Val, Player.Val, Board, Int) =
     this.synchronized {
-      setMove(fromCoordinate, toCoordinate, "makeLegitMove")
+      setMove(move, "makeLegitMove")
     }
 
-  override def makeNonLegitMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): (Player.Val, Player.Val, Board, Int) =
-    setMove(fromCoordinate, toCoordinate, "makeMove")
+  override def makeNonLegitMove(move: Move): (Player.Val, Player.Val, Board, Int) =
+    setMove(move, "makeMove")
 
-  private def setMove(fromCoordinate: Coordinate, toCoordinate: Coordinate, predicate: String): (Player.Val, Player.Val, Board, Int) = {
+  private def setMove(move: Move, predicate: String): (Player.Val, Player.Val, Board, Int) = {
     goal = engine.solve(s"$predicate(($variant, $playerToMove, $winner, $board)," +
-      s"p(${fromCoordinate.x},${fromCoordinate.y})," +
-      s"p(${toCoordinate.x},${toCoordinate.y}), L, (V,P,W,B)).")
+      s"${move.from.toString}," +
+      s"${move.to.toString}, L, (V,P,W,B)).")
 
     setGameTerms(goal)
 
@@ -239,19 +235,19 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   }
 
   override def isCentralCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, p(${coordinate.x},${coordinate.y})).")
+    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, ${coordinate.toString}).")
 
     goal.isSuccess
   }
 
   override def isCornerCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, p(${coordinate.x},${coordinate.y})).")
+    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, ${coordinate.toString}).")
 
     goal.isSuccess
   }
 
   override def isPawnCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"isInitialPawnCoord($variant, p(${coordinate.x},${coordinate.y})).")
+    goal = engine.solve(s"isInitialPawnCoord($variant, ${coordinate.toString}).")
 
     goal.isSuccess
   }

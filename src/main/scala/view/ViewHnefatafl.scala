@@ -4,7 +4,7 @@ import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
 import model.{GameSnapshot, Player, Snapshot}
 import utils.BoardGame.Board
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 trait ViewHnefatafl {
 
@@ -52,12 +52,10 @@ trait ViewHnefatafl {
   /**
     * Makes move.
     *
-    * @param fromCoordinate
-    *              starting coordinate.
-    * @param toCoordinate
-    *              arrival coordiante.
+    * @param move
+   *             move to make
     */
-  def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate)
+  def makeMove(move: Move)
 
   /**
     * Gets the possible moves from a specifies coordiante.
@@ -201,8 +199,8 @@ object ViewHnefatafl {
       viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
     }
 
-    override def makeMove(fromCoordinate: Coordinate, toCoordinate: Coordinate): Unit = {
-      controller.makeMove(fromCoordinate, toCoordinate)
+    override def makeMove(move: Move): Unit = {
+      controller.makeMove(move)
     }
 
     override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = {

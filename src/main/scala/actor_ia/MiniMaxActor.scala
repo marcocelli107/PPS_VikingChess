@@ -3,7 +3,7 @@ package actor_ia
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import ia.{EvaluationFunction, EvaluationFunctionImpl}
 import model.{GameVariant, ParserProlog, ParserPrologImpl, TheoryGame}
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 case class FirstMsg()
 
@@ -84,7 +84,7 @@ abstract class MiniMaxActor (game: ParserProlog, depth:Int, move: (Coordinate,Co
 
   def  moveAnyPawn(parserProlog: ParserProlog, startCord: Coordinate, endCord: Coordinate ): ParserProlog = {
     val copy = parserProlog.copy()
-    copy.makeLegitMove(startCord, endCord)
+    copy.makeLegitMove(Move(startCord, endCord))
     copy
   }
 }

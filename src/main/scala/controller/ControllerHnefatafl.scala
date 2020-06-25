@@ -3,7 +3,7 @@ package controller
 import model._
 import view.ViewHnefatafl
 import utils.BoardGame.Board
-import utils.Coordinate
+import utils.{Coordinate, Move}
 
 trait ControllerHnefatafl {
 
@@ -24,9 +24,12 @@ trait ControllerHnefatafl {
   /**
     * Calls model for making a move from coordinate to coordinate.
     *
+    * @param move
+    *               move to make
+    *
     * @return (board, numberBlackPiecesCaptured, numberWhitePiecesCaptured)
     */
-  def makeMove(coordinateStart: Coordinate, coordinateArrival: Coordinate): Unit
+  def makeMove(move: Move): Unit
 
   /**
     * Notifies the view that the move has been updated.
@@ -121,8 +124,8 @@ object ControllerHnefatafl {
 
     override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = modelGame.showPossibleCells(coordinate)
 
-    override def makeMove(coordinateStart: Coordinate, coordinateArrival: Coordinate): Unit = {
-      modelGame.makeMove(coordinateStart, coordinateArrival)
+    override def makeMove(move: Move): Unit = {
+      modelGame.makeMove(move: Move)
     }
 
     override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
