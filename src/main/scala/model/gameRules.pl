@@ -467,28 +467,17 @@ writeMove(B, P, FromCoord, ToCoord, NB) :-
 %%% Returns the coordinates of the captured pawn on a side,
 %%% returns an empty list if there are no captures.
 % [checkCapture(+Size, +PlayerWhoMoved, +AdjacentCells, -CapturesList)]
-checkCapture(_, _, [], []).
-checkCapture(_, _, [X], []).
-checkCapture(_, _, [c(_, e)|_], []).
-checkCapture(_, Player, [c(_, Piece)|_], []) :-
-		pieceOwner(Piece, Player).
-checkCapture(_, Player, [c(_, Piece),c(_, Piece1)], []) :-
-		pieceOwner(Piece, Opponent),
-		pieceOwner(Piece1, Opponent).
-% King captured triggers the end of the game so it is evaluated in checkVictory,
-% moreover, the rule for capturing the king is different
-checkCapture(_, Player, [c(_, k),_], []).
 checkCapture(_, Player, [c(C, Piece),c(C1, Piece1)], [C]) :-
+    isPawn(Piece),
+    opponent(Player, Opponent),
 		pieceOwner(Piece, Opponent),
-		pieceOwner(Piece1, Player),
-		isPawn(Piece).
+		pieceOwner(Piece1, Player), !.
 checkCapture(S, Player, [c(C, Piece),c(C1, e)], [C]) :-
-		pieceOwner(Piece, Opponent),
 		isPawn(Piece),
-		isSpecialCoord(S, C1), !.
-checkCapture(S, Player, [c(C, Piece),c(C1, e)], []) :-
+		opponent(Player, Opponent),
 		pieceOwner(Piece, Opponent),
-		not(isSpecialCoord(S, C1)).
+		isSpecialCoord(S, C1), !.
+checkCapture(_, _, _, []).
 
 %%% Returns all captured pieces coordinates after +PlayerWhoMoved moved a piece to +MovedCoord,
 %%% returns an empty list if there are no captures.
