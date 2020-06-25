@@ -577,7 +577,8 @@ checkKingCapturedSmallBoard(S, C, H, V, MoveCoord) :-
 % [kingCapturedFourSides(+KingHorizAdjacentCells, +KingVertAdjacentCells)]
 kingCapturedFourSides(V, H) :-
 		append(V, H, Around),
-		allBlackPawns(Around), !.
+		allBlackPawns(Around),
+		size(Around, 4), !.
 
 %%% Checks if the king has been captured surrounded on three sides and
 %%% hostile central cell in the last one.
@@ -586,6 +587,7 @@ kingCapturedThreeSidesAndThrone(S, H, V, MoveCoord) :-
 		append(H, V, Around),
 		member(c(MoveCoord, _), Around),
 		centralCellCoord(S, Central),
+		member(c(Central, _), Around),
 		delete(c(Central, _), Around, FilteredAround),
 		allBlackPawns(FilteredAround), !.
 
