@@ -77,6 +77,8 @@ object BoardGame {
      */
     def getCell(coordinate: Coordinate): BoardCell
 
+    def setCell(cell: BoardCell)
+
     def toString: String
 
     def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]]
@@ -88,13 +90,16 @@ object BoardGame {
 
     def apply(cells: Seq[Seq[BoardCell]]): Board = BoardImpl(cells)
 
-    case class BoardImpl(private val allCells: Seq[Seq[BoardCell]]) extends Board {
+    case class BoardImpl(private var allCells: Seq[Seq[BoardCell]]) extends Board {
 
       override def rows: Seq[Seq[BoardCell]] = allCells
 
       override def size: Int = allCells.length
 
       override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x - 1) (coordinate.y - 1)
+
+      override def setCell(cell: BoardCell): Unit =
+        allCells = allCells.map(_.map(c => if(c.getCoordinate.equals(cell.getCoordinate)) cell else c))
 
       override def equals(obj: Any): Boolean = this.rows.equals(obj.asInstanceOf[Board].rows)
 
