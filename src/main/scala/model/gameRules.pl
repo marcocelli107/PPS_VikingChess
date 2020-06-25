@@ -468,8 +468,8 @@ writeMove(B, P, FromCoord, ToCoord, NB) :-
 %%% returns an empty list if there are no captures.
 % [checkCapture(+Size, +PlayerWhoMoved, +AdjacentCells, -CapturesList)]
 checkCapture(_, Player, [c(C, Piece),c(C1, Piece1)], [C]) :-
-    isPawn(Piece),
-    opponent(Player, Opponent),
+        isPawn(Piece),
+         opponent(Player, Opponent),
 		pieceOwner(Piece, Opponent),
 		pieceOwner(Piece1, Player), !.
 checkCapture(S, Player, [c(C, Piece),c(C1, e)], [C]) :-
