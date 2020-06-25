@@ -81,6 +81,8 @@ object BoardGame {
      */
     def getCell(coordinate: Coordinate): BoardCell
 
+    def setCell(cell: BoardCell)
+
     def toString: String
 
     def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]]
@@ -89,7 +91,6 @@ object BoardGame {
 
     def specialCoordinates: List[Coordinate]
 
-    def setCell(cell: BoardCell)
   }
 
   object Board {
