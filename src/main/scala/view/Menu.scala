@@ -96,6 +96,8 @@ object Menu {
     private var levelIA: Level.Value = _
     private var player: Player.Val = _
 
+    private var limits: GridBagConstraints = _
+
     override def getPlayer: Player.Val = player
 
     override def initMenu: JPanel = {
@@ -111,6 +113,9 @@ object Menu {
       menuPanel.add(pvpButton)
       menuPanel.add(exitButtonMenu)
       menuPanel.add(Box.createVerticalGlue)
+      limits = GameFactory.createBagConstraints
+      limits.fill = GridBagConstraints.NONE
+      limits.anchor = GridBagConstraints.LINE_START
       menuPanel
     }
 
@@ -122,42 +127,36 @@ object Menu {
       panelVariantTablut = MenuFactory.createSubMenuVariantPanel
       panelVariantBrandubh = MenuFactory.createSubMenuVariantPanel
 
-      val limits: GridBagConstraints = new java.awt.GridBagConstraints()
-      limits.gridy = 0
-      limits.weightx = 0
-      limits.fill = GridBagConstraints.NONE
-      limits.anchor = GridBagConstraints.LINE_START
-
       labelHnefatafl = MenuFactory.createLabelBoardHnefatafl
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelVariantHnefatafl.add(labelHnefatafl, limits)
       hnefatafl = MenuFactory.createVariantButton("Hnefatafl (11 x 11)")
       hnefatafl.addActionListener(chooseVariantListener("Hnefatafl"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelVariantHnefatafl.add(hnefatafl, limits)
 
       labelTawlbwrdd = MenuFactory.createLabelBoardTawlbwrdd
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelVariantTawlbwrdd.add(labelTawlbwrdd, limits)
       tawlbwrdd = MenuFactory.createVariantButton("Tawlbwrdd (11 x 11)")
       tawlbwrdd.addActionListener(chooseVariantListener("Tawlbwrdd"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelVariantTawlbwrdd.add(tawlbwrdd, limits)
 
       labelTablut = MenuFactory.createLabelBoardTablut
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelVariantTablut.add(labelTablut, limits)
       tablut = MenuFactory.createVariantButton("Tablut (9 x 9)")
       tablut.addActionListener(chooseVariantListener("Tablut"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelVariantTablut.add(tablut, limits)
 
       labelBrandubh = MenuFactory.createLabelBoardBrandubh
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelVariantBrandubh.add(labelBrandubh, limits)
       brandubh = MenuFactory.createVariantButton("Brandubh (7 x 7)")
       brandubh.addActionListener(chooseVariantListener("Brandubh"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelVariantBrandubh.add(brandubh, limits)
 
       returnToMenu = MenuFactory.createMainButton("Previous Menu")
@@ -183,42 +182,36 @@ object Menu {
       panelLevelStandard = MenuFactory.createSubMenuLevelPanel
       panelLevelAdvanced = MenuFactory.createSubMenuLevelPanel
 
-      val limits: GridBagConstraints = new java.awt.GridBagConstraints()
-      limits.gridy = 0
-      limits.weightx = 0
-      limits.fill = GridBagConstraints.NONE
-      limits.anchor = GridBagConstraints.LINE_START
-
       labelNewcomer = MenuFactory.createLabelNewcomer
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelLevelNewcomer.add(labelNewcomer, limits)
       newcomer = MenuFactory.createLevelButton("Newcomer")
       newcomer.addActionListener(chooseLevelIAListener("Newcomer"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelLevelNewcomer.add(newcomer, limits)
 
       labelAmateur = MenuFactory.createLabelAmateur
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelLevelAmateur.add(labelAmateur, limits)
       amateur = MenuFactory.createLevelButton("Amateur")
       amateur.addActionListener(chooseLevelIAListener("Amateur"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelLevelAmateur.add(amateur, limits)
 
       labelStandard = MenuFactory.createLabelStandard
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelLevelStandard.add(labelStandard, limits)
       standard = MenuFactory.createLevelButton("Standard")
       standard.addActionListener(chooseLevelIAListener("Standard"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelLevelStandard.add(standard, limits)
 
       labelAdvanced = MenuFactory.createLabelAdvanced
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelLevelAdvanced.add(labelAdvanced, limits)
       advanced = MenuFactory.createLevelButton("Advanced")
       advanced.addActionListener(chooseLevelIAListener("Advanced"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelLevelAdvanced.add(advanced, limits)
 
       returnToMenu = MenuFactory.createMainButton("Previous Menu")
@@ -241,26 +234,20 @@ object Menu {
       panelChoseWhite = MenuFactory.createSubMenuPlayerPanel
       panelChoseBlack = MenuFactory.createSubMenuPlayerPanel
 
-      val limits: GridBagConstraints = new java.awt.GridBagConstraints()
-      limits.gridy = 0
-      limits.weightx = 0
-      limits.fill = GridBagConstraints.NONE
-      limits.anchor = GridBagConstraints.LINE_START
-
       labelWhiteChose = MenuFactory.createLabelWhitePlayer
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelChoseWhite.add(labelWhiteChose,limits)
       whiteButton = MenuFactory.createPlayerButton("White Pawns")
       whiteButton.addActionListener(setPlayer("White"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelChoseWhite.add(whiteButton,limits)
 
       labelBlackChose = MenuFactory.createLabelBlackPlayer
-      limits.gridx = 0
+      GameFactory.resetXConstraints(limits)
       panelChoseBlack.add(labelBlackChose,limits)
       blackButton = MenuFactory.createPlayerButton("Black Pawns")
       blackButton.addActionListener(setPlayer("Black"))
-      limits.gridx = 1
+      GameFactory.incrementXConstraints(limits)
       panelChoseBlack.add(blackButton,limits)
 
       returnToMenu = MenuFactory.createMainButton("Previous Menu")

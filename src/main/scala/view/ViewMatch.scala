@@ -1,6 +1,6 @@
 package view
 
-import java.awt.{Dimension, GridBagConstraints, GridBagLayout}
+import java.awt.{Dimension, GridBagConstraints}
 
 import javax.swing._
 import model.{GameSnapshot, Piece, Player, Snapshot}
@@ -89,8 +89,14 @@ object ViewMatch {
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
     private var kingCoordinate: Option[Coordinate] = Option.empty
 
+    private var limits: GridBagConstraints = _
+
     override def initGamePanel(board: Board): JPanel = {
       this.board = board
+
+      limits = GameFactory.createBagConstraints
+      limits.fill = GridBagConstraints.NONE
+      limits.anchor = GridBagConstraints.LINE_START
 
       GameFactory.setVariantBoardSize(this.view.getDimension)
 
@@ -202,6 +208,9 @@ object ViewMatch {
       case _ => switchPlayerLabel(playerToMove)
     }
 
+    /**
+      * Resets all listeners for each cell button.
+      */
     private def resetListeners(): Unit = cells.values.foreach(c => c.getActionListeners.foreach(c.removeActionListener))
 
     /**
@@ -245,19 +254,14 @@ object ViewMatch {
       */
     private def initBoard(): Unit = {
       boardPanel = GameFactory.createBoardPanel
-      val layout: GridBagLayout = new java.awt.GridBagLayout()
-      boardPanel.setLayout(layout)
-      val lim: GridBagConstraints = new java.awt.GridBagConstraints()
       for (i <- 1 to view.getDimension) {
         for (j <- 1 to view.getDimension) {
           val coordinate: Coordinate = Coordinate(i, j)
           val cell: Cell = setTypeCell(coordinate)
           cell.addActionListener(_ => actionCell(cell))
-          lim.gridx = j
-          lim.gridy = i
-          layout.setConstraints(cell, lim)
+          GameFactory.setXYConstraints(limits,i,j)
           cells += coordinate -> cell
-          boardPanel.add(cell)
+          boardPanel.add(cell, limits)
         }
       }
     }
@@ -269,26 +273,23 @@ object ViewMatch {
       northPanel = GameFactory.createTopBottomPanel
       northPanel.add(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
       subNorthPanel = GameFactory.createGameSubMenuPanel
-      val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      lim.gridx = 0
-      lim.gridy = 0
-      lim.weightx = 0
-      lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.LINE_START
 
+      GameFactory.resetXConstraints(limits)
       playerBlackLabel.setVisible(true)
       playerWhiteLabel.setVisible(false)
-      subNorthPanel.add(playerBlackLabel, lim)
-      subNorthPanel.add(playerWhiteLabel, lim)
+      subNorthPanel.add(playerBlackLabel, limits)
+      subNorthPanel.add(playerWhiteLabel, limits)
 
       playerOrWinnerLabel = GameFactory.createLabelPlayerToMoveWinner
-      lim.gridx = 1
-      subNorthPanel.add(playerOrWinnerLabel, lim)
+      GameFactory.incrementXConstraints(limits)
+      subNorthPanel.add(playerOrWinnerLabel, limits)
       northPanel.add(subNorthPanel)
+
       northPanel.add(Box.createRigidArea(new Dimension(BETWEEN_COMPONENTS_DIMENSION, HEIGHT_DIMENSION)))
       menuButton = GameFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
       northPanel.add(menuButton)
+
       northPanel.add(Box.createRigidArea(new Dimension(MEDIUM_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
     }
 
@@ -299,36 +300,33 @@ object ViewMatch {
       southPanel = GameFactory.createTopBottomPanel
       southPanel.add(Box.createRigidArea(new Dimension(BIG_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
       subSouthPanel = GameFactory.createGameSubMenuPanel
-      val lim: GridBagConstraints = new java.awt.GridBagConstraints()
-      lim.gridy = 0
-      lim.weightx = 1
-      lim.fill = GridBagConstraints.NONE
-      lim.anchor = GridBagConstraints.CENTER
 
+      GameFactory.resetXConstraints(limits)
+      GameFactory.incrementWeightXConstraints(limits)
+      limits.anchor = GridBagConstraints.CENTER
       firstMoveButton = GameFactory.createFirstMoveButton()
       firstMoveButton.addActionListener(_ => changeSnapshot(Snapshot.First))
-      lim.gridx = 0
-      subSouthPanel.add(firstMoveButton, lim)
+      subSouthPanel.add(firstMoveButton, limits)
 
       previousMoveButton = GameFactory.createPreviousMoveButton()
       previousMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Previous))
-      lim.gridx = 1
-      subSouthPanel.add(previousMoveButton, lim)
+      GameFactory.incrementXConstraints(limits)
+      subSouthPanel.add(previousMoveButton, limits)
 
       nextMoveButton = GameFactory.createNextMoveButton()
       nextMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Next))
-      lim.gridx = 2
-      subSouthPanel.add(nextMoveButton, lim)
+      GameFactory.incrementXConstraints(limits)
+      subSouthPanel.add(nextMoveButton, limits)
 
       lastMoveButton = GameFactory.createLastMoveButton()
       lastMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Last))
-      lim.gridx = 3
-      subSouthPanel.add(lastMoveButton, lim)
+      GameFactory.incrementXConstraints(limits)
+      subSouthPanel.add(lastMoveButton, limits)
 
       undoMoveButton = GameFactory.createUndoMoveButton()
       undoMoveButton.addActionListener(_ => undoMove())
-      lim.gridx = 4
-      subSouthPanel.add(undoMoveButton, lim)
+      GameFactory.incrementXConstraints(limits)
+      subSouthPanel.add(undoMoveButton, limits)
       southPanel.add(subSouthPanel)
       southPanel.add(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
     }

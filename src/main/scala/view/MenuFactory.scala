@@ -1,9 +1,10 @@
 package view
 
-import java.awt._
+import java.awt.{GridBagConstraints, _}
 import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.image.BufferedImage
 import java.io.File
+
 import javax.imageio.ImageIO
 import javax.swing._
 
