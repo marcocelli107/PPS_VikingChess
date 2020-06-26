@@ -87,9 +87,11 @@ object BoardGame {
 
     def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]]
 
-    def orthogonalCoordinates(coordinate: Coordinate): List[List[Coordinate]]
-
     def specialCoordinates: List[Coordinate]
+
+    def cornerCoordinates: List[Coordinate]
+
+    def centerCoordinates: Coordinate
 
   }
 
@@ -116,35 +118,25 @@ object BoardGame {
         List(upCells(coordinate), rightCells(coordinate), downCells(coordinate), leftCells(coordinate))
 
       private def upCells(coordinate: Coordinate): List[BoardCell] =
-        upCoords(coordinate).map(getCell)
+        (coordinate.x - 1 to 1 by -1).toList.map(Coordinate(_, coordinate.y)).map(getCell)
 
       private def rightCells(coordinate: Coordinate): List[BoardCell] =
-        rightCoords(coordinate).map(getCell)
+        (coordinate.y + 1 to size).toList.map(Coordinate(coordinate.x, _)).map(getCell)
 
       private def downCells(coordinate: Coordinate): List[BoardCell] =
-        downCoords(coordinate).map(getCell)
+        (coordinate.x + 1 to size).toList.map(Coordinate(_, coordinate.y)).map(getCell)
 
       private def leftCells(coordinate: Coordinate): List[BoardCell] =
-        leftCoords(coordinate).map(getCell)
-
-      override def orthogonalCoordinates(coordinate: Coordinate): List[List[Coordinate]] =
-        List(upCoords(coordinate), rightCoords(coordinate), downCoords(coordinate), leftCoords(coordinate))
-
-      private def upCoords(coordinate: Coordinate): List[Coordinate] =
-        (coordinate.x - 1 to 1 by -1).toList.map(Coordinate(_, coordinate.y))
-
-      private def rightCoords(coordinate: Coordinate): List[Coordinate] =
-        (coordinate.y + 1 to size).toList.map(Coordinate(coordinate.x, _))
-
-      private def downCoords(coordinate: Coordinate): List[Coordinate] =
-        (coordinate.x + 1 to size).toList.map(Coordinate(_, coordinate.y))
-
-      private def leftCoords(coordinate: Coordinate): List[Coordinate] =
-        (coordinate.y - 1 to 1 by - 1).toList.map(Coordinate(coordinate.x, _))
+        (coordinate.y - 1 to 1 by - 1).toList.map(Coordinate(coordinate.x, _)).map(getCell)
 
       override def specialCoordinates: List[Coordinate] =
+        cornerCoordinates :+ centerCoordinates
+
+      override def cornerCoordinates: List[Coordinate] =
         List(Coordinate(1, 1), Coordinate(1, size), Coordinate(size, 1),
-          Coordinate(size, size), Coordinate(size / 2 + 1, size / 2 + 1))
+        Coordinate(size, size))
+
+      override def centerCoordinates: Coordinate = Coordinate(size / 2 + 1, size / 2 + 1)
 
     }
 

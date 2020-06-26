@@ -1,7 +1,7 @@
 package model
 
 import utils.BoardGame.Board
-import utils.{Coordinate, Move}
+import utils.Move
 
 trait GameSnapshot {
 

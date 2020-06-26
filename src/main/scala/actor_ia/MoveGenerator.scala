@@ -39,14 +39,14 @@ object MoveGenerator {
     def _checkCaptures(adjacentCells: List[BoardCell]): List[Coordinate] = adjacentCells match {
       case l if l.size < 2 => Nil
       case h :: t
-        if (!isOwner(h.getPiece, gameSnapshot.getPlayerToMove) && !h.getPiece.equals(Piece.WhiteKing)) &&
+        if (!isOwner(h.getPiece, gameSnapshot.getPlayerToMove) && !h.getPiece.equals(Piece.WhiteKing) && !h.getPiece.equals(Piece.Empty)) &&
         (isOwner(t.head.getPiece, gameSnapshot.getPlayerToMove) || gameSnapshot.getBoard.specialCoordinates.contains(t.head.getCoordinate))
         => List(h.getCoordinate)
       case _ => Nil
     }
 
     def _incrementCapturedPieces(piecesCaptured: Int): (Int, Int) = gameSnapshot.getPlayerToMove match {
-      case Player.Black => (gameSnapshot.getNumberCapturedBlacks + piecesCaptured, gameSnapshot.getNumberCapturedWhites)
+      case Player.Black => ( gameSnapshot.getNumberCapturedBlacks + piecesCaptured, gameSnapshot.getNumberCapturedWhites)
       case Player.White => (gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites + piecesCaptured)
       case _ => null
     }
@@ -63,10 +63,10 @@ object MoveGenerator {
       case _ => Player.None
     }
 
-    def checkVictory(): Boolean = GameVariant.Val match{
-      case GameVariant.Hnefatafl | GameVariant.Tawlbwrdd => checkBlackBigBoardVictory()
-      case GameVariant.Brandubh | GameVariant.Tablut => checkBlackSmallBoardVictory()
-      case _ => gameSnapshot.getBoard.specialCoordinates.take(4).contains(move.to) //fifth elem is center cell
+    def checkVictory(): Boolean = (gameSnapshot.getVariant, gameSnapshot.getPlayerToMove) match{
+      case (GameVariant.Hnefatafl | GameVariant.Tawlbwrdd, Player.Black) => checkBlackBigBoardVictory()
+      case (GameVariant.Brandubh | GameVariant.Tablut , Player.Black) => checkBlackSmallBoardVictory()
+      case _ => gameSnapshot.getBoard.cornerCoordinates.contains(move.to) //fifth elem is center cell
     }
 
     def checkDraw(): Boolean = {
@@ -97,36 +97,34 @@ object MoveGenerator {
         kingCapturedTwoSides(adjacentCells)
     }
 
-    def kingOnThrone(kingCoord: Coordinate): Boolean = {
+    def kingOnThrone(kingCoord: Coordinate): Boolean =
       kingCoord.equals(gameSnapshot.getBoard.specialCoordinates.last)
-    }
 
-    def kingNextToThrone(kingCoord: Coordinate): Boolean = {
-      val centerCoord = gameSnapshot.getBoard.specialCoordinates.last
-      gameSnapshot.getBoard.orthogonalCoordinates(centerCoord).map(_.head).contains(kingCoord)
-    }
+
+    def kingNextToThrone(kingCoord: Coordinate): Boolean =
+      gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).map(_.head).contains(kingCoord)
+
 
     def fourOrThreeSideCondition(adjacentCells: List[List[BoardCell]]): Boolean =
-      adjacentCells.map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
-        cell.getCoordinate.equals(gameSnapshot.getBoard.specialCoordinates.last)) == 4
+      adjacentCells.filter(_.nonEmpty).map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
+        cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4
 
 
-    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean = {
+    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean =
       kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head) || kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head)
-    }
+
 
     def kingCapturedInLine(lineCells1: BoardCell, lineCells2: BoardCell): Boolean =
       lineCells1.getPiece.equals(Piece.BlackPawn) && lineCells2.getPiece.equals(Piece.BlackPawn)
 
 
     _move()
-    val listCapturesCoordinate = gameSnapshot.getBoard.orthogonalCells(move.from).map(_.take(2)).flatMap(list => _checkCaptures(list))
+    val listCapturesCoordinate = gameSnapshot.getBoard.orthogonalCells(move.to).map(_.take(2)).flatMap(list => _checkCaptures(list))
     listCapturesCoordinate.foreach(c => gameSnapshot.getBoard.setCell(BoardCell(c, Piece.Empty)))
     val capturedPieces = _incrementCapturedPieces(listCapturesCoordinate.size)
 
     GameSnapshot(gameSnapshot.getVariant, switchPlayer(), checkWinner(), gameSnapshot.getBoard, Option(move), capturedPieces._1, capturedPieces._2)
   }
-
 
   private def isOwner(pawn: Piece.Value, player: Player.Value): Boolean = (pawn, player) match {
     case (Piece.WhitePawn, Player.White) => true
@@ -135,9 +133,6 @@ object MoveGenerator {
     case _ => false
   }
 
-  def findKing(gameSnapshot: GameSnapshot):Coordinate = {
-    gameSnapshot.getBoard.rows.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).map(_.getCoordinate).head
-  }
 }
 
 // TODO fare test sensati
@@ -181,7 +176,7 @@ object daicheva extends App {
   b.setCell(BoardCell(Coordinate(2,6), Piece.Empty))
   //println(b.getCell(Coordinate(2,6)))
 
-
+  println(parserProlog.gamePossibleMoves())
   /*val start = System.currentTimeMillis()
   MoveGenerator.findKing(snap2)
   val stop = System.currentTimeMillis() - start
