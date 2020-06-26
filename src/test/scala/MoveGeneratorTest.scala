@@ -60,64 +60,88 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     snapHnefatafl = GameSnapshotImpl(variantHnefatafl, gameHnefatafl._1, gameHnefatafl._2, gameHnefatafl._3, Option.empty, 0, 0)
 
     val step1 = moveGenerator.makeMove(snapHnefatafl,Move(Coordinate(1,4), Coordinate(4,4)))
-    assert(step1.getBoard.getCell(Coordinate(4,4)).getPiece.equals( Piece.BlackPawn) )
+    assert(step1.getBoard.getCell(Coordinate(4,4)).getPiece.equals( Piece.BlackPawn))
   }
 
-  test( "Vertical white capture test - Tablut "){
+  test( "Vertical captured white test - Tablut "){
     gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
     snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
 
     val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(9,6), Coordinate(6,6)))
-    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(6,3), Coordinate(5,3)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(5,3), Coordinate(6,3)))
     val step3 = moveGenerator.makeMove(step2, Move(Coordinate(1,6), Coordinate(4,6)))
 
     assert(step3.getBoard.getCell(Coordinate(5,6)).getPiece.equals(Piece.Empty))
-    assert(step3.getNumberCapturedBlacks == 1)
+    assert(step3.getNumberCapturedWhites == 1)
   }
 
-  test( "Vertical black capture test - Tablut"){
+  test( "Vertical captured black test - Tablut"){
     gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
     snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
 
     val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(1,6), Coordinate(4,6)))
     val step2 = moveGenerator.makeMove(step1, Move(Coordinate(3,5), Coordinate(3,6)))
 
+
     assert(step2.getBoard.getCell(Coordinate(4,6)).getPiece.equals(Piece.Empty))
-    assert(step2.getNumberCapturedWhites == 1)
+    assert(step2.getNumberCapturedBlacks == 1)
   }
 
-  test( "Double white capture test - Tablut"){
+  test( "Double captured white test - Tablut"){
     gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
     snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
 
     val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(9,4), Coordinate(6,4)))
     val step2 = moveGenerator.makeMove(step1, Move(Coordinate(7,5), Coordinate(7,6)))
     val step3 = moveGenerator.makeMove(step2, Move(Coordinate(4,9), Coordinate(4,6)))
-    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(5,7), Coordinate(2,5)))
-    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(6,9), Coordinate(6,6)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(5,7), Coordinate(5,2)))
+    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(8,5), Coordinate(8,6)))
+    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(6,5), Coordinate(7,5)))
+    val step7 = moveGenerator.makeMove(step6, Move(Coordinate(6,9), Coordinate(6,6)))
 
-    assert(step5.getBoard.getCell(Coordinate(6,5)).getPiece.equals(Piece.Empty) &&
-      step5.getBoard.getCell(Coordinate(5,6)).getPiece.equals(Piece.Empty))
-    println( "Black " + step5.getNumberCapturedBlacks + " White " + step5.getNumberCapturedWhites)
-    assert(step5.getNumberCapturedBlacks == 2)
+    assert(step7.getBoard.getCell(Coordinate(5,6)).getPiece.equals(Piece.Empty) &&
+      step7.getBoard.getCell(Coordinate(7,6)).getPiece.equals(Piece.Empty))
+    assert(step7.getNumberCapturedWhites == 2)
   }
 
-  test( "Triple black capture test - Tawlbwrdd"){
+
+  test( "Triple captured white test - Tablut"){
+    gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
+    snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(9,4), Coordinate(6,4)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(7,5), Coordinate(7,6)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(4,9), Coordinate(4,6)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(5,7), Coordinate(5,2)))
+    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(8,5), Coordinate(8,6)))
+    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(5,3), Coordinate(4,3)))
+    val step7 = moveGenerator.makeMove(step6, Move(Coordinate(6,9), Coordinate(6,6)))
+
+    assert(step7.getBoard.getCell(Coordinate(5,6)).getPiece.equals(Piece.Empty) &&
+      step7.getBoard.getCell(Coordinate(7,6)).getPiece.equals(Piece.Empty) &&
+      step7.getBoard.getCell(Coordinate(6,5)).getPiece.equals(Piece.Empty))
+    assert(step7.getNumberCapturedWhites == 3)
+  }
+
+  test( "Triple captured white test - Tawlbwrdd"){
     gameTawlbwrdd = parserProlog.createGame(variantTawlbwrdd.toString().toLowerCase)
     snapTawlbwrdd = GameSnapshotImpl(variantTawlbwrdd, gameTawlbwrdd._1, gameTawlbwrdd._2, gameTawlbwrdd._3, Option.empty, 0, 0)
 
-    val step1 = moveGenerator.makeMove(snapTawlbwrdd, Move(Coordinate(1,5), Coordinate(4,4)))
-    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(1,6), Coordinate(4,8)))
-    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(4,6), Coordinate(4,5)))
-    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(6,6), Coordinate(1,2)))
-    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(5,7), Coordinate(4,7)))
-    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(11,5), Coordinate(11,4)))
-    val step7 = moveGenerator.makeMove(step6, Move(Coordinate(3,6), Coordinate(4,6)))
+    val step1 = moveGenerator.makeMove(snapTawlbwrdd, Move(Coordinate(6,3), Coordinate(4,3)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(6,4), Coordinate(4,4)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(2,7), Coordinate(4,7)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(6,5), Coordinate(6,3)))
+    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(7,2), Coordinate(6,2)))
+    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(6,3), Coordinate(10,3)))
+    val step7 = moveGenerator.makeMove(step6, Move(Coordinate(6,2), Coordinate(6,5)))
+    val step8 = moveGenerator.makeMove(step7, Move(Coordinate(6,8), Coordinate(5,8)))
+    val step9 = moveGenerator.makeMove(step8, Move(Coordinate(2,5), Coordinate(4,5)))
 
-    assert(step7.getBoard.getCell(Coordinate(4,5)).getPiece.equals(Piece.Empty) &&
-      step7.getBoard.getCell(Coordinate(4,7)).getPiece.equals(Piece.Empty) &&
-      step7.getBoard.getCell(Coordinate(5,6)).getPiece.equals(Piece.Empty))
-    assert(step7.getNumberCapturedBlacks == 3)
+
+    assert(step9.getBoard.getCell(Coordinate(4,4)).getPiece.equals(Piece.Empty) &&
+      step9.getBoard.getCell(Coordinate(4,6)).getPiece.equals(Piece.Empty) &&
+      step9.getBoard.getCell(Coordinate(5,5)).getPiece.equals(Piece.Empty))
+    assert(step9.getNumberCapturedWhites == 3)
   }
 
   test("1. Test white win in (1,1)"){
@@ -183,18 +207,21 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     assert(step13.getWinner.equals(Player.Black))
   }
 
-  test("Test board king not captured 3 sides"){
+  test("Test board king far from throne, not been captured 3 sides"){
     gameTawlbwrdd = parserProlog.createGame(variantTawlbwrdd.toString().toLowerCase)
     snapTawlbwrdd = GameSnapshotImpl(variantTawlbwrdd, gameTawlbwrdd._1, gameTawlbwrdd._2, gameTawlbwrdd._3, Option.empty, 0, 0)
 
-    val step1 = moveGenerator.makeMove(snapTawlbwrdd, Move(Coordinate(1,5), Coordinate(2,3)))
-    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(6,6), Coordinate(3,3)))
-    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(1, 6), Coordinate(3, 2)))
-    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(1,6), Coordinate(3,2)))
-    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(4,6), Coordinate(4,11)))
-    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(1,7), Coordinate(4,3)))
+    val step1 = moveGenerator.makeMove(snapTawlbwrdd, Move(Coordinate(6,3), Coordinate(3,3)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(6,4), Coordinate(2,4)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(3,6), Coordinate(3,4)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(6,5), Coordinate(6,4)))
+    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(5,2), Coordinate(4,2)))
+    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(6,4), Coordinate(4,4)))
+    val step7 = moveGenerator.makeMove(step6, Move(Coordinate(3,3), Coordinate(4,3)))
+    val step8 = moveGenerator.makeMove(step7, Move(Coordinate(6,6), Coordinate(6,2)))
+    val step9 = moveGenerator.makeMove(step8, Move(Coordinate(4,2), Coordinate(5,2)))
 
-    assert(step6.getWinner.equals(Player.None))
+    assert(step9.getWinner.equals(Player.None))
   }
 
 
@@ -215,14 +242,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     assert(step9.getWinner.equals(Player.None))
   }
 
-  /*testBoard11KingOnThroneCapture :-
-		newGame(hnefatafl, G),
-		makeMove(G, p(1, 4), p(5, 6), NC1, G1),
-		makeMove(G1, p(1, 5), p(6, 5), NC2, G2),
-		makeMove(G2, p(1, 6), p(6, 7), NC3, G3),
-		makeMove(G3, p(4, 6), p(4, 2), NC4, G4),
-		makeMove(G4, p(1, 7), p(7, 6), NC5, O),
-		gameWinner(O, b)*/
 
   test("Test board 11 king on throne capture "){
     gameHnefatafl = parserProlog.createGame(variantHnefatafl.toString().toLowerCase)
@@ -260,14 +279,14 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   //TODO jumped testBoard11KingFarFromThroneCapture
 
-  test("Test board 9 king on throne capture "){
+  test("Test board 9 king on throne capture - Tablut"){
     gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
     snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
 
-    val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(5,2), Coordinate(2,2)))
-    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(5,4), Coordinate(2,4)))
-    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(4,9), Coordinate(3,9)))
-    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(5,3), Coordinate(1,3)))
+    val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(1,4), Coordinate(3,4)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(2,4), Coordinate(4,3)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(4,1), Coordinate(3,9)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(5,3), Coordinate(4,5)))
     val step5 = moveGenerator.makeMove(step4, Move(Coordinate(6,9), Coordinate(7,9)))
     val step6 = moveGenerator.makeMove(step5, Move(Coordinate(3,5), Coordinate(3,8)))
     val step7 = moveGenerator.makeMove(step6, Move(Coordinate(5,9), Coordinate(4,9)))
@@ -292,6 +311,116 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     assert(step17.getWinner.equals(Player.Black) && step17.getBoard.getCell(Coordinate(5,5)).getPiece.equals(Piece.WhiteKing))
 
   }
+
+
+  test("Test board 7 king on throne no captured three sides - Brandubh"){
+    gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
+    snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapBrandubh, Move(Coordinate(1,4), Coordinate(3,4)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(5,4), Coordinate(5,7)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(2,4), Coordinate(4,3)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(4,5), Coordinate(1,5)))
+    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(4,1), Coordinate(4,5)))
+
+    assert(step5.getWinner.equals(Player.None))
+
+  }
+
+
+  test("Test board 9 king far from throne, vert capture - Tablut"){
+    gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
+    snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(1,4), Coordinate(1,3)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(5,5), Coordinate(2,3)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(1,5), Coordinate(3,3)))
+
+    assert(step3.getWinner.equals(Player.Black))
+
+  }
+
+  test("Test board 9 king far from throne, horizontal capture - Tablut"){
+    gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
+    snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(6,9), Coordinate(8,9)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(5,5), Coordinate(8,8)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(8,5), Coordinate(8,7)))
+
+    assert(step3.getWinner.equals(Player.Black))
+
+  }
+
+
+  test("Test board 9 sneaky king not captured - Tablut"){
+    gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
+    snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapTablut, Move(Coordinate(6,9), Coordinate(7,9)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(5,5), Coordinate(6,9)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(5,8), Coordinate(6,8)))
+
+    assert(step3.getWinner.equals(Player.None))
+
+  }
+
+  test("Test board 11 sneaky king not captured - Tawlbwrdd"){
+    gameTawlbwrdd = parserProlog.createGame(variantTawlbwrdd.toString().toLowerCase)
+    snapTawlbwrdd = GameSnapshotImpl(variantTawlbwrdd, gameTawlbwrdd._1, gameTawlbwrdd._2, gameTawlbwrdd._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapTawlbwrdd, Move(Coordinate(6,9), Coordinate(7,9)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(6,6), Coordinate(6,10)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(7,9), Coordinate(8,9)))
+
+    assert(step3.getWinner.equals(Player.None))
+
+  }
+
+
+  test("Test board 7 king next to throne captured three sides - Brandubh"){
+    gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
+    snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapBrandubh, Move(Coordinate(1,4), Coordinate(3,3)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(4,4), Coordinate(4,3)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(2,4), Coordinate(5,3)))
+
+    assert(step3.getWinner.equals(Player.Black))
+
+  }
+
+  test("Test board 7 Draw - Brandubh"){
+    gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
+    snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
+
+    val step1 = moveGenerator.makeMove(snapBrandubh, Move(Coordinate(4,6), Coordinate(1,6)))
+    val step2 = moveGenerator.makeMove(step1, Move(Coordinate(3,4), Coordinate(3,7)))
+    val step3 = moveGenerator.makeMove(step2, Move(Coordinate(2,4), Coordinate(2,7)))
+    val step4 = moveGenerator.makeMove(step3, Move(Coordinate(5,4), Coordinate(5,7)))
+    val step5 = moveGenerator.makeMove(step4, Move(Coordinate(6,4), Coordinate(6,7)))
+    val step6 = moveGenerator.makeMove(step5, Move(Coordinate(4,3), Coordinate(1,3)))
+    val step7 = moveGenerator.makeMove(step6, Move(Coordinate(4,2), Coordinate(1,2)))
+    val step8 = moveGenerator.makeMove(step7, Move(Coordinate(4,5), Coordinate(7,5)))
+    val step9 = moveGenerator.makeMove(step8, Move(Coordinate(1,6), Coordinate(7,6)))
+    val step10 = moveGenerator.makeMove(step9, Move(Coordinate(4,4), Coordinate(4,6)))
+    val step11 = moveGenerator.makeMove(step10, Move(Coordinate(4,7), Coordinate(3,7)))
+    val step12 = moveGenerator.makeMove(step11, Move(Coordinate(4,6), Coordinate(4,7)))
+    val step13 = moveGenerator.makeMove(step12, Move(Coordinate(7,6), Coordinate(5,6)))
+    val step14 = moveGenerator.makeMove(step13, Move(Coordinate(4,7), Coordinate(4,6)))
+    val step15 = moveGenerator.makeMove(step14, Move(Coordinate(6,7), Coordinate(5,7)))
+    val step16 = moveGenerator.makeMove(step15, Move(Coordinate(4,6), Coordinate(4,7)))
+    val step17 = moveGenerator.makeMove(step16, Move(Coordinate(5,6), Coordinate(4,6)))
+
+    assert(step17.getWinner.equals(Player.Draw))
+
+  }
+
+
+
+
+
+
 
 
 
