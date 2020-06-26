@@ -205,6 +205,31 @@ trait GameFactory {
   def createGameSubMenuPanel: JPanel
 
   /**
+    * Creates a constraints for grid bag layouts.
+    */
+  def createBagConstraints: GridBagConstraints
+
+  /**
+    * Resets a constraints for x grid parameter.
+    */
+  def resetXConstraints(limits: GridBagConstraints)
+
+  /**
+    * Sets a constraints for x and y grid parameter.
+    */
+  def setXYConstraints(limits: GridBagConstraints, x: Int, y: Int)
+
+  /**
+    * Increments a constraints for x grid parameter.
+    */
+  def incrementXConstraints(limits: GridBagConstraints)
+
+  /**
+    * Increments a constraints for x weight parameter.
+    */
+  def incrementWeightXConstraints(limits: GridBagConstraints): Unit
+
+  /**
     * Generates a sound for the moved piece.
     */
   //def generateASoundForMove()
@@ -272,6 +297,16 @@ object GameFactory extends GameFactory {
   override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
 
   override def createGameSubMenuPanel: JPanel = new GameSubMenuPanel
+
+  override def createBagConstraints: GridBagConstraints = new GridBagConstraints()
+
+  override def resetXConstraints(limits: GridBagConstraints): Unit = limits.gridx = 0
+
+  override def setXYConstraints(limits: GridBagConstraints, x: Int, y: Int): Unit = {limits.gridx = x; limits.gridy = y}
+
+  override def incrementXConstraints(limits: GridBagConstraints): Unit = limits.gridx += 1
+
+  override def incrementWeightXConstraints(limits: GridBagConstraints): Unit = limits.weightx += 1
 
   //override def generateASoundForMove(): Unit = playMoveSound()
 
@@ -399,6 +434,7 @@ object GameFactory extends GameFactory {
   private def cornerCell(): Cell = new IconCell(ColorProvider.getSpecialCellColor, cornerCellIconPath)
 
   private class BoardPanel extends JPanel {
+    setLayout(new java.awt.GridBagLayout())
     this.setBackground(ColorProvider.getLightBrownColor)
   }
 
@@ -466,7 +502,7 @@ object GameFactory extends GameFactory {
     setIcon(imageIcon)
     setCursor(new Cursor(Cursor.HAND_CURSOR))
     setHorizontalAlignment(SwingConstants.CENTER)
-    setEnabled(true)
+    setEnabled(false)
     setToolTipText(hoverText)
     setBorderPainted(false)
     setOpaque(false)
