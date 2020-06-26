@@ -1,6 +1,7 @@
 package actor_ia
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import alice.tuprolog.NoMoreSolutionException
 import ia.{EvaluationFunction, EvaluationFunctionImpl}
 import model.{GameVariant, ParserProlog, ParserPrologImpl, TheoryGame}
 import utils.{Coordinate, Move}
@@ -45,7 +46,7 @@ abstract class MiniMaxActor (game: ParserProlog, depth:Int, move: (Coordinate,Co
       gamePossibleMove = fatherGame.gamePossibleMoves()
 
     }catch {
-      case _ => println(" father game " + fatherGame.getActualBoard + " coord " + move)
+      case _: NoMoreSolutionException => println(" father game " + fatherGame.getActualBoard + " coord " + move)
     }
 
     //println(copy.equals(fatherGame))

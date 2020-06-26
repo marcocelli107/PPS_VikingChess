@@ -46,8 +46,8 @@ object MoveGenerator {
     }
 
     def _incrementCapturedPieces(piecesCaptured: Int): (Int, Int) = gameSnapshot.getPlayerToMove match {
-      case Player.Black => ( gameSnapshot.getNumberCapturedBlacks + piecesCaptured, gameSnapshot.getNumberCapturedWhites)
-      case Player.White => (gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites + piecesCaptured)
+      case Player.Black => (gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites  + piecesCaptured)
+      case Player.White => (gameSnapshot.getNumberCapturedBlacks + piecesCaptured, gameSnapshot.getNumberCapturedWhites)
       case _ => null
     }
 
@@ -66,11 +66,11 @@ object MoveGenerator {
     def checkVictory(): Boolean = (gameSnapshot.getVariant, gameSnapshot.getPlayerToMove) match{
       case (GameVariant.Hnefatafl | GameVariant.Tawlbwrdd, Player.Black) => checkBlackBigBoardVictory()
       case (GameVariant.Brandubh | GameVariant.Tablut , Player.Black) => checkBlackSmallBoardVictory()
-      case _ => gameSnapshot.getBoard.cornerCoordinates.contains(move.to) //fifth elem is center cell
+      case _ => gameSnapshot.getBoard.cornerCoordinates.contains(move.to)
     }
 
     def checkDraw(): Boolean = {
-      gamePossibleMoves(gameSnapshot).isEmpty
+      gamePossibleMoves(GameSnapshot(gameSnapshot.getVariant, switchPlayer(), Player.None, gameSnapshot.getBoard, Option(move), 0, 0)).isEmpty
     }
 
     def findKing():Coordinate = {
@@ -110,8 +110,10 @@ object MoveGenerator {
         cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4
 
 
-    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean =
-      kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head) || kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head)
+    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean = adjacentCells.filter(_.nonEmpty).map(_.head).size match {
+      case 4 => kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head) || kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head)
+      case _ => false
+    }
 
 
     def kingCapturedInLine(lineCells1: BoardCell, lineCells2: BoardCell): Boolean =
