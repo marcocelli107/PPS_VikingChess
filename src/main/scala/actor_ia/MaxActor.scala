@@ -1,16 +1,16 @@
 package actor_ia
 
 import akka.actor.{ActorRef, Props}
-import model.ParserProlog
-import utils.Coordinate
+import model.GameSnapshot
+import utils.Move
 
-case class MaxActor(game: ParserProlog, depth:Int, alfa: Int, beta: Int, move: (Coordinate,Coordinate), fatherRef: ActorRef) extends MiniMaxActor(game, depth, move, fatherRef) {
+case class MaxActor(gameSnapshot: GameSnapshot, depth:Int, alfa: Int, beta: Int, move: Move, fatherRef: ActorRef) extends MiniMaxActor(gameSnapshot, depth, move, fatherRef) {
 
   tempVal = -100
   myAlfa = alfa
   myBeta = beta
 
-  override def createChild(fatherGame: ParserProlog, move: (Coordinate, Coordinate), fatherRef: ActorRef): Props =
+  override def createChild(fatherGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props =
     Props(MinActor(fatherGame, depth-1, myAlfa, myBeta, move, fatherRef))
 
   override def miniMaxComparison(score: Int): Unit = {

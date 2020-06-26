@@ -1,21 +1,21 @@
 package ia
 
 
-import model.{ParserProlog, Piece, Player}
+import model.{GameSnapshot, ParserProlog, Piece, Player}
 import utils.BoardGame.{Board, BoardCell}
 import utils.Coordinate
 
 import scala.util.Random
 
 trait EvaluationFunction{
-  def score(gameState: ParserProlog):Int
+  def score(gameSnapshot: GameSnapshot):Int
 }
 
 class  EvaluationFunctionImpl( boardSize: Int ) extends EvaluationFunction {
 
 
 
-  override def score(gameState: ParserProlog): Int =  ((Random.nextDouble() * 200) -100).intValue()
+  override def score(gameSnapshot: GameSnapshot): Int =  ((Random.nextDouble() * 200) -100).intValue()
 
   /* RULES */
 

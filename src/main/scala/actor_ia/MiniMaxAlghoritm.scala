@@ -3,7 +3,7 @@ package actor_ia
 import akka.actor.{Actor, ActorSystem, Props}
 import ia.EvaluationFunctionImpl
 import model._
-
+/*
 case class Alfa_Beta(game:ParserProlog, depth: Int, alfa: Int , beta : Int , phase: MaxMin.Value, playerIA: Player.Value)
 
 case class MiniMaxAlghoritm() extends Actor {
@@ -37,3 +37,4 @@ object TryMiniMax extends App{
 
 
 }
+*/
