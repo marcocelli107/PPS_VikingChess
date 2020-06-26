@@ -7,7 +7,7 @@ import utils.{BoardGame, Coordinate, Move}
 
 class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
-  var moveGenerator: MoveGenerator.type = actor_ia.MoveGenerator
+  var moveGenerator: MoveGenerator = actor_ia.MoveGenerator()
 
   val THEORY: String = TheoryGame.GameRules.toString
   val parserProlog: ParserProlog = ParserPrologImpl(THEORY)

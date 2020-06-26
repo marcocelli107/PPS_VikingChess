@@ -2,7 +2,7 @@ package ia
 import model._
 import utils.BoardGame.BoardCell
 import utils.{Coordinate, Move}
-
+/*
 trait MiniMax {
 
   def findBestMove(game: ParserProlog):Coordinate
@@ -184,3 +184,4 @@ object TryMinMax extends App{
   println(endTime)*/
 
 }
+*/

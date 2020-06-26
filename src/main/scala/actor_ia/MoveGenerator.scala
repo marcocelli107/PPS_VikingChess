@@ -5,7 +5,7 @@ import model.{GameSnapshot, GameVariant, ParserProlog, ParserPrologImpl, Piece, 
 import utils.BoardGame.BoardCell
 import utils.{Coordinate, Move}
 
-object MoveGenerator {
+case class MoveGenerator() {
 
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     def _moves(cell: BoardCell): List[Move] = {
@@ -169,8 +169,9 @@ object daicheva extends App {
   println(stop)*/
 
   /* test move generator make move */
+  var generator: MoveGenerator = MoveGenerator()
   var snap = GameSnapshotImpl(variant, game._1, game._2, game._3, Option.empty, 0, 0)
-  val snap2 = MoveGenerator.makeMove(snap, Move(Coordinate(4,1),Coordinate(4,3)))
+  val snap2 = generator.makeMove(snap, Move(Coordinate(4,1),Coordinate(4,3)))
   println(snap2.getBoard)
 
   /* test board setcell */
