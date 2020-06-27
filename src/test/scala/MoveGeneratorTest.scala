@@ -416,12 +416,18 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   }
 
+  //TODO DELETE
+  test("Copy Snapshot - Brandubh") {
+    gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
+    snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
 
+    val snapBrandubh2 = snapBrandubh.getCopy
 
+    val step1 = moveGenerator.makeMove(snapBrandubh2, Move(Coordinate(4,6), Coordinate(1,6)))
 
-
-
-
-
-
+    println(snapBrandubh2.getBoard)
+    println()
+    println(snapBrandubh.getBoard)
+    assert(!snapBrandubh2.getBoard.equals(snapBrandubh.getBoard))
+  }
 }
