@@ -46,7 +46,7 @@ abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move:
 
     numberOfChildren = gamePossibleMove.size
 
-    //println("N° Actors: " + numberOfChildren)
+    println("N° Actors: " + numberOfChildren)
 
     var listSonRef: List[ActorRef] = List.empty
 
@@ -66,9 +66,9 @@ abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move:
     numberOfChildren = numberOfChildren - 1
     miniMaxComparison(score)
     if(myBeta <= myAlfa || numberOfChildren == 0) {
-      context.children.foreach(child => context.stop(child))
+      //context.children.foreach(child => context.stop(child))
       fatherRef ! ValueSonMsg(tempVal)
-      context.stop(self)
+     // context.stop(self)
     }
   }
 
