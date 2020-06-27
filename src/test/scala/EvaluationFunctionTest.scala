@@ -1,7 +1,7 @@
 import java.io.FileInputStream
 
 import alice.tuprolog.{Prolog, Theory}
-import ia.EvaluationFunctionImpl
+import ia.EvaluationFunctionImpl.EvaluationFunctionImpl
 import model.{Piece, TheoryGame}
 import org.scalatest.FunSuite
 import utils.BoardGame.BoardCell
@@ -11,8 +11,8 @@ class EvaluationFunctionTest extends FunSuite{
 
   val prolog: Prolog = new Prolog()
   val theory: Theory = new Theory(new FileInputStream(TheoryGame.GameRules.toString))
-  val ef11: EvaluationFunctionImpl =  new EvaluationFunctionImpl(11)
-  val ef7: EvaluationFunctionImpl =  new EvaluationFunctionImpl(7)
+  val ef11: EvaluationFunctionImpl =  EvaluationFunctionImpl(11)
+  val ef7: EvaluationFunctionImpl =   EvaluationFunctionImpl(7)
 
   test("Tests if King is near corners."){
     val c1:Coordinate = Coordinate(1,2)

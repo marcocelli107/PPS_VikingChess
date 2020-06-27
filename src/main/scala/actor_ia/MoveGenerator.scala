@@ -63,7 +63,7 @@ case class MoveGenerator() {
       case _ => Player.None
     }
 
-    def checkVictory(): Boolean = (gameSnapshot.getVariant, gameSnapshot.getPlayerToMove) match{
+    def checkVictory(): Boolean = (gameSnapshot.getVariant, gameSnapshot.getPlayerToMove) match {
       case (GameVariant.Hnefatafl | GameVariant.Tawlbwrdd, Player.Black) => checkBlackBigBoardVictory()
       case (GameVariant.Brandubh | GameVariant.Tablut , Player.Black) => checkBlackSmallBoardVictory()
       case _ => gameSnapshot.getBoard.cornerCoordinates.contains(move.to)
@@ -85,7 +85,7 @@ case class MoveGenerator() {
 
     def checkBlackSmallBoardVictory(): Boolean = {
       val kingCoord = findKing()
-      val adjacentCells = gameSnapshot.getBoard.orthogonalCells(findKing())
+      val adjacentCells = gameSnapshot.getBoard.orthogonalCells(kingCoord)
 
       checkKingCapturedSmallBoard(kingCoord, adjacentCells)
     }
