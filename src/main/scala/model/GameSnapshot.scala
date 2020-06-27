@@ -49,6 +49,6 @@ object GameSnapshot {
 
     override def getNumberCapturedWhites: Int = numberCapturedWhites
 
-    override def getCopy: GameSnapshot = GameSnapshotImpl(variant, playerToMove, winner, board, lastMove, numberCapturedBlacks, numberCapturedWhites)
+    override def getCopy: GameSnapshot = GameSnapshotImpl(variant, playerToMove, winner, board.getCopy, lastMove, numberCapturedBlacks, numberCapturedWhites)
   }
 }

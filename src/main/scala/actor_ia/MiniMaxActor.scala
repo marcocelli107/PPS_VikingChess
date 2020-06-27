@@ -12,22 +12,21 @@ case class StartMsg()
 case class ValueSonMsg(score: Int)
 
 
-abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth: Int, move: Move, fatherRef: ActorRef) extends Actor {
+abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends Actor {
 
   var numberOfChildren: Int = _
   var tempVal: Int = _
-  var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl(gameSnapshot.getBoard.size)
+  var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl(fatherGameSnapshot.getBoard.size)
   var myAlfa: Int = _
   var myBeta: Int = _
-  var myMove: Move = move
-  var fatherGame: GameSnapshot = gameSnapshot
+  var currentGame: GameSnapshot = fatherGameSnapshot
   var moveGenerator: MoveGenerator = MoveGenerator()
   var gamePossibleMove : List[Move] = List()
 
   override def receive: Receive = {
     case event: ValueSonMsg => miniMax(event.score)
-    case _ : FirstMsg => analyzeMyChildren()
-    case _ : StartMsg => compute()
+    case _: FirstMsg => analyzeMyChildren()
+    case _: StartMsg => compute()
   }
 
   def compute(): Unit = depth match {
@@ -35,46 +34,37 @@ abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth: Int, move: Move,
     case _ => analyzeMyChildren()
   }
 
-  def computeEvaluationFunction(): Unit =  fatherRef ! ValueSonMsg(evaluationFunction.score(gameSnapshot))
+  def computeEvaluationFunction(): Unit =  fatherRef ! ValueSonMsg(evaluationFunction.score(fatherGameSnapshot))
 
 
   def analyzeMyChildren(): Unit = {
 
-    if(move != null)
-      fatherGame = moveGenerator.makeMove(gameSnapshot, move)
+    if(move.nonEmpty)
+      currentGame = moveGenerator.makeMove(fatherGameSnapshot, move.get)
 
-
-    gamePossibleMove = moveGenerator.gamePossibleMoves(fatherGame)
-
-    //println(" father game " + fatherGame.getBoard + " coord " + move)
-
-
-    //println(copy.equals(fatherGame))
-
-
+    gamePossibleMove = moveGenerator.gamePossibleMoves(currentGame)
 
     numberOfChildren = gamePossibleMove.size
+
+    //println("N° Actors: " + numberOfChildren)
 
     var listSonRef: List[ActorRef] = List.empty
 
     for(pawnMove <- gamePossibleMove) {
-        val sonActor: Props = createChild(fatherGame, pawnMove, this.self)
+        val sonActor: Props = createChild(currentGame.getCopy, pawnMove, this.self)
         listSonRef = listSonRef :+ context.actorOf(sonActor)
-        myMove = pawnMove
     }
 
-    //println("Deph: " + depth + ", Number of children: " + gamePossibleMove.size)
     listSonRef.foreach( _ ! StartMsg())
   }
 
-  def createChild(fatherGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props
+  def createChild(currentGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props
 
   def miniMaxComparison(score: Int)
 
   def miniMax(score: Int): Unit = {
     numberOfChildren = numberOfChildren - 1
     miniMaxComparison(score)
-    //println("Alfa: " + myAlfa + " Beta: " + myBeta + " tempVal: " + tempVal)
     if(myBeta <= myAlfa || numberOfChildren == 0) {
       context.children.foreach(child => context.stop(child))
       fatherRef ! ValueSonMsg(tempVal)
@@ -97,8 +87,8 @@ abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth: Int, move: Move,
 object tryProva extends App {
   val THEORY: String = TheoryGame.GameRules.toString
   val game: ParserProlog = ParserPrologImpl(THEORY)
-  val initGame = game.createGame(GameVariant.Tablut.nameVariant.toLowerCase)
-  val gameSnapshot = GameSnapshot(GameVariant.Tablut, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
+  val initGame = game.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
+  val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
   val start = System.currentTimeMillis()
@@ -116,7 +106,7 @@ object tryProva extends App {
       case event: ValueSonMsg => println(event.score);  val stop = System.currentTimeMillis() - start
         println(stop)
 
-      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 4, -100, 100, null, self))) ! FirstMsg()
+      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, -100, 100, Option.empty, self))) ! FirstMsg()
     }
   }
 }

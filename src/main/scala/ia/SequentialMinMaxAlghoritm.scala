@@ -25,7 +25,7 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
       case Nil  => bestCoord
       case h::t => {
                 val sonGameSnapshot = moveGenerator.makeMove(gameSnapshot.getCopy,h)
-                val moveScore = pruningAlfaBeta(sonGameSnapshot, depth, -100,+100, MaxMin.min )
+                val moveScore = pruningAlfaBeta(sonGameSnapshot, depth, -100,+100, MaxMin.min)
                 val (newBestCoord, newBestScore) = if (bestScore > moveScore ) (bestCoord , bestScore) else (h, moveScore)
                _findBestMove( newBestCoord, newBestScore ,t )
       }
