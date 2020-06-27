@@ -93,6 +93,8 @@ object BoardGame {
 
     def centerCoordinates: Coordinate
 
+    def getCopy: Board
+
   }
 
   object Board {
@@ -138,6 +140,7 @@ object BoardGame {
 
       override def centerCoordinates: Coordinate = Coordinate(size / 2 + 1, size / 2 + 1)
 
+      override def getCopy: Board = BoardImpl(allCells)
     }
 
   }

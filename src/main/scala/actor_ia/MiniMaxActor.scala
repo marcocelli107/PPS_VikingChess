@@ -12,13 +12,14 @@ case class StartMsg()
 case class ValueSonMsg(score: Int)
 
 
-abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth:Int, move: Move, fatherRef: ActorRef) extends Actor{
+abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth: Int, move: Move, fatherRef: ActorRef) extends Actor {
 
   var numberOfChildren: Int = _
   var tempVal: Int = _
   var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl(gameSnapshot.getBoard.size)
   var myAlfa: Int = _
   var myBeta: Int = _
+  var myMove: Move = move
   var fatherGame: GameSnapshot = gameSnapshot
   var moveGenerator: MoveGenerator = MoveGenerator()
   var gamePossibleMove : List[Move] = List()
@@ -34,16 +35,16 @@ abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth:Int, move: Move, 
     case _ => analyzeMyChildren()
   }
 
-  def computeEvaluationFunction(): Unit =  fatherRef! ValueSonMsg(evaluationFunction.score(gameSnapshot))
+  def computeEvaluationFunction(): Unit =  fatherRef ! ValueSonMsg(evaluationFunction.score(gameSnapshot))
 
 
-  def analyzeMyChildren():Unit = {
-
+  def analyzeMyChildren(): Unit = {
 
     if(move != null)
       fatherGame = moveGenerator.makeMove(gameSnapshot, move)
 
-    gamePossibleMove = moveGenerator.gamePossibleMoves(gameSnapshot)
+
+    gamePossibleMove = moveGenerator.gamePossibleMoves(fatherGame)
 
     //println(" father game " + fatherGame.getBoard + " coord " + move)
 
@@ -56,15 +57,14 @@ abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth:Int, move: Move, 
 
     var listSonRef: List[ActorRef] = List.empty
 
-    for(pawnMove <- gamePossibleMove ) {
-        val sonActor: Props = createChild(fatherGame, pawnMove, self)
-        val sonRef = context.actorOf(sonActor)
-        listSonRef = listSonRef :+ sonRef
+    for(pawnMove <- gamePossibleMove) {
+        val sonActor: Props = createChild(fatherGame, pawnMove, this.self)
+        listSonRef = listSonRef :+ context.actorOf(sonActor)
+        myMove = pawnMove
     }
 
-    println("Number of children: " + gamePossibleMove.size)
-    listSonRef.foreach( x => x ! StartMsg())
-
+    //println("Deph: " + depth + ", Number of children: " + gamePossibleMove.size)
+    listSonRef.foreach( _ ! StartMsg())
   }
 
   def createChild(fatherGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props
@@ -86,17 +86,19 @@ abstract class MiniMaxActor (gameSnapshot: GameSnapshot, depth:Int, move: Move, 
 
 /** PERFORMANCE HNEFATAFL
   *
-  * DEPH 1: circa 0.08 sec
-  * DEPH 2: circa 0.8 sec
-  * DEPH 3: circa 10 sec
-  * DEPH 4: circa 30 sec
+  * DEPH 1: HNEFATAFL - circa 0.08 sec / TAWLBWURDD - circa 0.07 sec / TABLUT - circa 0.06 sec / BRANDUBH - circa 0.05 sec
+  * DEPH 2: HNEFATAFL - circa 0.8 sec / TAWLBWURDD - circa 1.11 sec / TABLUT - circa 0.76 sec / BRANDUBH - circa 0.44 sec
+  * DEPH 3: HNEFATAFL - circa 8 sec / TAWLBWURDD - circa 10 sec / TABLUT - circa 4 sec / BRANDUBH - circa 1.4 sec
+  *
+  * ADESSO VA MA CON 9x9 e SUPERIORI CI METTE TROPPO
+  * DEPH 4: HNEFATAFL - circa ... sec / TAWLBWURDD - circa ... sec / TABLUT - circa ... sec / BRANDUBH - circa 17 sec
   *
   */
 object tryProva extends App {
   val THEORY: String = TheoryGame.GameRules.toString
   val game: ParserProlog = ParserPrologImpl(THEORY)
-  val initGame = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
-  val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
+  val initGame = game.createGame(GameVariant.Tablut.nameVariant.toLowerCase)
+  val gameSnapshot = GameSnapshot(GameVariant.Tablut, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
   val start = System.currentTimeMillis()
@@ -114,7 +116,7 @@ object tryProva extends App {
       case event: ValueSonMsg => println(event.score);  val stop = System.currentTimeMillis() - start
         println(stop)
 
-      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, -100, 100, null, self))) ! FirstMsg()
+      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 4, -100, 100, null, self))) ! FirstMsg()
     }
   }
 }

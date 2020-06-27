@@ -24,6 +24,8 @@ trait GameSnapshot {
   def getNumberCapturedBlacks: Int
 
   def getNumberCapturedWhites: Int
+
+  def getCopy: GameSnapshot
 }
 
 object GameSnapshot {
@@ -46,5 +48,7 @@ object GameSnapshot {
     override def getNumberCapturedBlacks: Int = numberCapturedBlacks
 
     override def getNumberCapturedWhites: Int = numberCapturedWhites
+
+    override def getCopy: GameSnapshot = GameSnapshotImpl(variant, playerToMove, winner, board, lastMove, numberCapturedBlacks, numberCapturedWhites)
   }
 }
