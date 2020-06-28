@@ -148,6 +148,9 @@ object ViewMatch {
       boardPanel.validate()
       gamePanel.validate()
 
+      if(gameSnapshot.getPlayerToMove != view.getPlayerChosen && gameSnapshot.getWinner.equals(Player.None))
+        view.makeMoveIA()
+
       /* TODO NON FUNZIONA */
       //ViewFactory.generateASoundForMove()
     }

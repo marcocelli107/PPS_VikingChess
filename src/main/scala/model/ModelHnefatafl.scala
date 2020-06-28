@@ -1,6 +1,9 @@
 package model
 
+import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
+import ia.{MiniMax, MiniMaxImpl}
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
@@ -26,6 +29,11 @@ trait ModelHnefatafl {
    * @return list buffer of the possible computed moves.
    */
   def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
+
+  /**
+    * Sends a message to IA Actor for the best move.
+    */
+  def makeMoveIA()
 
   /**
    * Calls parser for making a move from coordinate to coordinate.
@@ -92,19 +100,20 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
-  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Value): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA)
+  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA)
 
-  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Value) extends ModelHnefatafl {
+  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Val) extends ModelHnefatafl {
 
     /**
      * Inits the parser prolog and set the file of the prolog rules.
      */
     private val THEORY: String = TheoryGame.GameRules.toString
-    private var CONSECUTIVE_UNDO_MOVE: Int = 3
     private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
-    private var currentNumberUndoMove: Int = 0
+
+    private var refIA: ActorRef = _
+    private val sequIA: MiniMax = MiniMaxImpl(level.depth,newVariant.size)
 
     /**
      * Defines status of the current game.
@@ -126,13 +135,15 @@ object ModelHnefatafl {
     /**
       * Defines the chosen level of IA.
       */
-    private val levelIA: Level.Value = level
+    private val levelIA: Level.Val = level
 
     override def createGame(): (Board, Player.Val) = {
 
       game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
 
       storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
+
+      initIAIfPVEMode()
 
       (game._3, game._1)
     }
@@ -141,6 +152,14 @@ object ModelHnefatafl {
       if (showingCurrentSnapshot)
         parserProlog.showPossibleCells(cell)
       else ListBuffer.empty
+    }
+
+    override def makeMoveIA(): Unit = {
+      //SEQUENTIAL IA
+      //makeMove(sequIA.findBestMove(storySnapshot.last))
+
+      //PARALLEL
+      refIA ! FindBestMoveMsg(storySnapshot.last)
     }
 
     override def makeMove(move: Move): Unit = {
@@ -159,6 +178,7 @@ object ModelHnefatafl {
 
       controller.activeFirstPrevious()
       controller.activeUndo()
+
       controller.updateView(storySnapshot.last)
     }
 
@@ -218,6 +238,9 @@ object ModelHnefatafl {
       case _ => false
     }
 
+    /**
+      * Increments current snapshot.
+      */
     private def incrementCurrentSnapshot(): Unit = {
       if(!showingCurrentSnapshot) {
         currentSnapshot += 1
@@ -226,6 +249,9 @@ object ModelHnefatafl {
       if(showingCurrentSnapshot) controller.disableNextLast()
     }
 
+    /**
+      * Decrements current snapshot.
+      */
     private def decrementCurrentSnapshot(): Unit = {
       if(currentSnapshot > 0) {
         currentSnapshot -= 1
@@ -234,6 +260,19 @@ object ModelHnefatafl {
       if(currentSnapshot == 0) controller.disableFirstPrevious()
     }
 
+    /**
+      * Checks if the currentSnapshot is the last.
+      */
     private def showingCurrentSnapshot: Boolean = currentSnapshot == storySnapshot.size - 1
+
+    /**
+      * Actives the IA Actor
+      */
+    private def initIAIfPVEMode(): Unit = mode match {
+      case GameMode.PVE =>
+        val system: ActorSystem = ActorSystem()
+        refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
+      case _ =>
+    }
   }
 }

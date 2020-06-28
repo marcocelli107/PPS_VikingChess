@@ -46,7 +46,7 @@ abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move:
 
     numberOfChildren = gamePossibleMove.size
 
-    println("N° Actors: " + numberOfChildren)
+    //println("Depth: " + depth + ", N° Actors: " + numberOfChildren)
 
     var listSonRef: List[ActorRef] = List.empty
 

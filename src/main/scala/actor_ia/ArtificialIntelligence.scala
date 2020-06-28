@@ -12,10 +12,10 @@ case class ReturnBestMoveMsg(bestMove: Move)
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
 object ArtificialIntelligenceImpl {
-  def apply(depth: Int): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(depth)
+  def apply(model: ModelHnefatafl, depth: Int): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth)
 }
 
- case class ArtificialIntelligenceImpl(depth:Int) extends Actor  {
+ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth:Int) extends Actor  {
 
   val moveGenerator: MoveGenerator = MoveGenerator()
   private val hashMapSonRef: mutable.HashMap[ActorRef,Move] = mutable.HashMap.empty
@@ -36,7 +36,7 @@ object ArtificialIntelligenceImpl {
   }
 
   private def updateBest(newScore: Int, actorRef: ActorRef): Unit = {
-    println("NewScore " + newScore)
+    //println("NewScore " + newScore)
     numberChildren -= 1
     if (newScore > bestScore)
       bestScore = newScore
@@ -49,7 +49,7 @@ object ArtificialIntelligenceImpl {
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
     case event: ValueSonMsg => updateBest(event.score, context.sender())
-    case event: ReturnBestMoveMsg => println(event.bestMove)
+    case _: ReturnBestMoveMsg => model.makeMove(bestMove)
   }
 }
 
@@ -60,7 +60,7 @@ object TryIA extends App {
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
-  system.actorOf(Props(ArtificialIntelligenceImpl(3)))!FindBestMoveMsg(gameSnapshot)
+  system.actorOf(Props(ArtificialIntelligenceImpl(null, 3)))!FindBestMoveMsg(gameSnapshot)
 
 
 
