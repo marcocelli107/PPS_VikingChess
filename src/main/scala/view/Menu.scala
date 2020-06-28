@@ -62,7 +62,7 @@ trait Menu {
     *
     * @return level
     */
-  def getDifficult: Level.Value
+  def getDifficult: Level.Val
 
   /**
     * Initializes the game menù.
@@ -93,7 +93,7 @@ object Menu {
 
     private var gameMode: GameMode.Value = _
     private var boardVariant: GameVariant.Val = _
-    private var levelIA: Level.Value = _
+    private var levelIA: Level.Val = _
     private var player: Player.Val = _
 
     private var limits: GridBagConstraints = _
@@ -266,7 +266,7 @@ object Menu {
 
     override def getGameMode: GameMode.Value = gameMode
 
-    override def getDifficult: Level.Value = levelIA
+    override def getDifficult: Level.Val = levelIA
 
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = MenuFactory.createMenuPanel("Choose Option: ")
@@ -274,7 +274,7 @@ object Menu {
       returnToGame.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, view.getGamePanel))
 
       restartGame = MenuFactory.createMainButton("Restart Match")
-      restartGame.addActionListener((_: ActionEvent) => {view.initOrRestoreGUI(); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
+      restartGame.addActionListener((_: ActionEvent) => {view.initOrRestoreGUI(player); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
 
       returnToMenu = MenuFactory.createMainButton("Leave Match")
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, menuPanel))
@@ -372,7 +372,7 @@ object Menu {
       * Initializes or restores the game by calling game view.
       */
     private def initOrRestore(): Unit = {
-      view.initOrRestoreGUI()
+      view.initOrRestoreGUI(player)
     }
   }
 }

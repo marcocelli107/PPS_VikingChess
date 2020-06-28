@@ -12,7 +12,7 @@ trait ControllerHnefatafl {
     *
     * @return board and player to move.
     */
-  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Value): (Board, Player.Value)
+  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val): (Board, Player.Value)
 
   /**
     * Calls model for the possible moves from a specified coordinate.
@@ -20,6 +20,11 @@ trait ControllerHnefatafl {
     * @return list of coordinates
     */
   def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate]
+
+  /**
+    * Calls the model to make the IA move.
+    */
+  def makeMoveIA()
 
   /**
     * Calls model for making a move from coordinate to coordinate.
@@ -117,16 +122,16 @@ object ControllerHnefatafl {
     private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Value): (Board, Player.Value) = {
+    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val): (Board, Player.Value) = {
       modelGame = ModelHnefatafl(this, variant, gameMode, levelIA)
       modelGame.createGame()
     }
 
     override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = modelGame.showPossibleCells(coordinate)
 
-    override def makeMove(move: Move): Unit = {
-      modelGame.makeMove(move: Move)
-    }
+    override def makeMoveIA(): Unit = modelGame.makeMoveIA()
+
+    override def makeMove(move: Move): Unit = modelGame.makeMove(move: Move)
 
     override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
 
