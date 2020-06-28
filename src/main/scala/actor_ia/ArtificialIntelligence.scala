@@ -28,7 +28,7 @@ object ArtificialIntelligenceImpl {
     numberChildren = gamePossibleMoves.size
 
     for(possibleMove <- gamePossibleMoves) {
-      val sonActor: Props = Props(MinActor(gameSnapshot.getCopy, depth, -100, 100, Option(possibleMove), self))
+      val sonActor: Props = Props(MinActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
       val refSonActor = context.actorOf(sonActor)
       refSonActor ! StartMsg()
       hashMapSonRef += (refSonActor -> possibleMove)
@@ -60,7 +60,7 @@ object TryIA extends App {
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
-  system.actorOf(Props(ArtificialIntelligenceImpl(null, 3)))!FindBestMoveMsg(gameSnapshot)
+  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2)))!FindBestMoveMsg(gameSnapshot)
 
 
 

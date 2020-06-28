@@ -15,10 +15,8 @@ case class ValueSonMsg(score: Int)
 abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends Actor {
 
   var numberOfChildren: Int = _
-  var tempVal: Int = _
   var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl()
-  var myAlfa: Int = _
-  var myBeta: Int = _
+  var alfa: Int = _
   var currentGame: GameSnapshot = fatherGameSnapshot
   var moveGenerator: MoveGenerator = MoveGenerator()
   var gamePossibleMove : List[Move] = List()
@@ -65,9 +63,9 @@ abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move:
   def miniMax(score: Int): Unit = {
     numberOfChildren = numberOfChildren - 1
     miniMaxComparison(score)
-    if(myBeta <= myAlfa || numberOfChildren == 0) {
+    if( numberOfChildren == 0) {
       //context.children.foreach(child => context.stop(child))
-      fatherRef ! ValueSonMsg(tempVal)
+      fatherRef ! ValueSonMsg(alfa)
      // context.stop(self)
     }
   }
@@ -106,7 +104,7 @@ object tryProva extends App {
       case event: ValueSonMsg => println(event.score);  val stop = System.currentTimeMillis() - start
         println(stop)
 
-      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, -100, 100, Option.empty, self))) ! FirstMsg()
+      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, Option.empty, self))) ! FirstMsg()
     }
   }
 }
