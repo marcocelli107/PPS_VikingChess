@@ -16,7 +16,7 @@ abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move:
 
   var numberOfChildren: Int = _
   var tempVal: Int = _
-  var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl(fatherGameSnapshot.getBoard.size)
+  var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl()
   var myAlfa: Int = _
   var myBeta: Int = _
   var currentGame: GameSnapshot = fatherGameSnapshot
@@ -34,7 +34,7 @@ abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move:
     case _ => analyzeMyChildren()
   }
 
-  def computeEvaluationFunction(): Unit =  fatherRef ! ValueSonMsg(evaluationFunction.score(fatherGameSnapshot))
+  def computeEvaluationFunction(): Unit =  fatherRef ! ValueSonMsg(evaluationFunction.score(fatherGameSnapshot, move.get))
 
 
   def analyzeMyChildren(): Unit = {

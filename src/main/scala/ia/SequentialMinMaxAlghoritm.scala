@@ -10,13 +10,13 @@ trait MiniMax {
 }
 
 object MiniMaxImpl {
-  def apply(depth: Int, sizeBoard: Int): MiniMaxImpl = new MiniMaxImpl(depth, sizeBoard)
+  def apply(depth: Int): MiniMaxImpl = new MiniMaxImpl(depth)
 }
 
 
-class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
+class MiniMaxImpl(depth: Int ) extends  MiniMax {
 
-  var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl(sizeBoard)
+  var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl()
   var moveGenerator: MoveGenerator = MoveGenerator()
 
   override def findBestMove(gameSnapshot: GameSnapshot):Move = {
@@ -25,7 +25,7 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
       case Nil  => bestCoord
       case h::t => {
                 val sonGameSnapshot = moveGenerator.makeMove(gameSnapshot.getCopy,h)
-                val moveScore = pruningAlfaBeta(sonGameSnapshot, depth, -100,+100, MaxMin.min)
+                val moveScore = pruningAlfaBeta(sonGameSnapshot, depth, -100,+100, MaxMin.min, h)
                 val (newBestCoord, newBestScore) = if (bestScore > moveScore ) (bestCoord , bestScore) else (h, moveScore)
                _findBestMove( newBestCoord, newBestScore ,t )
       }
@@ -34,9 +34,9 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
   }
 
 
-  def pruningAlfaBeta (sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin.Value ): Int =  (depth, phase)  match {
-    case (_,_)  if(isTerminalNode(sonGameSnapshot)) => evaluationFunction.score(sonGameSnapshot)
-    case (0,_)  => evaluationFunction.score(sonGameSnapshot)
+  def pruningAlfaBeta (sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin.Value, move: Move ): Int =  (depth, phase)  match {
+    case (_,_)  if(isTerminalNode(sonGameSnapshot)) => evaluationFunction.score(sonGameSnapshot, move)
+    case (0,_)  => evaluationFunction.score(sonGameSnapshot, move)
     case (_, MaxMin.Max) => maximizationPhase(sonGameSnapshot, depth, alfa, beta)
     case  _ => minimizationPhase(sonGameSnapshot, depth, alfa, beta)
   }
@@ -51,7 +51,7 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
       case _  if beta <= alfa => tempVal
       case h::t =>  {
             val sonGame: GameSnapshot = moveGenerator.makeMove(sonGameSnapshot.getCopy, h)
-            val newTempVal = math.max(tempVal, pruningAlfaBeta(sonGame, depth-1, alfa, beta, MaxMin.min))
+            val newTempVal = math.max(tempVal, pruningAlfaBeta(sonGame, depth-1, alfa, beta, MaxMin.min, h))
             val newAlfa = math.max(alfa, newTempVal)
             //println("Max: " + depth)
             _maximizationPhase(t, newTempVal, depth, newAlfa, beta)
@@ -71,7 +71,7 @@ class MiniMaxImpl(depth: Int, sizeBoard: Int ) extends  MiniMax {
       case _  if beta <= alfa => tempVal
       case h::t =>  {
             val sonGame: GameSnapshot = moveGenerator.makeMove(sonGameSnapshot.getCopy, h)
-            val newTempVal = math.min(tempVal, pruningAlfaBeta(sonGame, depth - 1, alfa, beta, MaxMin.Max))
+            val newTempVal = math.min(tempVal, pruningAlfaBeta(sonGame, depth - 1, alfa, beta, MaxMin.Max, h))
             val newBeta = math.min(beta, newTempVal)
             _minimizationPhase( t, newTempVal, depth, alfa, newBeta)
       }
@@ -91,7 +91,7 @@ object TryMinMax extends App{
   val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 
 
-  val miniMax: MiniMax = new MiniMaxImpl(  2, 11 )
+  val miniMax: MiniMax = new MiniMaxImpl(  3 )
 
   println( miniMax.findBestMove(gameSnapshot))
 
