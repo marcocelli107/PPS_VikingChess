@@ -27,7 +27,7 @@ object Player extends Enumeration {
 }
 
 /**
-  * Defines Enumeration for the IA.
+  * Defines Enumeration for the IA difficulty.
   */
 object Level extends Enumeration {
   case class Val(difficulty: String, depth: Int) extends super.Val
