@@ -30,10 +30,11 @@ object Player extends Enumeration {
   * Defines Enumeration for the IA.
   */
 object Level extends Enumeration {
-  val Newcomer: Level.Value = Value("Newcomer")
-  val Amateur: Level.Value = Value("Amateur")
-  val Standard: Level.Value = Value("Standard")
-  val Advanced: Level.Value = Value("Advanced")
+  case class Val(difficulty: String, depth: Int) extends super.Val
+  val Newcomer: Val = Val("Newcomer", 1)
+  val Amateur: Val = Val("Amateur", 2)
+  val Standard: Val = Val("Standard", 3)
+  val Advanced: Val = Val("Advanced", 4)
 }
 
 /**

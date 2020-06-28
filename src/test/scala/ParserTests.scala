@@ -175,13 +175,13 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
 
   test("Tests 2 deep clone."){
     var copyParser: ParserProlog = null
-
-    parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
-    parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,5)))
-    parser.makeLegitMove(Move(Coordinate(4,5), Coordinate(7,5)))
-    parser.makeLegitMove(Move(Coordinate(6,4), Coordinate(6,5)))
+    inSequence {
+      parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
+      parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,5)))
+      parser.makeLegitMove(Move(Coordinate(4,5), Coordinate(7,5)))
+      parser.makeLegitMove(Move(Coordinate(6,4), Coordinate(6,5)))
+    }
     copyParser = parser.copy()
-
     assert(parser.equals(copyParser))
   }
 
@@ -190,11 +190,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       copyParser = parser.copy()
-
       parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,3)))
-
-      println(copyParser.getActualBoard.toString )
-      println(parser.getActualBoard.toString )
     }
     assert(parser.showPossibleCells(Coordinate(1, 4)).isEmpty)
     assert(copyParser.showPossibleCells(Coordinate(1, 4)).nonEmpty)

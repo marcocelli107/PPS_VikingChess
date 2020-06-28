@@ -2,7 +2,7 @@ package view
 
 import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
-import model.{GameSnapshot, Player, Snapshot}
+import model.{GameMode, GameSnapshot, Player, Snapshot}
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
@@ -47,7 +47,12 @@ trait ViewHnefatafl {
   /**
     * Initializes or restores the game.
     */
-  def initOrRestoreGUI()
+  def initOrRestoreGUI(playerChosen: Player.Value)
+
+  /**
+    * Calls the controller to make the IA move.
+    */
+  def makeMoveIA()
 
   /**
     * Makes move.
@@ -141,6 +146,11 @@ trait ViewHnefatafl {
     */
   def activeUndo()
   def disableUndo()
+
+  /**
+    * Gets player chosen from user.
+    */
+  def getPlayerChosen: Player.Value
 }
 
 object ViewHnefatafl {
@@ -185,7 +195,7 @@ object ViewHnefatafl {
 
     override def getMenuUtils: Menu = viewMainMenu
 
-    override def initOrRestoreGUI(): Unit = {
+    override def initOrRestoreGUI(playerChosen: Player.Value): Unit = {
       if (gamePanel.getComponents.length > 0) {
         viewMatch.restoreGame()
         overlayPanel.remove(gamePanel)
@@ -197,7 +207,12 @@ object ViewHnefatafl {
       overlayPanel.add(gamePanel)
       showGame()
       viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
+
+      if(viewMainMenu.getGameMode.equals(GameMode.PVE) & playerChosen.equals(Player.White))
+        makeMoveIA()
     }
+
+    override def makeMoveIA(): Unit = controller.makeMoveIA()
 
     override def makeMove(move: Move): Unit = {
       controller.makeMove(move)
@@ -232,6 +247,8 @@ object ViewHnefatafl {
     override def activeNextLast(): Unit = viewMatch.activeNextLast()
 
     override def activeFirstPrevious(): Unit = viewMatch.activeFirstPrevious()
+
+    override def getPlayerChosen: Player.Value = viewMainMenu.getPlayer
 
     /**
       * Initializes the main menù.
