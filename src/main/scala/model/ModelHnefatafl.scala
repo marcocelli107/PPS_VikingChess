@@ -113,7 +113,7 @@ object ModelHnefatafl {
     private var currentSnapshot: Int = 0
 
     private var refIA: ActorRef = _
-    private val sequIA: MiniMax = MiniMaxImpl(level.depth,newVariant.size)
+    private val sequIA: MiniMax = MiniMaxImpl(level.depth)
 
     /**
      * Defines status of the current game.
