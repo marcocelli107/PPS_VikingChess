@@ -14,11 +14,23 @@ import scala.collection.mutable.ListBuffer
 trait ModelHnefatafl {
 
   /**
+    * Gets dimension of board from a specified version.
+    *
+    * @return dimension
+    */
+  def getDimension: Int
+
+  /**
    * Calls parser for a new Game.
    *
    * @return created board and player to move.
    */
   def createGame(): (Board, Player.Val)
+
+  /**
+    * Initializes IA in PVE mode. IA makes first move if is your turn.
+    */
+  def startGame(): Unit
 
   /**
    * Calls parser for the possible moves from a cell.
@@ -29,11 +41,6 @@ trait ModelHnefatafl {
    * @return list buffer of the possible computed moves.
    */
   def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
-
-  /**
-    * Sends a message to IA Actor for the best move.
-    */
-  def makeMoveIA()
 
   /**
    * Calls parser for making a move from coordinate to coordinate.
@@ -100,9 +107,9 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
-  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA)
+  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
 
-  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Val) extends ModelHnefatafl {
+  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Val, playerChosen: Player.Value) extends ModelHnefatafl {
 
     /**
      * Inits the parser prolog and set the file of the prolog rules.
@@ -113,7 +120,7 @@ object ModelHnefatafl {
     private var currentSnapshot: Int = 0
 
     private var refIA: ActorRef = _
-    private val sequIA: MiniMax = MiniMaxImpl(level.depth)
+    private var sequIA: MiniMax = _
 
     /**
      * Defines status of the current game.
@@ -137,29 +144,29 @@ object ModelHnefatafl {
       */
     private val levelIA: Level.Val = level
 
+    override def getDimension: Int = newVariant.size
+
     override def createGame(): (Board, Player.Val) = {
 
       game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
 
       storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
 
-      initIAIfPVEMode()
-
       (game._3, game._1)
+    }
+
+    override def startGame(): Unit = {
+      if(mode.equals(GameMode.PVE)) {
+        initIA()
+        if (playerChosen != storySnapshot.last.getPlayerToMove)
+          makeMoveIA()
+      }
     }
 
     override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
       if (showingCurrentSnapshot)
         parserProlog.showPossibleCells(cell)
       else ListBuffer.empty
-    }
-
-    override def makeMoveIA(): Unit = {
-      //SEQUENTIAL IA
-      //makeMove(sequIA.findBestMove(storySnapshot.last))
-
-      //PARALLEL
-      refIA ! FindBestMoveMsg(storySnapshot.last)
     }
 
     override def makeMove(move: Move): Unit = {
@@ -176,10 +183,17 @@ object ModelHnefatafl {
 
       currentSnapshot += 1
 
-      controller.activeFirstPrevious()
-      controller.activeUndo()
+
+      if(!(refIA != null & storySnapshot.size <= 2) || mode.equals(GameMode.PVP)) {
+        controller.activeFirstPrevious()
+        controller.activeUndo()
+      }
 
       controller.updateView(storySnapshot.last)
+
+      if(storySnapshot.last.getWinner.equals(Player.None) && iaTurn){
+        makeMoveIA()
+      }
     }
 
     override def isCentralCell(coordinate: Coordinate): Boolean = parserProlog.isCentralCell(coordinate)
@@ -198,24 +212,47 @@ object ModelHnefatafl {
         case Snapshot.Last => currentSnapshot = storySnapshot.size - 1; controller.disableNextLast(); controller.activeFirstPrevious()
       }
       val gameSnapshot = storySnapshot(currentSnapshot)
-      controller.updateView(gameSnapshot)
+      controller.changeSnapshotView(gameSnapshot)
     }
 
     override def undoMove(): Unit = {
-      if (showingCurrentSnapshot) {
-        if (storySnapshot.last.getLastMove.nonEmpty) {
-          storySnapshot -= storySnapshot.last
-          controller.activeFirstPrevious()
-          currentSnapshot -= 1
-          parserProlog.undoMove(storySnapshot.last.getBoard)
-          controller.updateView(storySnapshot.last)
-        }
+      if (showingCurrentSnapshot & storySnapshot.last.getLastMove.nonEmpty) {
+        storySnapshot -= storySnapshot.last
+        currentSnapshot -= 1
+        controller.activeFirstPrevious()
+        parserProlog.undoMove(storySnapshot.last.getBoard)
+        pveUndoMove()
+        controller.changeSnapshotView(storySnapshot.last)
       }
       if(storySnapshot.size == 1) {
         controller.disableNextLast()
         controller.disableFirstPrevious()
         controller.disableUndo()
+        if(iaTurn)
+          makeMoveIA()
       }
+    }
+
+    /**
+      * Deletes an other snapshot for start from user move.
+      */
+    private def pveUndoMove(): Unit = {
+      if(mode.equals(GameMode.PVE) & storySnapshot.size > 1) {
+        storySnapshot -= storySnapshot.last
+        currentSnapshot -= 1
+        parserProlog.undoMove(storySnapshot.last.getBoard)
+      }
+    }
+
+    /**
+      * Sends a messages to IA actor for make a move.
+      */
+    private def makeMoveIA(): Unit = {
+      //SEQUENTIAL IA
+      //makeMove(sequIA.findBestMove(storySnapshot.last))
+
+      //PARALLEL
+      refIA ! FindBestMoveMsg(storySnapshot.last)
     }
 
     /**
@@ -268,11 +305,17 @@ object ModelHnefatafl {
     /**
       * Actives the IA Actor
       */
-    private def initIAIfPVEMode(): Unit = mode match {
-      case GameMode.PVE =>
-        val system: ActorSystem = ActorSystem()
-        refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
-      case _ =>
+    private def initIA(): Unit = {
+      val system: ActorSystem = ActorSystem()
+      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
+      //sequIA = MiniMaxImpl(levelIA.depth)
     }
+
+    /**
+      * Checks if IA turn.
+      *
+      * @return boolean
+      */
+    private def iaTurn: Boolean = !storySnapshot.last.getPlayerToMove.equals(playerChosen)
   }
 }

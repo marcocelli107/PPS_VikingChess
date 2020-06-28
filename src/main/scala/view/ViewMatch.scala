@@ -3,7 +3,7 @@ package view
 import java.awt.{Dimension, GridBagConstraints}
 
 import javax.swing._
-import model.{GameSnapshot, Piece, Player, Snapshot}
+import model._
 import utils.BoardGame.{Board, BoardCell}
 import utils.{Coordinate, Move}
 
@@ -34,12 +34,20 @@ trait ViewMatch {
   def getLabelPlayer: JLabel
 
   /**
-    * Shows the specified snapshot of the game
+    * Updates view to current snapshot.
+    *
+    * @param gameSnapshot
+    *                 snapshot to update.
+    */
+  def update(gameSnapshot: GameSnapshot)
+
+  /**
+    * Shows the specified snapshot of the game.
     *
     * @param gameSnapshot
     *                 snapshot to show.
     */
-  def update(gameSnapshot: GameSnapshot)
+  def updateSnapshot(gameSnapshot: GameSnapshot)
 
   /**
     * Actives/Disables next and last move.
@@ -62,6 +70,7 @@ trait ViewMatch {
 }
 
 object ViewMatch {
+
   def apply(gameView: ViewHnefatafl): ViewMatch = ViewMatchImpl(gameView)
 
   case class ViewMatchImpl(view: ViewHnefatafl) extends ViewMatch {
@@ -81,8 +90,6 @@ object ViewMatch {
     private val playerWhiteLabel: JLabel = MenuFactory.createLabelWhitePlayer
     private val playerBlackLabel: JLabel = MenuFactory.createLabelBlackPlayer
 
-    private var board: Board = _
-
     private val cells: mutable.HashMap[Coordinate, Cell] = mutable.HashMap.empty
     private var possibleMoves: Seq[Coordinate] = Seq.empty
     private var selectedCell: Option[Coordinate] = Option.empty
@@ -91,9 +98,7 @@ object ViewMatch {
 
     private var limits: GridBagConstraints = _
 
-    override def initGamePanel(board: Board): JPanel = {
-      this.board = board
-
+    override def initGamePanel(initialBoard: Board): JPanel = {
       limits = GameFactory.createBagConstraints
       limits.fill = GridBagConstraints.NONE
       limits.anchor = GridBagConstraints.LINE_START
@@ -104,7 +109,7 @@ object ViewMatch {
       initSouthPanel()
       initLeftRightPanel()
       initBoard()
-      drawPawns(board)
+      drawPawns(initialBoard)
 
       gamePanel = GameFactory.createGamePanel
       gamePanel.add(northPanel)
@@ -127,6 +132,15 @@ object ViewMatch {
     override def getLabelPlayer: JLabel = playerOrWinnerLabel
 
     override def update(gameSnapshot: GameSnapshot): Unit = {
+      updateSnapshot(gameSnapshot)
+
+      //makeMoveIA(gameSnapshot)
+
+      /* TODO NON FUNZIONA */
+      //ViewFactory.generateASoundForMove()
+    }
+
+    override def updateSnapshot(gameSnapshot: GameSnapshot): Unit = {
       addLostPawns(gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites)
       drawPawns(gameSnapshot.getBoard)
 
@@ -147,12 +161,6 @@ object ViewMatch {
       boardPanel.repaint()
       boardPanel.validate()
       gamePanel.validate()
-
-      if(gameSnapshot.getPlayerToMove != view.getPlayerChosen && gameSnapshot.getWinner.equals(Player.None))
-        view.makeMoveIA()
-
-      /* TODO NON FUNZIONA */
-      //ViewFactory.generateASoundForMove()
     }
 
     override def activeNextLast(): Unit = {
@@ -338,6 +346,7 @@ object ViewMatch {
       * Initializes the panels of captures.
       */
     private def initLeftRightPanel(): Unit = {
+
       leftPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
       rightPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
     }

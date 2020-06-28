@@ -315,6 +315,9 @@ object Menu {
 
     /**
       * Sets the variant chosen from user.
+      *
+      * @param variant
+      *              variant chosen from user.
       */
     private def setBoardVariant(variant: String): Unit = variant match {
       case "Hnefatafl" => boardVariant = GameVariant.Hnefatafl

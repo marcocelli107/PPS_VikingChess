@@ -8,11 +8,23 @@ import utils.{Coordinate, Move}
 trait ControllerHnefatafl {
 
   /**
-    * Calls model for a new game.
+    * Calls model to a new game.
     *
     * @return board and player to move.
     */
-  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val): (Board, Player.Value)
+  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value)
+
+  /**
+    * Calls model to initialize IA in PVE mode.
+    */
+  def startGame(): Unit
+
+  /**
+    * Calls model to get dimension of board.
+    *
+    * @return dimension
+    */
+  def getDimension: Int
 
   /**
     * Calls model for the possible moves from a specified coordinate.
@@ -20,11 +32,6 @@ trait ControllerHnefatafl {
     * @return list of coordinates
     */
   def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate]
-
-  /**
-    * Calls the model to make the IA move.
-    */
-  def makeMoveIA()
 
   /**
     * Calls model for making a move from coordinate to coordinate.
@@ -43,6 +50,14 @@ trait ControllerHnefatafl {
     *                 snapshot to show.
     */
   def updateView(gameSnapshot: GameSnapshot): Unit
+
+  /**
+    * Notifies the viewer a change snapshot to view.
+    *
+    * @param gameSnapshot
+    *                 snapshot to show.
+    */
+  def changeSnapshotView(gameSnapshot: GameSnapshot): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -122,18 +137,22 @@ object ControllerHnefatafl {
     private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val): (Board, Player.Value) = {
-      modelGame = ModelHnefatafl(this, variant, gameMode, levelIA)
+    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value) = {
+      modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)
       modelGame.createGame()
     }
 
+    override def startGame(): Unit = modelGame.startGame()
+
     override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = modelGame.showPossibleCells(coordinate)
 
-    override def makeMoveIA(): Unit = modelGame.makeMoveIA()
+    override def getDimension: Int = modelGame.getDimension
 
     override def makeMove(move: Move): Unit = modelGame.makeMove(move: Move)
 
     override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
+
+    override def changeSnapshotView(gameSnapshot: GameSnapshot): Unit = viewGame.changeSnapshot(gameSnapshot)
 
     override def isCentralCell(coordinate: Coordinate): Boolean = modelGame.isCentralCell(coordinate)
 
@@ -146,7 +165,6 @@ object ControllerHnefatafl {
     override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = modelGame.changeSnapshot(snapshotToShow)
 
     override def undoMove(): Unit = modelGame.undoMove()
-
 
     override def disableNextLast(): Unit = viewGame.disableNextLast()
 

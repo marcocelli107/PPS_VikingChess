@@ -9,7 +9,9 @@ import utils.{Coordinate, Move}
 trait ViewHnefatafl {
 
   /**
-    * Gets the dimension according to game variant.
+    * Calls controller to get the dimension according to game variant.
+    *
+    * @return dimension
     */
   def getDimension: Int
 
@@ -50,11 +52,6 @@ trait ViewHnefatafl {
   def initOrRestoreGUI(playerChosen: Player.Value)
 
   /**
-    * Calls the controller to make the IA move.
-    */
-  def makeMoveIA()
-
-  /**
     * Makes move.
     *
     * @param move
@@ -78,6 +75,14 @@ trait ViewHnefatafl {
     *                 snapshot to show.
     */
   def update(gameSnapshot: GameSnapshot)
+
+  /**
+    * Notifies the viewer a change snapshot to view.
+    *
+    * @param gameSnapshot
+    *                 snapshot to show.
+    */
+  def changeSnapshot(gameSnapshot: GameSnapshot): Unit
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
@@ -151,6 +156,11 @@ trait ViewHnefatafl {
     * Gets player chosen from user.
     */
   def getPlayerChosen: Player.Value
+
+  /**
+    * Gets game mode chosen from user.
+    */
+  def getGameMode: GameMode.Value
 }
 
 object ViewHnefatafl {
@@ -161,7 +171,6 @@ object ViewHnefatafl {
 
     private var menuPanel, variantsPanel, diffPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
     private var dimension: Int = _
-    private var board: Board = _
     private val viewMainMenu: Menu = Menu(this)
     private val viewMatch: ViewMatch = ViewMatch(this)
     private val frame: JFrame = GameFactory.createFrame
@@ -182,7 +191,7 @@ object ViewHnefatafl {
     frame.add(overlayPanel)
     frame.setVisible(true)
 
-    override def getDimension: Int = dimension
+    override def getDimension: Int = controller.getDimension
 
     override def switchOverlay(actualPanel: JPanel, panelToShow: JPanel): Unit = {
       actualPanel.setVisible(false)
@@ -200,19 +209,15 @@ object ViewHnefatafl {
         viewMatch.restoreGame()
         overlayPanel.remove(gamePanel)
       }
-      val newGame: (Board, Player.Value) = controller.newGame(viewMainMenu.getBoardVariant,viewMainMenu.getGameMode, viewMainMenu.getDifficult)
-      board = newGame._1.asInstanceOf[Board]
-      dimension = board.size
-      initGamePanel(board)
+      val newGame: (Board, Player.Value) = controller.newGame(viewMainMenu.getBoardVariant,viewMainMenu.getGameMode, viewMainMenu.getDifficult, viewMainMenu.getPlayer)
+      dimension = newGame._1.size
+      initGamePanel(newGame._1)
       overlayPanel.add(gamePanel)
       showGame()
       viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
 
-      if(viewMainMenu.getGameMode.equals(GameMode.PVE) & playerChosen.equals(Player.White))
-        makeMoveIA()
+      controller.startGame()
     }
-
-    override def makeMoveIA(): Unit = controller.makeMoveIA()
 
     override def makeMove(move: Move): Unit = {
       controller.makeMove(move)
@@ -223,6 +228,8 @@ object ViewHnefatafl {
     }
 
     override def update(gameSnapshot: GameSnapshot): Unit = viewMatch.update(gameSnapshot)
+
+    override def changeSnapshot(gameSnapshot: GameSnapshot): Unit = viewMatch.updateSnapshot(gameSnapshot)
 
     override def isCentralCell(coordinate: Coordinate): Boolean = controller.isCentralCell(coordinate)
 
@@ -249,6 +256,8 @@ object ViewHnefatafl {
     override def activeFirstPrevious(): Unit = viewMatch.activeFirstPrevious()
 
     override def getPlayerChosen: Player.Value = viewMainMenu.getPlayer
+
+    override def getGameMode: GameMode.Value = viewMainMenu.getGameMode
 
     /**
       * Initializes the main menù.
