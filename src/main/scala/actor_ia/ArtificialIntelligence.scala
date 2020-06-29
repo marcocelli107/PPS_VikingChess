@@ -12,10 +12,10 @@ case class ReturnBestMoveMsg(bestMove: Move)
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
 object ArtificialIntelligenceImpl {
-  def apply(model: ModelHnefatafl, depth: Int): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth)
+  def apply(model: ModelHnefatafl, depth: Int, playerChosen: Player.Value): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth, playerChosen)
 }
 
- case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth:Int) extends Actor  {
+ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth:Int, playerChosen: Player.Value) extends Actor  {
 
   val moveGenerator: MoveGenerator = MoveGenerator()
   private val hashMapSonRef: mutable.HashMap[ActorRef,Move] = mutable.HashMap.empty
@@ -28,7 +28,11 @@ object ArtificialIntelligenceImpl {
     numberChildren = gamePossibleMoves.size
 
     for(possibleMove <- gamePossibleMoves) {
-      val sonActor: Props = Props(MinActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
+      var sonActor: Props = Props.empty
+      if(playerChosen.equals(Player.Black))
+        sonActor = Props(MinActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
+      else
+        sonActor = Props(MaxActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
       val refSonActor = context.actorOf(sonActor)
       refSonActor ! StartMsg()
       hashMapSonRef += (refSonActor -> possibleMove)
@@ -60,7 +64,7 @@ object TryIA extends App {
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
-  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2)))!FindBestMoveMsg(gameSnapshot)
+  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2, gameSnapshot.getPlayerToMove)))!FindBestMoveMsg(gameSnapshot)
 
 
 
