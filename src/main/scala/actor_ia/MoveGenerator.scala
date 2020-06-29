@@ -4,7 +4,7 @@ import model.{GameSnapshot, GameVariant, Piece, Player}
 import utils.BoardGame.BoardCell
 import utils.{Coordinate, Move}
 
-case class MoveGenerator() {
+object MoveGenerator {
 
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     def _moves(cell: BoardCell): List[Move] = {
@@ -65,7 +65,8 @@ case class MoveGenerator() {
     def checkVictory(): Boolean = (gameSnapshot.getVariant, gameSnapshot.getPlayerToMove) match {
       case (GameVariant.Hnefatafl | GameVariant.Tawlbwrdd, Player.Black) => checkBlackBigBoardVictory()
       case (GameVariant.Brandubh | GameVariant.Tablut , Player.Black) => checkBlackSmallBoardVictory()
-      case _ => gameSnapshot.getBoard.cornerCoordinates.contains(move.to)
+      case (_, Player.White) => gameSnapshot.getBoard.cornerCoordinates.contains(move.to)
+      case _ => false
     }
 
     def checkDraw(): Boolean = {
@@ -90,32 +91,26 @@ case class MoveGenerator() {
     }
 
     def checkKingCapturedSmallBoard(kingCoord: Coordinate, adjacentCells: List[List[BoardCell]]): Boolean = {
-      if(kingOnThrone(kingCoord) || kingNextToThrone(kingCoord))
+      if(kingOnThrone(gameSnapshot, kingCoord) || kingNextToThrone(gameSnapshot, kingCoord))
         fourOrThreeSideCondition(adjacentCells)
       else
         kingCapturedTwoSides(adjacentCells)
     }
 
-    def kingOnThrone(kingCoord: Coordinate): Boolean =
-      kingCoord.equals(gameSnapshot.getBoard.specialCoordinates.last)
-
-
-    def kingNextToThrone(kingCoord: Coordinate): Boolean =
-      gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).map(_.head).contains(kingCoord)
-
-
     def fourOrThreeSideCondition(adjacentCells: List[List[BoardCell]]): Boolean =
       adjacentCells.filter(_.nonEmpty).map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
         cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4
 
-
-    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean = adjacentCells.filter(_.nonEmpty).map(_.head).size match {
-      case 4 => kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head) || kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head)
-      case _ => false
-    }
-
+    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean =
+      (adjacentCells(1).nonEmpty &&
+        adjacentCells(3).nonEmpty &&
+        kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head)) ||
+        (adjacentCells(0).nonEmpty &&
+          adjacentCells(2).nonEmpty &&
+          kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head))
 
     def kingCapturedInLine(lineCells1: BoardCell, lineCells2: BoardCell): Boolean =
+      (move.to.equals(lineCells1.getCoordinate) || move.to.equals(lineCells2.getCoordinate)) &&
       lineCells1.getPiece.equals(Piece.BlackPawn) && lineCells2.getPiece.equals(Piece.BlackPawn)
 
 
@@ -126,6 +121,12 @@ case class MoveGenerator() {
 
     GameSnapshot(gameSnapshot.getVariant, switchPlayer(), checkWinner(), gameSnapshot.getBoard, Option(move), capturedPieces._1, capturedPieces._2)
   }
+
+  def kingOnThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
+    kingCoord.equals(gameSnapshot.getBoard.specialCoordinates.last)
+
+  def kingNextToThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
+    gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).map(_.head).contains(kingCoord)
 
   private def isOwner(pawn: Piece.Value, player: Player.Value): Boolean = (pawn, player) match {
     case (Piece.WhitePawn, Player.White) => true

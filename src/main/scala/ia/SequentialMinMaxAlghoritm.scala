@@ -17,20 +17,19 @@ object MiniMaxImpl {
 class MiniMaxImpl(depth: Int) extends  MiniMax {
 
   var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl()
-  var moveGenerator: MoveGenerator = MoveGenerator()
 
   override def findBestMove(gameSnapshot: GameSnapshot):Move = {
 
     def _findBestMove( bestCoord: Move , bestScore: Int ,gamePossibleMove: List[Move] ):Move = gamePossibleMove match {
       case Nil  => bestCoord
       case h::t =>
-                val sonGameSnapshot = moveGenerator.makeMove(gameSnapshot.getCopy,h)
+                val sonGameSnapshot = MoveGenerator.makeMove(gameSnapshot.getCopy,h)
                 val moveScore = pruningAlfaBeta(sonGameSnapshot, depth, Int.MinValue,Int.MaxValue, MaxMin.min, h)
                 val (newBestCoord, newBestScore) = if (bestScore > moveScore ) (bestCoord , bestScore) else (h, moveScore)
                _findBestMove( newBestCoord, newBestScore ,t )
 
     }
-    _findBestMove( null, -100, moveGenerator.gamePossibleMoves(gameSnapshot) )
+    _findBestMove( null, -100, MoveGenerator.gamePossibleMoves(gameSnapshot) )
   }
 
 
@@ -43,14 +42,14 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 
   def maximizationPhase(sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int):Int = {
     val tempVal:Int = -100
-    val gameMoves: List[Move] = moveGenerator.gamePossibleMoves(sonGameSnapshot)
+    val gameMoves: List[Move] = MoveGenerator.gamePossibleMoves(sonGameSnapshot)
 
 
     def _maximizationPhase(gameMoves: List[Move], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
       case Nil => tempVal
       case _  if beta <= alfa => tempVal
       case h::t =>
-            val sonGame: GameSnapshot = moveGenerator.makeMove(sonGameSnapshot.getCopy, h)
+            val sonGame: GameSnapshot = MoveGenerator.makeMove(sonGameSnapshot.getCopy, h)
             val newTempVal = math.max(tempVal, pruningAlfaBeta(sonGame, depth-1, alfa, beta, MaxMin.min, h))
             val newAlfa = math.max(alfa, newTempVal)
             //println("Max: " + depth)
@@ -63,14 +62,14 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 
   def minimizationPhase(sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int): Int = {
     val tempVal:Int = 100
-    val gameMoves: List[Move] = moveGenerator.gamePossibleMoves(sonGameSnapshot)
+    val gameMoves: List[Move] = MoveGenerator.gamePossibleMoves(sonGameSnapshot)
 
 
     def _minimizationPhase( gameMoves: List[Move], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
       case Nil => tempVal
       case _  if beta <= alfa => tempVal
       case h::t =>
-            val sonGame: GameSnapshot = moveGenerator.makeMove(sonGameSnapshot.getCopy, h)
+            val sonGame: GameSnapshot = MoveGenerator.makeMove(sonGameSnapshot.getCopy, h)
             val newTempVal = math.min(tempVal, pruningAlfaBeta(sonGame, depth - 1, alfa, beta, MaxMin.Max, h))
             val newBeta = math.min(beta, newTempVal)
             _minimizationPhase( t, newTempVal, depth, alfa, newBeta)
