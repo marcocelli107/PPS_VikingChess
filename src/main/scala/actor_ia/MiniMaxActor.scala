@@ -18,7 +18,6 @@ abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: 
   var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl()
   var alfa: Int = _
   var currentGame: GameSnapshot = fatherGameSnapshot
-  var moveGenerator: MoveGenerator = MoveGenerator()
   var gamePossibleMove : List[Move] = List()
 
   override def receive: Receive = {
@@ -28,19 +27,19 @@ abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: 
   }
 
   def compute(): Unit = depth match {
-    case 0 => computeEvaluationFunction()
-    case _ => analyzeMyChildren()
+    case 0 => makeMove(); computeEvaluationFunction()
+    case _ => makeMove(); analyzeMyChildren()
   }
 
-  def computeEvaluationFunction(): Unit =  fatherRef ! ValueSonMsg(evaluationFunction.score(fatherGameSnapshot, move.get))
+  def computeEvaluationFunction(): Unit = fatherRef ! ValueSonMsg(evaluationFunction.score(currentGame, move.get))
 
+  def makeMove(): Unit =
+    if(move.nonEmpty)
+      currentGame = MoveGenerator.makeMove(fatherGameSnapshot, move.get)
 
   def analyzeMyChildren(): Unit = {
 
-    if(move.nonEmpty)
-      currentGame = moveGenerator.makeMove(fatherGameSnapshot, move.get)
-
-    gamePossibleMove = moveGenerator.gamePossibleMoves(currentGame)
+    gamePossibleMove = MoveGenerator.gamePossibleMoves(currentGame.getCopy)
 
     numberOfChildren = gamePossibleMove.size
 

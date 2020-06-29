@@ -15,21 +15,20 @@ object ArtificialIntelligenceImpl {
   def apply(model: ModelHnefatafl, depth: Int, playerChosen: Player.Value): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth, playerChosen)
 }
 
- case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth:Int, playerChosen: Player.Value) extends Actor  {
+case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int, playerChosen: Player.Value) extends Actor {
 
-  val moveGenerator: MoveGenerator = MoveGenerator()
-  private val hashMapSonRef: mutable.HashMap[ActorRef,Move] = mutable.HashMap.empty
+  private val hashMapSonRef: mutable.HashMap[ActorRef, Move] = mutable.HashMap.empty
   private var numberChildren: Int = 0
   private var bestMove: Move = _
   private var bestScore: Int = Int.MinValue
 
- def findBestMove(gameSnapshot: GameSnapshot): Unit = {
-    val gamePossibleMoves = moveGenerator.gamePossibleMoves(gameSnapshot)
+  def findBestMove(gameSnapshot: GameSnapshot): Unit = {
+    val gamePossibleMoves = MoveGenerator.gamePossibleMoves(gameSnapshot)
     numberChildren = gamePossibleMoves.size
 
-    for(possibleMove <- gamePossibleMoves) {
+    for (possibleMove <- gamePossibleMoves) {
       var sonActor: Props = Props.empty
-      if(playerChosen.equals(Player.Black))
+      if (iaIsBlack())
         sonActor = Props(MinActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
       else
         sonActor = Props(MaxActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
@@ -39,16 +38,18 @@ object ArtificialIntelligenceImpl {
     }
   }
 
+  private def iaIsBlack(): Boolean = playerChosen.equals(Player.White)
+
   private def updateBest(newScore: Int, actorRef: ActorRef): Unit = {
     //println("NewScore " + newScore)
     numberChildren -= 1
     if (newScore > bestScore)
       bestScore = newScore
-      bestMove = hashMapSonRef(actorRef)
+    bestMove = hashMapSonRef(actorRef)
     checkChildren()
   }
 
-  private def checkChildren(): Unit = if(numberChildren == 0) self ! ReturnBestMoveMsg(bestMove)
+  private def checkChildren(): Unit = if (numberChildren == 0) self ! ReturnBestMoveMsg(bestMove)
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
@@ -64,10 +65,7 @@ object TryIA extends App {
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
-  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2, gameSnapshot.getPlayerToMove)))!FindBestMoveMsg(gameSnapshot)
-
-
-
+  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2, gameSnapshot.getPlayerToMove))) ! FindBestMoveMsg(gameSnapshot)
 
 
 }
