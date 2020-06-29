@@ -12,13 +12,14 @@ case class StartMsg()
 case class ValueSonMsg(score: Int)
 
 
-abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends Actor {
+abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, count:Int ) extends Actor {
 
   var numberOfChildren: Int = _
   var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl()
   var alfa: Int = _
   var currentGame: GameSnapshot = fatherGameSnapshot
   var gamePossibleMove : List[Move] = List()
+
 
   override def receive: Receive = {
     case event: ValueSonMsg => miniMax(event.score)
@@ -49,8 +50,7 @@ abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: 
 
     for(pawnMove <- gamePossibleMove) {
         val sonActor: Props = createChild(currentGame.getCopy, pawnMove, this.self)
-        listSonRef = listSonRef :+ context.actorOf(sonActor)
-    }
+        listSonRef = listSonRef :+ context.actorOf(sonActor)    }
 
     listSonRef.foreach( _ ! StartMsg())
   }
@@ -103,7 +103,7 @@ object tryProva extends App {
       case event: ValueSonMsg => println(event.score);  val stop = System.currentTimeMillis() - start
         println(stop)
 
-      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, Option.empty, self))) ! FirstMsg()
+      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, Option.empty, self, 0))) ! FirstMsg()
     }
   }
 }

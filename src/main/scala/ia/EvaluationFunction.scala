@@ -4,7 +4,7 @@ package ia
 import actor_ia.MoveGenerator
 import model._
 import utils.BoardGame.BoardCell
-import utils.{BoardGame, Coordinate, Move}
+import utils.{Coordinate, Move}
 
 trait EvaluationFunction {
   def score(gameSnapshot: GameSnapshot, move: Move = null):Int
@@ -28,7 +28,8 @@ object EvaluationFunctionImpl {
 
     override def score(snapshot: GameSnapshot, moves: Move = null): Int = {
       if(!snapshot.getWinner.equals(Player.None)) {
-        println(snapshot.getWinner)
+       // println("Board " + snapshot.getBoard)
+        // println(snapshot.getWinner)
       }
       score1(snapshot, moves)
     }
@@ -112,9 +113,6 @@ object EvaluationFunctionImpl {
               returnValue = true
       returnValue
     }
-
-
-
 
     def computeWhiteBetterPositions(gameSnapshot: GameSnapshot): Int = {
       scoreKingNearCorners() +

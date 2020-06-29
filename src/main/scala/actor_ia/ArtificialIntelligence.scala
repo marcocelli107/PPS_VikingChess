@@ -20,18 +20,19 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int, playerC
   private val hashMapSonRef: mutable.HashMap[ActorRef, Move] = mutable.HashMap.empty
   private var numberChildren: Int = 0
   private var bestMove: Move = _
-  private var bestScore: Int = Int.MinValue
+  private var bestScore: Int = _
 
   def findBestMove(gameSnapshot: GameSnapshot): Unit = {
+    bestScore = if (iaIsBlack()) Int.MaxValue else Int.MinValue
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(gameSnapshot)
     numberChildren = gamePossibleMoves.size
 
     for (possibleMove <- gamePossibleMoves) {
       var sonActor: Props = Props.empty
-      if (iaIsBlack())
-        sonActor = Props(MinActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
+      if (!iaIsBlack())
+        sonActor = Props(MinActor(gameSnapshot.getCopy, depth - 1, Option(possibleMove), self,0))
       else
-        sonActor = Props(MaxActor(gameSnapshot.getCopy, depth, Option(possibleMove), self))
+        sonActor = Props(MaxActor(gameSnapshot.getCopy, depth - 1, Option(possibleMove), self,0))
       val refSonActor = context.actorOf(sonActor)
       refSonActor ! StartMsg()
       hashMapSonRef += (refSonActor -> possibleMove)
@@ -43,9 +44,13 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int, playerC
   private def updateBest(newScore: Int, actorRef: ActorRef): Unit = {
     //println("NewScore " + newScore)
     numberChildren -= 1
-    if (newScore > bestScore)
+    if (newScore > bestScore && !iaIsBlack() ) {
       bestScore = newScore
-    bestMove = hashMapSonRef(actorRef)
+      bestMove = hashMapSonRef(actorRef)
+    } else if( newScore < bestScore && iaIsBlack())  {
+      bestScore = newScore
+      bestMove = hashMapSonRef(actorRef)
+    }
     checkChildren()
   }
 
