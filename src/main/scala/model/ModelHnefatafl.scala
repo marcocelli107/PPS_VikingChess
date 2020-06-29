@@ -3,7 +3,7 @@ package model
 import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.{MiniMax, MiniMaxImpl}
+import ia.MiniMax
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
@@ -113,7 +113,7 @@ object ModelHnefatafl {
     private var currentSnapshot: Int = 0
 
     private var refIA: ActorRef = _
-    private val sequIA: MiniMax = MiniMaxImpl(level.depth)
+    private var sequIA: MiniMax = _
 
     /**
      * Defines status of the current game.

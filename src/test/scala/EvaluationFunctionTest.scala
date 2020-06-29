@@ -2,10 +2,8 @@ import java.io.FileInputStream
 
 import alice.tuprolog.{Prolog, Theory}
 import ia.EvaluationFunctionImpl.EvaluationFunctionImpl
-import model.{Piece, TheoryGame}
+import model.TheoryGame
 import org.scalatest.FunSuite
-import utils.BoardGame.BoardCell
-import utils.Coordinate
 
 class EvaluationFunctionTest extends FunSuite{
 
@@ -32,7 +30,7 @@ class EvaluationFunctionTest extends FunSuite{
     assert(ef7.scoreKingNearCorners() != 0 )
     assert(ef11.scoreKingNearCorners() == 0 )
   }*/
-
+/*
   test("Test Sequence of Free Cells"){
     var seqEmpty: Seq [BoardCell] = Seq()
     for ( i <- 1 to 10 ) {
@@ -61,7 +59,7 @@ class EvaluationFunctionTest extends FunSuite{
       assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) < ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingFreeRoworColumn))
 
   }
-
+*/
 
 
 

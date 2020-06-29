@@ -1,14 +1,16 @@
 package ia
 
 
-import model.{GameSnapshot, Piece, Player}
+import actor_ia.MoveGenerator
+import ia.EvaluationFunctionImpl.EvaluationFunctionImpl
+import model._
 import utils.BoardGame.BoardCell
 import utils.{BoardGame, Coordinate, Move}
 
 import scala.util.Random
 
 trait EvaluationFunction {
-  def score(gameSnapshot: GameSnapshot, move: Move):Int
+  def score(gameSnapshot: GameSnapshot, move: Move = null):Int
 }
 
 object EvaluationFunctionImpl {
@@ -20,13 +22,13 @@ object EvaluationFunctionImpl {
     private var boardSize: Int = _
     private var kingCoord: Coordinate = _
     private var cornerCells: Seq[Coordinate] = _
-    private var quadrants: Seq[Seq[BoardCell]] = _
+    private var quadrants: Seq[Seq[Seq[BoardCell]]]= _
     private var ortogonalKingCell: Seq[Seq[BoardCell]] = _
-    private var columnKing: Seq[BoardCell] = _
+    private var blackCoord: Seq[Coordinate] = _
 
 
 
-    override def score(gameSnapshot: GameSnapshot, moves: Move): Int = ((Random.nextDouble() * 200) - 100).intValue()
+    override def score(gameSnapshot: GameSnapshot, moves: Move = null): Int = ((Random.nextDouble() * 200) - 100).intValue()
 
     def usefulValues(board: BoardGame.Board): Unit = {
       boardSize = board.size
@@ -34,17 +36,29 @@ object EvaluationFunctionImpl {
       ortogonalKingCell = board.orthogonalCells(kingCoord)
       cornerCells = board.cornerCoordinates
       quadrants = splitMatrixInFourPart(board.rows)
+      blackCoord = board.rows.flatten.filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate).toList
 
     }
 
-    def computeScore():Int = ???
+    def computeScore(gameSnapshot: GameSnapshot):Int = {
+      usefulValues(gameSnapshot.getBoard)
+      compiuteBlackScore(gameSnapshot)  - compiuteWhiteScore(gameSnapshot) + scoreWinner(gameSnapshot)}
 
-    def compiuteWhiteScore: Int =
-      scoreKingNearCorners()
 
 
-    def compiuteBlackScore: Int = ???
+    def compiuteWhiteScore(gameSnapshot: GameSnapshot): Int = {
+      scoreKingNearCorners() +
+      scoreKingIsInFreeRowOrColumn() +
+      scoreKingMovesToAFreeCorner() +
+      scoreCapturedBlack(gameSnapshot)
+    }
 
+
+      def compiuteBlackScore(gameSnapshot: GameSnapshot): Int ={
+      scoreBlackPawnProtectTheCorner()// +
+      //scoreBlackSurroundTheKing() +
+      //scoreCapturedWhite(gameSnapshot)
+        }
 
     /* RULES */
 
@@ -52,18 +66,20 @@ object EvaluationFunctionImpl {
     * White positive score
     * */
 
+    def scoreCapturedBlack(gameSnapshot: GameSnapshot):Int = gameSnapshot.getNumberCapturedBlacks * 10
+
     // Positive score if king is near corner
-    def scoreKingNearCorners(): Int = if (isItDistantFromCornerOf(kingCoord, 1)) 90 else 0
+    def scoreKingNearCorners(): Int = if (isItDistantFromCornerOf(kingCoord, 1)) 900 else 0
 
     // Positive score if king is in free row or column
-    def scoreKingIsInFreeRowOrColumn(rowKing: Seq[BoardCell], columnKing: Seq[BoardCell]): Int = {
-      val rowWhithoutKing = whithoutKing(rowKing)
-      val columnWhithoutKing = whithoutKing(columnKing)
+    def scoreKingIsInFreeRowOrColumn(): Int = {
+      val rowWhithoutKing = ortogonalKingCell(1) ++ ortogonalKingCell(3)
+      val columnWhithoutKing = ortogonalKingCell(0) ++ ortogonalKingCell(2)
 
       def _scoreKingIsInFreeRowOrColumn(): Int = (rowWhithoutKing, columnWhithoutKing) match {
-        case (row, column) if isSequenceFreeCells(row) && isSequenceFreeCells(column) => 10
-        case (row, _) if isSequenceFreeCells(row) => 5
-        case (_, column) if isSequenceFreeCells(column) => 5
+        case (row, column) if isSequenceFreeCells(row) && isSequenceFreeCells(column) => 50
+        case (row, _) if isSequenceFreeCells(row) => 25
+        case (_, column) if isSequenceFreeCells(column) => 25
         case _ => 0
       }
 
@@ -74,15 +90,15 @@ object EvaluationFunctionImpl {
     // The score is inversely proportional to the concentration of black pawns in the king's quadrant.
     def scoreKingMovesToAFreeCorner(): Int = {
       val quadranKing = findQuadrant(kingCoord)
-      val numberBlackPieceInKingQuadrant = quadranKing.count(cell => cell.getPiece.equals(Piece.BlackPawn))
-      val score: Int = 10 * 1 / numberBlackPieceInKingQuadrant
-      score
+      val numberBlackPieceInKingQuadrant = quadranKing.flatten.count(cell => cell.getPiece.equals(Piece.BlackPawn))
+      val score: Double = 100 * 1 / numberBlackPieceInKingQuadrant
+      score.toInt
     }
 
     // Positive score if the white opening in opposite side of black Blockade
     def scoreWhiteOpeningOnOppositeSideOfBlackBlockade(whiteCoord: Coordinate): Int = {
-      val oppositeQuadrant: Seq[BoardCell] = findQuadrant(whiteCoord: Coordinate, true)
-      val numberBlackPieceInOppositeKingQuadrant: Int = oppositeQuadrant.count(cell => cell.getPiece.equals(Piece.BlackPawn))
+      val oppositeQuadrant: Seq[Seq[BoardCell]] = findQuadrant(whiteCoord: Coordinate, true)
+      val numberBlackPieceInOppositeKingQuadrant: Int = oppositeQuadrant.flatten.count(cell => cell.getPiece.equals(Piece.BlackPawn))
       val score: Int = numberBlackPieceInOppositeKingQuadrant * 2
       score
     }
@@ -90,24 +106,22 @@ object EvaluationFunctionImpl {
     /*
     * Black score
     * */
+    def scoreCapturedWhite(gameSnapshot: GameSnapshot):Int = gameSnapshot.getNumberCapturedWhites * 10
 
     //Positive score if the black pieces protect the corners - 	black barricade
-    def scoreBlackPawnProtectTheCorner(pawnCoord: Coordinate): Int = {
-      val closerCorner = findCloserCorner(pawnCoord)
-      val distance = quadraticDistanceBetweenCells(closerCorner, pawnCoord)
-
-      def _scoreBlackPawnProtectTheCorner(): Int = distance match {
-        case 1 => -50
-        case _ => 20 * 1 / distance
+    def scoreBlackPawnProtectTheCorner(): Int = {
+      def scoreBlackPawn(pawnCoord: Coordinate): Double = quadraticDistanceBetweenCells(findCloserCorner(pawnCoord), pawnCoord) match {
+        case 1 => -200
+        case distance =>  100 * 1/distance
       }
+      blackCoord.map(scoreBlackPawn(_)).sum.toInt
 
-      _scoreBlackPawnProtectTheCorner()
     }
 
     //Positive score if the black pieces Surround The King
-    def scoreBlackSurroundTheKing(pawnCoord: Coordinate, board: Seq[BoardCell]): Int = {
-      val score: Int = 10 * 1 / quadraticDistanceBetweenCells(pawnCoord, kingCoord)
-      score
+    def scoreBlackSurroundTheKing(): Int = {
+      def scoreBlackPawn(pawnCoord: Coordinate):Double = 100 * 1 / quadraticDistanceBetweenCells(pawnCoord, kingCoord)
+      blackCoord.map(scoreBlackPawn(_)).sum.toInt
     }
 
     //Positive score if the pawn is diagonal alignment with other pawns
@@ -130,7 +144,7 @@ object EvaluationFunctionImpl {
     /* UTILS METHODS */
 
 
-    def findQuadrant(coord: Coordinate, oppositQuadrant: Boolean = false): Seq[BoardCell] = {
+    def findQuadrant(coord: Coordinate, oppositQuadrant: Boolean = false): Seq[Seq[BoardCell]] = {
 
       def getQuadrant(coord: Coordinate): Int = {
         if (isInRange(coord, (1, boardSize / 2), (1, boardSize / 2))) 0
@@ -146,7 +160,7 @@ object EvaluationFunctionImpl {
         case _ => 1
       }
 
-      def _findQuadrant(index: Int, quadrants: Seq[Seq[BoardCell]], oppositQuadrant: Boolean): Seq[BoardCell] =
+      def _findQuadrant(index: Int, quadrants: Seq[Seq[Seq[BoardCell]]], oppositQuadrant: Boolean): Seq[Seq[BoardCell]] =
         if (oppositQuadrant)
           quadrants(opposite(index))
         else
@@ -183,28 +197,28 @@ object EvaluationFunctionImpl {
     def quadraticDistanceBetweenCells(start: Coordinate, end: Coordinate): Int = (scala.math.pow(start.x - end.x, 2) + scala.math.pow(start.y - end.y, 2)).toInt
 
     def findCloserCorner(coord: Coordinate): Coordinate = {
-      def _getCloserCorner(coord: Coordinate, cornerCoord: List[Coordinate], closerCornerCord: Coordinate, closerDist: Int): Coordinate = cornerCoord match {
+      def _getCloserCorner( closerCornerCord: Coordinate, closerDist: Int, cells: Seq[Coordinate] = cornerCells ): Coordinate = cells match {
         case Nil => closerCornerCord
         case h :: t =>
           val distCoordFromCorner = quadraticDistanceBetweenCells(h, coord)
           val (newCloserCorner, newCloserDist) = if (distCoordFromCorner > closerDist) (closerCornerCord, closerDist) else (h, distCoordFromCorner)
-          _getCloserCorner(coord, t, newCloserCorner, newCloserDist)
+          _getCloserCorner( newCloserCorner, newCloserDist,t)
       }
 
-      _getCloserCorner(coord, getCoordCorners, null, 20)
+      _getCloserCorner(Coordinate(1,1), Int.MaxValue)
     }
 
     // Split a rows sequence in dials sequence
-    def splitMatrixInFourPart(seqRows: Seq[Seq[BoardCell]]): Seq[Seq[BoardCell]] = {
+    def splitMatrixInFourPart(seqRows: Seq[Seq[BoardCell]]): Seq[Seq[Seq[BoardCell]]] = {
       val sizeSplit: Int = boardSize / 2
       val northAndSouth = seqRows.toList.splitAt(sizeSplit)
 
-      def splitList(seq: Seq[Seq[BoardCell]], westSeq: Seq[Seq[BoardCell]], estSeq: Seq[Seq[BoardCell]]): Seq[Seq[BoardCell]] = seq match {
+      def splitList(seq: Seq[Seq[BoardCell]], westSeq: Seq[Seq[BoardCell]], estSeq: Seq[Seq[BoardCell]]): Seq[Seq[Seq[BoardCell]]]= seq match {
         case h :: t =>
           val westAndEst = h.splitAt(sizeSplit)
           splitList(t, westSeq :+ westAndEst._1, estSeq :+ westAndEst._2)
 
-        case _ => westSeq ++ estSeq
+        case _ => Seq(westSeq,estSeq)
       }
 
       val firstAndSecond = splitList(northAndSouth._1, Seq(), Seq())
@@ -224,5 +238,21 @@ object EvaluationFunctionImpl {
     def findKing(board: Seq[Seq[BoardCell]]): Coordinate =
       board.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).map(_.getCoordinate).head
   }
+
+}
+
+object blabla extends App{
+  val THEORY: String = TheoryGame.GameRules.toString
+  val game: ParserProlog = ParserPrologImpl(THEORY)
+  val initGame = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
+  val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
+  val ef: EvaluationFunctionImpl = new EvaluationFunctionImpl()
+  val mg:MoveGenerator= MoveGenerator()
+
+  val newGs = mg.makeMove(gameSnapshot, Move(Coordinate(6,6), Coordinate(4,3)))
+
+  println(ef.score(newGs))
+
+
 
 }

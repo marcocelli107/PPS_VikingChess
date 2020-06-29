@@ -6,7 +6,7 @@ import utils.Move
 
 case class MinActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends MiniMaxActor(fatherGameSnapshot, depth, move, fatherRef) {
 
-  alfa = 100
+  alfa = Int.MaxValue
 
 
   override def createChild(currentGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props =
