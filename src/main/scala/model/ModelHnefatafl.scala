@@ -3,7 +3,7 @@ package model
 import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.MiniMax
+import ia.{MiniMax, MiniMaxImpl}
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
@@ -307,7 +307,7 @@ object ModelHnefatafl {
       */
     private def initIA(): Unit = {
       val system: ActorSystem = ActorSystem()
-      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
+      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth, playerChosen)))
       //sequIA = MiniMaxImpl(levelIA.depth)
     }
 

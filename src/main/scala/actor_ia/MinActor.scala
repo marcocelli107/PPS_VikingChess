@@ -1,7 +1,7 @@
 package actor_ia
 
 import akka.actor.{ActorRef, Props}
-import model.GameSnapshot
+import model.{GameSnapshot, Player}
 import utils.Move
 
 case class MinActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends MiniMaxActor(fatherGameSnapshot, depth, move, fatherRef) {

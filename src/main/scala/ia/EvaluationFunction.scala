@@ -2,12 +2,9 @@ package ia
 
 
 import actor_ia.MoveGenerator
-import ia.EvaluationFunctionImpl.EvaluationFunctionImpl
 import model._
 import utils.BoardGame.BoardCell
 import utils.{BoardGame, Coordinate, Move}
-
-import scala.util.Random
 
 trait EvaluationFunction {
   def score(gameSnapshot: GameSnapshot, move: Move = null):Int
@@ -21,44 +18,42 @@ object EvaluationFunctionImpl {
 
     private var boardSize: Int = _
     private var kingCoord: Coordinate = _
-    private var cornerCells: Seq[Coordinate] = _
+    private var cornerCells: List[Coordinate] = _
     private var quadrants: Seq[Seq[Seq[BoardCell]]]= _
-    private var ortogonalKingCell: Seq[Seq[BoardCell]] = _
+    private var orthogonalKingCell: Seq[Seq[BoardCell]] = _
     private var blackCoord: Seq[Coordinate] = _
 
 
 
-    override def score(gameSnapshot: GameSnapshot, moves: Move = null): Int = ((Random.nextDouble() * 200) - 100).intValue()
+    override def score(gameSnapshot: GameSnapshot, moves: Move = null): Int = computeBlackWhiteScore(gameSnapshot)
 
     def usefulValues(board: BoardGame.Board): Unit = {
       boardSize = board.size
       kingCoord = findKing(board.rows)
-      ortogonalKingCell = board.orthogonalCells(kingCoord)
+      orthogonalKingCell = board.orthogonalCells(kingCoord)
       cornerCells = board.cornerCoordinates
       quadrants = splitMatrixInFourPart(board.rows)
       blackCoord = board.rows.flatten.filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate).toList
-
     }
 
-    def computeScore(gameSnapshot: GameSnapshot):Int = {
+    def computeScore(gameSnapshot: GameSnapshot): Int = {
       usefulValues(gameSnapshot.getBoard)
-      compiuteBlackScore(gameSnapshot)  - compiuteWhiteScore(gameSnapshot) + scoreWinner(gameSnapshot)}
+      computeBlackWhiteScore(gameSnapshot)
+    }
 
-
-
-    def compiuteWhiteScore(gameSnapshot: GameSnapshot): Int = {
+    def computeWhiteScore(gameSnapshot: GameSnapshot): Int = {
       scoreKingNearCorners() +
       scoreKingIsInFreeRowOrColumn() +
       scoreKingMovesToAFreeCorner() +
       scoreCapturedBlack(gameSnapshot)
     }
 
-
-      def compiuteBlackScore(gameSnapshot: GameSnapshot): Int ={
-      scoreBlackPawnProtectTheCorner()// +
-      //scoreBlackSurroundTheKing() +
-      //scoreCapturedWhite(gameSnapshot)
-        }
+    def computeBlackScore(gameSnapshot: GameSnapshot): Int = {
+      //valutare se il re può andare in un angolo in una mossa successiva
+      scoreBlackPawnProtectTheCorner() +
+      scoreBlackSurroundTheKing() +
+      scoreCapturedWhite(gameSnapshot)
+    }
 
     /* RULES */
 
@@ -73,8 +68,8 @@ object EvaluationFunctionImpl {
 
     // Positive score if king is in free row or column
     def scoreKingIsInFreeRowOrColumn(): Int = {
-      val rowWhithoutKing = ortogonalKingCell(1) ++ ortogonalKingCell(3)
-      val columnWhithoutKing = ortogonalKingCell(0) ++ ortogonalKingCell(2)
+      val rowWhithoutKing = orthogonalKingCell(1) ++ orthogonalKingCell.last
+      val columnWhithoutKing = orthogonalKingCell.head ++ orthogonalKingCell(2)
 
       def _scoreKingIsInFreeRowOrColumn(): Int = (rowWhithoutKing, columnWhithoutKing) match {
         case (row, column) if isSequenceFreeCells(row) && isSequenceFreeCells(column) => 50
@@ -91,7 +86,10 @@ object EvaluationFunctionImpl {
     def scoreKingMovesToAFreeCorner(): Int = {
       val quadranKing = findQuadrant(kingCoord)
       val numberBlackPieceInKingQuadrant = quadranKing.flatten.count(cell => cell.getPiece.equals(Piece.BlackPawn))
-      val score: Double = 100 * 1 / numberBlackPieceInKingQuadrant
+      val score: Double = numberBlackPieceInKingQuadrant match {
+        case 0 => 0
+        case _ => 100 * 1 / numberBlackPieceInKingQuadrant
+      }
       score.toInt
     }
 
@@ -108,20 +106,21 @@ object EvaluationFunctionImpl {
     * */
     def scoreCapturedWhite(gameSnapshot: GameSnapshot):Int = gameSnapshot.getNumberCapturedWhites * 10
 
-    //Positive score if the black pieces protect the corners - 	black barricade
+    //Positive score if the black pieces protect the corners - black barricade
     def scoreBlackPawnProtectTheCorner(): Int = {
       def scoreBlackPawn(pawnCoord: Coordinate): Double = quadraticDistanceBetweenCells(findCloserCorner(pawnCoord), pawnCoord) match {
         case 1 => -200
-        case distance =>  100 * 1/distance
+        case distance =>  100 * 1 / distance
       }
-      blackCoord.map(scoreBlackPawn(_)).sum.toInt
+      blackCoord.map(scoreBlackPawn).sum.toInt
 
     }
 
-    //Positive score if the black pieces Surround The King
+    //Positive score if the black pieces surround The King
     def scoreBlackSurroundTheKing(): Int = {
-      def scoreBlackPawn(pawnCoord: Coordinate):Double = 100 * 1 / quadraticDistanceBetweenCells(pawnCoord, kingCoord)
-      blackCoord.map(scoreBlackPawn(_)).sum.toInt
+      def scoreBlackPawn(pawnCoord: Coordinate): Double = 100 * 1 / quadraticDistanceBetweenCells(pawnCoord, kingCoord)
+      //aggiungere controllo se in celle adiacenti si può essere mangiati alla mossa successiva
+      blackCoord.map(scoreBlackPawn).sum.toInt
     }
 
     //Positive score if the pawn is diagonal alignment with other pawns
@@ -129,15 +128,16 @@ object EvaluationFunctionImpl {
 
     /*
     * Jolly rules
-    * */
+    */
 
     //Positive score if pieces (black or white) arranged in square
     def scorePawnArrangedInSquare(): Double = ???
 
-    def scoreWinner(snapshot: GameSnapshot): Int = snapshot.getWinner match {
-      case Player.Black => 100
-      case Player.White => -100
-      case _ => 0
+    def computeBlackWhiteScore(snapshot: GameSnapshot): Int = snapshot.getWinner match {
+      case Player.Black => -1000
+      case Player.White => 1000
+      case Player.Draw => 0
+      case _ =>  computeWhiteScore(snapshot) - computeBlackScore(snapshot)
     }
 
 
@@ -184,7 +184,7 @@ object EvaluationFunctionImpl {
         case _ :: t => _isItDistantFromTheCornerOf(coord, distance, t)
       }
 
-      _isItDistantFromTheCornerOf(coord, distance, getCoordCorners)
+      _isItDistantFromTheCornerOf(coord, distance, cornerCells)
     }
 
     def transposeCoordinates(coord: Coordinate): Coordinate = coord match {
@@ -232,9 +232,6 @@ object EvaluationFunctionImpl {
     def isSequenceFreeCells(seq: Seq[BoardCell]): Boolean =
       seq.count(boardCell => !boardCell.getPiece.equals(Piece.Empty)) == 0
 
-    def getCoordCorners = List(Coordinate(1, 1), Coordinate(1, boardSize), Coordinate(boardSize, 1), Coordinate(boardSize, boardSize))
-
-
     def findKing(board: Seq[Seq[BoardCell]]): Coordinate =
       board.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).map(_.getCoordinate).head
   }
@@ -246,7 +243,7 @@ object blabla extends App{
   val game: ParserProlog = ParserPrologImpl(THEORY)
   val initGame = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
   val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
-  val ef: EvaluationFunctionImpl = new EvaluationFunctionImpl()
+  val ef: EvaluationFunction = EvaluationFunctionImpl()
   val mg:MoveGenerator= MoveGenerator()
 
   val newGs = mg.makeMove(gameSnapshot, Move(Coordinate(6,6), Coordinate(4,3)))

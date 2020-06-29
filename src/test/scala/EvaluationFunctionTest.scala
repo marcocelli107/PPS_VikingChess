@@ -9,8 +9,8 @@ class EvaluationFunctionTest extends FunSuite{
 
   val prolog: Prolog = new Prolog()
   val theory: Theory = new Theory(new FileInputStream(TheoryGame.GameRules.toString))
-  val ef11: EvaluationFunctionImpl =  EvaluationFunctionImpl()
-  val ef7: EvaluationFunctionImpl =   EvaluationFunctionImpl()
+  //val ef11: EvaluationFunctionImpl =  EvaluationFunctionImpl()
+  //val ef7: EvaluationFunctionImpl =   EvaluationFunctionImpl()
   /*
   test("Tests if King is near corners."){
     val c1:Coordinate = Coordinate(1,2)

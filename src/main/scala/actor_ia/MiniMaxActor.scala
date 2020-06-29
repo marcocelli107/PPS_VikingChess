@@ -12,7 +12,7 @@ case class StartMsg()
 case class ValueSonMsg(score: Int)
 
 
-abstract class MiniMaxActor (fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends Actor {
+abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef) extends Actor {
 
   var numberOfChildren: Int = _
   var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl()
