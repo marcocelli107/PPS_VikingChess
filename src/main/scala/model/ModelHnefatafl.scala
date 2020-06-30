@@ -307,7 +307,7 @@ object ModelHnefatafl {
       */
     private def initIA(): Unit = {
       val system: ActorSystem = ActorSystem()
-      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth, playerChosen)))
+      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
       //sequIA = MiniMaxImpl(levelIA.depth)
     }
 

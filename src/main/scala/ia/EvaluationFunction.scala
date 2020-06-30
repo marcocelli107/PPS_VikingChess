@@ -10,6 +10,8 @@ trait EvaluationFunction {
   def score(gameSnapshot: GameSnapshot, move: Move = null):Int
 }
 
+// TODO classe statica?
+
 object EvaluationFunctionImpl {
 
   def apply(): EvaluationFunction = EvaluationFunctionImpl()
