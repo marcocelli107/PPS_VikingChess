@@ -25,7 +25,8 @@ object EvaluationFunctionImpl {
     private var quadrants: Seq[Seq[Seq[BoardCell]]]= _
     private var kingOrthogonalCells: Seq[Seq[BoardCell]] = _
     private var kingAdjacentCells: Seq[Option[BoardCell]] = _
-    private var blackCoord: Seq[Coordinate] = _
+    private var blacksCoord: Seq[Coordinate] = _
+    private var whitesCoord: Seq[Coordinate] = _
     private var gamePossibleMoves: Seq[Move] = _
 
     override def score(snapshot: GameSnapshot, moves: Move = null): Int = {
@@ -52,7 +53,9 @@ object EvaluationFunctionImpl {
       cornerCoordinates = board.cornerCoordinates
       centralCoordinate = board.centerCoordinates
       quadrants = splitMatrixInFourPart(board.rows)
-      blackCoord = board.rows.flatten.filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate).toList
+      blacksCoord = board.rows.flatten.filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate).toList
+      whitesCoord = board.rows.flatten.filter(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing))
+        .map(_.getCoordinate).toList
       gamePossibleMoves = MoveGenerator.gamePossibleMoves(gameSnapshot)
     }
 
@@ -116,8 +119,29 @@ object EvaluationFunctionImpl {
       returnValue
     }
 
+    def scoreKingInThrone(gameSnapshot: GameSnapshot): Int = {
+      if(kingCoord.equals(gameSnapshot.getBoard.centerCoordinates)) 0
+      else if (quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord)) == 0) 150
+      else 150 / quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord))
+    }
+
+    def scoreTower(gameSnapshot: GameSnapshot): Int = {
+      var score: Double = 0
+      for(x <- 1 until boardSize)
+        for(y <- 1 until boardSize)
+          if(!gameSnapshot.getBoard.cornerCoordinates.contains(Coordinate(x,y)) &&
+            (gameSnapshot.getBoard.getCell(Coordinate(x, y)).getPiece.equals(Piece.WhitePawn) || gameSnapshot.getBoard.getCell(Coordinate(x,y)).getPiece.equals(Piece.WhiteKing)) &&
+            (gameSnapshot.getBoard.getCell(Coordinate(x, y + 1)).getPiece.equals(Piece.WhitePawn) || gameSnapshot.getBoard.getCell(Coordinate(x,y+1)).getPiece.equals(Piece.WhiteKing)) &&
+            (gameSnapshot.getBoard.getCell(Coordinate(x + 1, y)).getPiece.equals(Piece.WhitePawn) || gameSnapshot.getBoard.getCell(Coordinate(x + 1,y)).getPiece.equals(Piece.WhiteKing)) &&
+            (gameSnapshot.getBoard.getCell(Coordinate(x + 1, y + 1)).getPiece.equals(Piece.WhitePawn) || gameSnapshot.getBoard.getCell(Coordinate(x + 1, y + 1)).getPiece.equals(Piece.WhiteKing)))
+              score += 1.25 * quadraticDistanceBetweenCells(Coordinate(x, y), gameSnapshot.getBoard.centerCoordinates)
+      score.toInt
+    }
+
     def computeWhiteBetterPositions(gameSnapshot: GameSnapshot): Int = {
-      scoreKingNearCorners() +
+      scoreKingInThrone(gameSnapshot) +
+      //scoreKingNearCorners() +
+      scoreTower(gameSnapshot) +
       scoreKingIsInFreeRowOrColumn() +
       scoreKingMovesToAFreeCorner() +
       scoreCapturedBlack(gameSnapshot)
@@ -187,7 +211,7 @@ object EvaluationFunctionImpl {
         case 1 => -200
         case distance =>  100 * 1 / distance
       }
-      blackCoord.map(scoreBlackPawn).sum.toInt
+      blacksCoord.map(scoreBlackPawn).sum.toInt
 
     }
 
@@ -195,7 +219,7 @@ object EvaluationFunctionImpl {
     def scoreBlackSurroundTheKing(): Int = {
       def scoreBlackPawn(pawnCoord: Coordinate): Double = 100 * 1 / quadraticDistanceBetweenCells(pawnCoord, kingCoord)
       //aggiungere controllo se in celle adiacenti si può essere mangiati alla mossa successiva
-      blackCoord.map(scoreBlackPawn).sum.toInt
+      blacksCoord.map(scoreBlackPawn).sum.toInt
     }
 
     //Positive score if the pawn is diagonal alignment with other pawns
