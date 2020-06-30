@@ -105,7 +105,7 @@ object MoveGenerator {
       (adjacentCells(1).nonEmpty &&
         adjacentCells(3).nonEmpty &&
         kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head)) ||
-        (adjacentCells(0).nonEmpty &&
+        (adjacentCells.head.nonEmpty &&
           adjacentCells(2).nonEmpty &&
           kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head))
 
