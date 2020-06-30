@@ -1,5 +1,6 @@
 package actor_ia
 
+import actor_ia.RootActor.{MaxRootActor, MinRootActor}
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import model._
 import utils.Move
@@ -12,17 +13,42 @@ case class ReturnBestMoveMsg(bestMove: Move)
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
 object ArtificialIntelligenceImpl {
-  def apply(model: ModelHnefatafl, depth: Int, playerChosen: Player.Value): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth, playerChosen)
+  //def apply(model: ModelHnefatafl, depth: Int, playerChosen: Player.Value): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth, playerChosen)
+  def apply(model: ModelHnefatafl, depth: Int): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth)
 }
 
-case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int, playerChosen: Player.Value) extends Actor {
+case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int) extends Actor {
 
+  override def receive: Receive = {
+    case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
+    case event: ReturnBestMoveMsg => model.makeMove(event.bestMove); context.stop(sender())
+  }
+
+  def findBestMove(gameSnapshot: GameSnapshot): Unit = {
+    var sonActor: Props = Props.empty
+    if (iaIsBlack(gameSnapshot.getPlayerToMove))
+      sonActor = Props(MinRootActor())
+    else
+      sonActor = Props(MaxRootActor())
+    val refSonActor = context.actorOf(sonActor)
+    refSonActor ! InitMsg(gameSnapshot.getCopy, depth, Option.empty)
+
+  }
+
+  private def iaIsBlack(iaPlayer: Player.Val): Boolean = iaPlayer.equals(Player.Black)
+
+}
+
+
+/*
   private val hashMapSonRef: mutable.HashMap[ActorRef, Move] = mutable.HashMap.empty
   private var numberChildren: Int = 0
   private var bestMove: Move = _
   private var bestScore: Int = _
+  private var iaPlayer: Player.Val = _
 
   def findBestMove(gameSnapshot: GameSnapshot): Unit = {
+    iaPlayer = gameSnapshot.getPlayerToMove
     bestScore = if (iaIsBlack()) Int.MaxValue else Int.MinValue
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(gameSnapshot)
     numberChildren = gamePossibleMoves.size
@@ -30,24 +56,24 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int, playerC
     for (possibleMove <- gamePossibleMoves) {
       var sonActor: Props = Props.empty
       if (!iaIsBlack())
-        sonActor = Props(MinActor(gameSnapshot.getCopy, depth - 1, Option(possibleMove), self,0))
+        sonActor = Props(new MinActor())
       else
-        sonActor = Props(MaxActor(gameSnapshot.getCopy, depth - 1, Option(possibleMove), self,0))
+        sonActor = Props(new MaxActor())
       val refSonActor = context.actorOf(sonActor)
-      refSonActor ! StartMsg()
+      refSonActor ! InitMsg(gameSnapshot.getCopy, depth - 1, Option(possibleMove))
       hashMapSonRef += (refSonActor -> possibleMove)
     }
   }
 
-  private def iaIsBlack(): Boolean = playerChosen.equals(Player.White)
+  private def iaIsBlack(): Boolean = iaPlayer.equals(Player.Black)
 
   private def updateBest(newScore: Int, actorRef: ActorRef): Unit = {
     //println("NewScore " + newScore)
     numberChildren -= 1
-    if (newScore > bestScore && !iaIsBlack() ) {
+    if (newScore > bestScore && !iaIsBlack()) {
       bestScore = newScore
       bestMove = hashMapSonRef(actorRef)
-    } else if( newScore < bestScore && iaIsBlack())  {
+    } else if (newScore < bestScore && iaIsBlack()) {
       bestScore = newScore
       bestMove = hashMapSonRef(actorRef)
     }
@@ -70,7 +96,7 @@ object TryIA extends App {
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
   val system: ActorSystem = ActorSystem()
 
-  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2, gameSnapshot.getPlayerToMove))) ! FindBestMoveMsg(gameSnapshot)
+  system.actorOf(Props(ArtificialIntelligenceImpl(null, 2))) ! FindBestMoveMsg(gameSnapshot)
 
 
-}
+}*/

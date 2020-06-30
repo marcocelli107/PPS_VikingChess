@@ -1,19 +1,16 @@
 package actor_ia
 
-import akka.actor.{ActorRef, Props}
-import model.GameSnapshot
-import utils.Move
+import akka.actor.Props
 
-case class MinActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, count:Int) extends MiniMaxActor(fatherGameSnapshot, depth, move, fatherRef, count ) {
+class MinActor() extends MiniMaxActor() {
 
-  alfa = Int.MaxValue
+  override def initAlfa: Int = Int.MaxValue
 
+  override def createChild(): Props =
+    Props(new MaxActor())
 
-  override def createChild(currentGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props =
-    Props(MaxActor(currentGame, depth - 1,  Option(move), fatherRef, count+1))
-
-  override def miniMaxComparison(score: Int): Unit = {
-    alfa = scala.math.min(alfa, score)
-
+  override def miniMaxComparison(score: Int, alfa: Int): Boolean = {
+    score < alfa
   }
+
 }

@@ -1,109 +1,117 @@
 package actor_ia
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import ia.{EvaluationFunction, EvaluationFunctionImpl}
+import akka.actor.{Actor, ActorRef, Props}
+import ia.EvaluationFunctionImpl
 import model._
 import utils.Move
 
-case class FirstMsg()
+import scala.collection.mutable
 
-case class StartMsg()
+case class InitMsg(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move])
+
+case class MakeMoveMsg()
+
+case class CheckLeafOrBranchMsg()
+
+case class EvaluationMsg()
+
+case class GenerateChildrenMsg()
 
 case class ValueSonMsg(score: Int)
 
+case class ActorState(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, alfa: Int)
 
-abstract class MiniMaxActor(fatherGameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, count:Int ) extends Actor {
-
-  var numberOfChildren: Int = _
-  var evaluationFunction: EvaluationFunction = EvaluationFunctionImpl()
-  var alfa: Int = _
-  var currentGame: GameSnapshot = fatherGameSnapshot
-  var gamePossibleMove : List[Move] = List()
-
+abstract class MiniMaxActor() extends Actor {
 
   override def receive: Receive = {
-    case event: ValueSonMsg => miniMax(event.score)
-    case _: FirstMsg => analyzeMyChildren()
-    case _: StartMsg => compute()
+    case event: InitMsg =>
+      context.become(initState(ActorState(event.gameSnapshot, event.depth, event.move, sender(), initAlfa)))
+      self ! MakeMoveMsg()
   }
 
-  def compute(): Unit = depth match {
-    case 0 => makeMove(); computeEvaluationFunction()
-    case _ => makeMove(); analyzeMyChildren()
+  def initState(actorState: ActorState): Receive = {
+    case _: MakeMoveMsg => makeMove(actorState)
   }
 
-  def computeEvaluationFunction(): Unit = fatherRef ! ValueSonMsg(evaluationFunction.score(currentGame, move.get))
+  def exploringState(actorState: ActorState): Receive = {
+    case _: CheckLeafOrBranchMsg => checkLeafOrBranch(actorState)
+  }
 
-  def makeMove(): Unit =
+  def leafState(actorState: ActorState): Receive = {
+    case _: EvaluationMsg => computeEvaluationFunction(actorState.fatherRef, actorState.gameSnapshot, actorState.move.get)
+  }
+
+  def branchState(actorState: ActorState): Receive = {
+    case _: GenerateChildrenMsg => generateChildren(actorState)
+  }
+
+  // TODO: passare mappa immutabile
+  def evaluatingChildren(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int, fatherRef: ActorRef): Receive = {
+    case event: ValueSonMsg => miniMax(hashMapSonRef, numberOfChildren, bestMove, alfa, fatherRef, sender(), event.score)
+  }
+
+  def initAlfa: Int
+
+  private def makeMove(actorState: ActorState): Unit = {
+    val currentSnapshot = newMoveSnapshot(actorState.gameSnapshot, actorState.move)
+    context.become(exploringState(ActorState(currentSnapshot, actorState.depth, actorState.move, actorState.fatherRef,
+      actorState.alfa)))
+    self ! CheckLeafOrBranchMsg()
+  }
+
+  def newMoveSnapshot(fatherSnapshot: GameSnapshot, move: Option[Move]): GameSnapshot =
     if(move.nonEmpty)
-      currentGame = MoveGenerator.makeMove(fatherGameSnapshot, move.get)
+      MoveGenerator.makeMove(fatherSnapshot, move.get)
+    else
+      fatherSnapshot
 
-  def analyzeMyChildren(): Unit = {
-
-    gamePossibleMove = MoveGenerator.gamePossibleMoves(currentGame.getCopy)
-
-    numberOfChildren = gamePossibleMove.size
-
-    //println("Depth: " + depth + ", N° Actors: " + numberOfChildren)
-
-    var listSonRef: List[ActorRef] = List.empty
-
-    for(pawnMove <- gamePossibleMove) {
-        val sonActor: Props = createChild(currentGame.getCopy, pawnMove, this.self)
-        listSonRef = listSonRef :+ context.actorOf(sonActor)    }
-
-    listSonRef.foreach( _ ! StartMsg())
+  def checkLeafOrBranch(actorState: ActorState): Unit = actorState.depth match {
+    case 0 => context.become(leafState(actorState)); self ! EvaluationMsg()
+    case _ => context.become(branchState(actorState)); self ! GenerateChildrenMsg()
   }
 
-  def createChild(currentGame: GameSnapshot, move: Move, fatherRef: ActorRef): Props
+  def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
+    fatherRef ! ValueSonMsg(EvaluationFunctionImpl().score(currentGame, move))
 
-  def miniMaxComparison(score: Int)
 
-  def miniMax(score: Int): Unit = {
-    numberOfChildren = numberOfChildren - 1
-    miniMaxComparison(score)
-    if( numberOfChildren == 0) {
-      //context.children.foreach(child => context.stop(child))
-      fatherRef ! ValueSonMsg(alfa)
-     // context.stop(self)
+  def generateChildren(actorState: ActorState): Unit = {
+    val gamePossibleMoves = MoveGenerator.gamePossibleMoves(actorState.gameSnapshot.getCopy)
+    val hashMapSonRef: mutable.HashMap[ActorRef, Move] = mutable.HashMap.empty
+
+    for(possibleMove <- gamePossibleMoves) {
+        val sonActor: Props = createChild()
+        hashMapSonRef += context.actorOf(sonActor) -> possibleMove
+    }
+
+    context.become(evaluatingChildren(hashMapSonRef, gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
+
+    hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
+  }
+
+  def createChild(): Props
+
+  def miniMaxComparison(score: Int, alfa: Int): Boolean
+
+  def miniMax(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int,
+              fatherRef: ActorRef, sonRef: ActorRef, score: Int): Unit = {
+    val newNumberOfChildren = numberOfChildren - 1
+    var newAlfa = alfa
+    var newBestMove = bestMove
+    if(miniMaxComparison(score, alfa)) {
+      newAlfa = score
+      newBestMove = updateBestMove(hashMapSonRef, sonRef)
+    }
+    if(newNumberOfChildren == 0) {
+      if(newBestMove.nonEmpty)
+        fatherRef ! ReturnBestMoveMsg(newBestMove.get)
+      else
+        fatherRef ! ValueSonMsg(alfa)
+    } else {
+      context.become(evaluatingChildren(hashMapSonRef, newNumberOfChildren, newBestMove, newAlfa, fatherRef))
     }
   }
 
+  protected def updateBestMove(hashMapSonRef: mutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
+    Option.empty
 }
 
-/** PERFORMANCE HNEFATAFL
-  *
-  * DEPH 1: HNEFATAFL - circa 0.08 sec / TAWLBWURDD - circa 0.07 sec / TABLUT - circa 0.06 sec / BRANDUBH - circa 0.05 sec
-  * DEPH 2: HNEFATAFL - circa 0.8 sec / TAWLBWURDD - circa 1.11 sec / TABLUT - circa 0.76 sec / BRANDUBH - circa 0.44 sec
-  * DEPH 3: HNEFATAFL - circa 8 sec / TAWLBWURDD - circa 10 sec / TABLUT - circa 4 sec / BRANDUBH - circa 1.4 sec
-  *
-  * ADESSO VA MA CON 9x9 e SUPERIORI CI METTE TROPPO
-  * DEPH 4: HNEFATAFL - circa ... sec / TAWLBWURDD - circa ... sec / TABLUT - circa ... sec / BRANDUBH - circa 17 sec
-  *
-  */
-object tryProva extends App {
-  val THEORY: String = TheoryGame.GameRules.toString
-  val game: ParserProlog = ParserPrologImpl(THEORY)
-  val initGame = game.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
-  val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
-  val system: ActorSystem = ActorSystem()
-
-  val start = System.currentTimeMillis()
-
-
-  var bestScore : Int = 0
-
-  val father = system.actorOf(Props(FatherActor()))
-   father ! StartMsg()
-
-  case class FatherActor() extends Actor {
-
-    override def receive: Receive = {
-
-      case event: ValueSonMsg => println(event.score);  val stop = System.currentTimeMillis() - start
-        println(stop)
-
-      case _: StartMsg => system.actorOf(Props(MaxActor(gameSnapshot, 3, Option.empty, self, 0))) ! FirstMsg()
-    }
-  }
-}
