@@ -7,7 +7,6 @@ import utils.Move
 
 import scala.collection.mutable
 
-// TODO fatherRef sostituibile da sender ???
 case class InitMsg(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move])
 
 case class MakeMoveMsg()
@@ -46,9 +45,9 @@ abstract class MiniMaxActor() extends Actor {
     case _: GenerateChildrenMsg => generateChildren(actorState)
   }
 
-  // TODO passare mappa immutabile
-  def evaluatingChildren(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, alfa: Int, fatherRef: ActorRef): Receive = {
-    case event: ValueSonMsg => miniMax(hashMapSonRef, numberOfChildren, alfa, fatherRef, event.score)
+  // TODO: passare mappa immutabile
+  def evaluatingChildren(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int, fatherRef: ActorRef): Receive = {
+    case event: ValueSonMsg => miniMax(hashMapSonRef, numberOfChildren, bestMove, alfa, fatherRef, sender(), event.score)
   }
 
   def initAlfa: Int
@@ -84,7 +83,7 @@ abstract class MiniMaxActor() extends Actor {
         hashMapSonRef += context.actorOf(sonActor) -> possibleMove
     }
 
-    context.become(evaluatingChildren(hashMapSonRef, gamePossibleMoves.size, actorState.alfa, actorState.fatherRef))
+    context.become(evaluatingChildren(hashMapSonRef, gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
 
     hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
   }
@@ -93,18 +92,26 @@ abstract class MiniMaxActor() extends Actor {
 
   def miniMaxComparison(score: Int, alfa: Int): Boolean
 
-  def miniMax(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, alfa: Int, fatherRef: ActorRef, score: Int): Unit = {
+  def miniMax(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int,
+              fatherRef: ActorRef, sonRef: ActorRef, score: Int): Unit = {
     val newNumberOfChildren = numberOfChildren - 1
     var newAlfa = alfa
+    var newBestMove = bestMove
     if(miniMaxComparison(score, alfa)) {
       newAlfa = score
-      // TODO updateBestMove
+      newBestMove = updateBestMove(hashMapSonRef, sonRef)
     }
     if(newNumberOfChildren == 0) {
-     fatherRef ! ValueSonMsg(alfa)
+      if(newBestMove.nonEmpty)
+        fatherRef ! ReturnBestMoveMsg(newBestMove.get)
+      else
+        fatherRef ! ValueSonMsg(alfa)
     } else {
-      context.become(evaluatingChildren(hashMapSonRef, newNumberOfChildren, newAlfa, fatherRef))
+      context.become(evaluatingChildren(hashMapSonRef, newNumberOfChildren, newBestMove, newAlfa, fatherRef))
     }
   }
+
+  protected def updateBestMove(hashMapSonRef: mutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
+    Option.empty
 }
 
