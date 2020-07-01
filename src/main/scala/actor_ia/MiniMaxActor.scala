@@ -1,7 +1,7 @@
 package actor_ia
 
 import akka.actor.{Actor, ActorRef, Props}
-import ia.EvaluationFunctionImpl
+import ia.EvaluationFunction
 import model._
 import utils.Move
 
@@ -71,7 +71,7 @@ abstract class MiniMaxActor() extends Actor {
   }
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
-    fatherRef ! ValueSonMsg(EvaluationFunctionImpl().score(currentGame, move))
+    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, move))
 
 
   def generateChildren(actorState: ActorState): Unit = {
