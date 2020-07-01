@@ -21,6 +21,6 @@ object RootActor {
 
   }
 
-  def rootUpdateBestMove(hashMapSonRef: mutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] = 
+  def rootUpdateBestMove(hashMapSonRef: mutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
     Option(hashMapSonRef(sonRef))
 }

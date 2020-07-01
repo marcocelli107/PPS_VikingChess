@@ -131,6 +131,22 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Black
   }
 
+  test("Tests king not captured on 2 sides next two thrones in Brandubh") {
+    inSequence {
+      parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
+      parser.makeLegitMove(Move(Coordinate(4,6), Coordinate(1,6)))
+      parser.makeLegitMove(Move(Coordinate(4,5), Coordinate(7,5)))
+      parser.makeLegitMove(Move(Coordinate(6,4), Coordinate(6,5)))
+      parser.makeLegitMove(Move(Coordinate(4,4), Coordinate(4,5)))
+      parser.makeLegitMove(Move(Coordinate(2,4), Coordinate(2,5)))
+      parser.makeLegitMove(Move(Coordinate(7,5), Coordinate(7,6)))
+      parser.makeLegitMove(Move(Coordinate(2,5), Coordinate(3,5)))
+      parser.makeLegitMove(Move(Coordinate(7,6), Coordinate(7,5)))
+    }
+    val currentGame: (_, Player.Value, _, _) = parser.makeLegitMove(Move(Coordinate(6,5), Coordinate(5,5)))
+    currentGame._2 shouldBe Player.None
+  }
+
   test("Tests draw in Brandubh.") {
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
@@ -153,8 +169,6 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     }
     val currentGame: (_, Player.Value, _, _) = parser.makeLegitMove(Move(Coordinate(5,6), Coordinate(4,6)))
     currentGame._2 shouldBe Player.Draw
-
-
   }
 
   test("Tests 1 deep clone."){

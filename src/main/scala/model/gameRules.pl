@@ -534,8 +534,7 @@ kingOnThrone(S, C) :- centralCellCoord(S, C).
 %%% Returns if the king is on a cell next to the throne (central cell).
 % [kingNextToThrone(+BoardSize, +KingCoordinate)]
 kingNextToThrone(S, C) :-
-		nextToCentralCellCoords(S, [U, R, D, L]),
-		append4(U, R, D, L, Around),
+		nextToCentralCellCoords(S, Around),
 		member(C, Around).
 
 %%% Returns king's adjacent cells divided in Horizontal and Vertical (one cell per side).
@@ -1042,6 +1041,20 @@ testBoard7KingNextToThroneCaptured3Sides :-
 		makeMove(G1, p(4, 4), p(4, 3), _, G2),
 		makeMove(G2, p(2, 4), p(5, 3), _, O),
 		gameWinner(O, b).
+
+% yes
+testBoard7KingNextToThroneNotCaptured2Sides :-
+		newGame(brandubh, G),
+		makeMove(G, p(4, 6), p(1, 6), _, G1),
+		makeMove(G1, p(4, 5), p(7, 5), _, G2),
+		makeMove(G2, p(6, 4), p(6, 5), _, G3),
+		makeMove(G3, p(4, 4), p(4, 5), _, G4),
+		makeMove(G4, p(2, 4), p(2, 5), _, G5),
+		makeMove(G5, p(7, 5), p(7, 6), _, G6),
+		makeMove(G6, p(2, 5), p(3, 5), _, G7),
+		makeMove(G7, p(7, 6), p(7, 5), _, G8),
+		makeMove(G8, p(6, 5), p(5, 5), _, G9),
+		gameWinner(G9, n).
 
 % yes
 testBoard7Draw :-
