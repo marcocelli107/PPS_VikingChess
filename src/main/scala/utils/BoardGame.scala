@@ -1,6 +1,9 @@
 package utils
 
 import model.Piece
+import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
+
+import scala.collection.immutable.HashMap
 
 /**
  * Util class representing a 2D coordinate
@@ -65,6 +68,11 @@ object BoardGame {
 
   }
 
+  object OrthogonalDirection extends Enumeration {
+    type OrthogonalDirection = Value
+    val Up, Right, Down, Left = Value
+  }
+
   trait Board {
     /**
      * Defines board's cells list.
@@ -85,7 +93,7 @@ object BoardGame {
 
     def toString: String
 
-    def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]]
+    def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]]
 
     def specialCoordinates: List[Coordinate]
 
@@ -116,8 +124,11 @@ object BoardGame {
 
       override def toString: String = rows.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
 
-      override def orthogonalCells(coordinate: Coordinate): List[List[BoardCell]] =
-        List(upCells(coordinate), rightCells(coordinate), downCells(coordinate), leftCells(coordinate))
+      override def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]] =
+        HashMap(OrthogonalDirection.Up -> upCells(coordinate),
+          OrthogonalDirection.Right -> rightCells(coordinate),
+          OrthogonalDirection.Down -> downCells(coordinate),
+          OrthogonalDirection.Left -> leftCells(coordinate))
 
       private def upCells(coordinate: Coordinate): List[BoardCell] =
         (coordinate.x - 1 to 1 by -1).toList.map(Coordinate(_, coordinate.y)).map(getCell)
@@ -136,7 +147,7 @@ object BoardGame {
 
       override def cornerCoordinates: List[Coordinate] =
         List(Coordinate(1, 1), Coordinate(1, size), Coordinate(size, 1),
-        Coordinate(size, size))
+          Coordinate(size, size))
 
       override def centerCoordinates: Coordinate = Coordinate(size / 2 + 1, size / 2 + 1)
 

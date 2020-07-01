@@ -15,15 +15,15 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
   var variantTablut:GameVariant.Val = GameVariant.Tablut
   var variantTawlbwrdd:GameVariant.Val = GameVariant.Tawlbwrdd
 
-  var gameBrandubh: (Player.Val, Player.Val, BoardGame.Board, Int) = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
-  var gameHnefatafl: (Player.Val, Player.Val, BoardGame.Board, Int) = parserProlog.createGame(variantHnefatafl.toString().toLowerCase)
-  var gameTablut: (Player.Val, Player.Val, BoardGame.Board, Int) = parserProlog.createGame(variantTablut.toString().toLowerCase)
-  var gameTawlbwrdd: (Player.Val, Player.Val, BoardGame.Board, Int) = parserProlog.createGame(variantTawlbwrdd.toString().toLowerCase)
+  var gameBrandubh: (Player.Val, Player.Val, BoardGame.Board, Int) = _
+  var gameHnefatafl: (Player.Val, Player.Val, BoardGame.Board, Int) = _
+  var gameTablut: (Player.Val, Player.Val, BoardGame.Board, Int) = _
+  var gameTawlbwrdd: (Player.Val, Player.Val, BoardGame.Board, Int) = _
 
-  var snapBrandubh: GameSnapshotImpl = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
-  var snapHnefatafl: GameSnapshotImpl = GameSnapshotImpl(variantHnefatafl, gameHnefatafl._1, gameHnefatafl._2, gameHnefatafl._3, Option.empty, 0, 0)
-  var snapTablut: GameSnapshotImpl = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
-  var snapTawlbwrdd: GameSnapshotImpl = GameSnapshotImpl(variantTawlbwrdd, gameTawlbwrdd._1, gameTawlbwrdd._2, gameTawlbwrdd._3, Option.empty, 0, 0)
+  var snapBrandubh: GameSnapshotImpl = _
+  var snapHnefatafl: GameSnapshotImpl = _
+  var snapTablut: GameSnapshotImpl = _
+  var snapTawlbwrdd: GameSnapshotImpl = _
 
   test("Test number of possible moves - Brandubh."){
     gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
@@ -271,8 +271,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   }
 
-  //TODO jumped testBoard11KingFarFromThroneCapture
-
   test("Test board 9 king on throne capture - Tablut"){
     gameTablut = parserProlog.createGame(variantTablut.toString().toLowerCase)
     snapTablut = GameSnapshotImpl(variantTablut, gameTablut._1, gameTablut._2, gameTablut._3, Option.empty, 0, 0)
@@ -384,6 +382,23 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   }
 
+  test("Test king not captured on 2 sides next to throne in Brandubh") {
+    gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
+    snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
+
+    val step1 = MoveGenerator.makeMove(snapBrandubh, Move(Coordinate(4,6), Coordinate(1,6)))
+    val step2 = MoveGenerator.makeMove(step1, Move(Coordinate(4,5), Coordinate(7,5)))
+    val step3 = MoveGenerator.makeMove(step2, Move(Coordinate(6,4), Coordinate(6,5)))
+    val step4 = MoveGenerator.makeMove(step3, Move(Coordinate(4,4), Coordinate(4,5)))
+    val step5 = MoveGenerator.makeMove(step4, Move(Coordinate(2,4), Coordinate(2,5)))
+    val step6 = MoveGenerator.makeMove(step5, Move(Coordinate(7,5), Coordinate(7,6)))
+    val step7 = MoveGenerator.makeMove(step6, Move(Coordinate(2,5), Coordinate(3,5)))
+    val step8 = MoveGenerator.makeMove(step7, Move(Coordinate(7,6), Coordinate(7,5)))
+    val step9 = MoveGenerator.makeMove(step8, Move(Coordinate(6,5), Coordinate(5,5)))
+
+    assert(step9.getWinner.equals(Player.None))
+  }
+
   test("Test board 7 Draw - Brandubh"){
     gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
     snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
@@ -410,18 +425,4 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   }
 
-  //TODO DELETE
-  test("Copy Snapshot - Brandubh") {
-    gameBrandubh = parserProlog.createGame(variantBrandubh.toString().toLowerCase)
-    snapBrandubh = GameSnapshotImpl(variantBrandubh, gameBrandubh._1, gameBrandubh._2, gameBrandubh._3, Option.empty, 0, 0)
-
-    val snapBrandubh2 = snapBrandubh.getCopy
-
-    val step1 = MoveGenerator.makeMove(snapBrandubh2, Move(Coordinate(4,6), Coordinate(1,6)))
-
-    println(snapBrandubh2.getBoard)
-    println()
-    println(snapBrandubh.getBoard)
-    assert(!snapBrandubh2.getBoard.equals(snapBrandubh.getBoard))
-  }
 }

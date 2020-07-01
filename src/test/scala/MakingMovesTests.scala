@@ -108,6 +108,11 @@ class MakingMovesTests extends FunSuite {
     assert(goal.isSuccess)
   }
 
+  test("Tests if in 7x7 board black doesn't win capturing the king on two sides plus hostile throne.") {
+    goal = prolog.solve("testBoard7KingNextToThroneNotCaptured2Sides.")
+    assert(goal.isSuccess)
+  }
+
   test("Tests a draw scenario.") {
     goal = prolog.solve("testBoard7Draw.")
     assert(goal.isSuccess)
