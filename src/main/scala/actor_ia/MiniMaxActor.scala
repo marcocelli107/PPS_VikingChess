@@ -73,19 +73,23 @@ abstract class MiniMaxActor() extends Actor {
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
     fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, move))
 
-
   def generateChildren(actorState: ActorState): Unit = {
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(actorState.gameSnapshot.getCopy)
     val hashMapSonRef: mutable.HashMap[ActorRef, Move] = mutable.HashMap.empty
 
-    for(possibleMove <- gamePossibleMoves) {
+    if(gamePossibleMoves.isEmpty) {
+      context.become(leafState(actorState))
+      self ! EvaluationMsg()
+    } else {
+      for (possibleMove <- gamePossibleMoves) {
         val sonActor: Props = createChild()
         hashMapSonRef += context.actorOf(sonActor) -> possibleMove
+      }
+
+      context.become(evaluatingChildren(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
+
+      hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
     }
-
-    context.become(evaluatingChildren(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
-
-    hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
   }
 
   def createChild(): Props
