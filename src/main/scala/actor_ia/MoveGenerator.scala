@@ -1,8 +1,7 @@
 package actor_ia
 
-import model.GameSnapshot.GameSnapshotImpl
-import model.{GameSnapshot, GameVariant, ParserProlog, ParserPrologImpl, Piece, Player, TheoryGame}
-import utils.BoardGame.{BoardCell, OrthogonalDirection}
+import model.{GameSnapshot, GameVariant, Piece, Player}
+import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 import utils.{Coordinate, Move}
 
@@ -75,18 +74,15 @@ object MoveGenerator {
       gamePossibleMoves(GameSnapshot(gameSnapshot.getVariant, switchPlayer(), Player.None, gameSnapshot.getBoard, Option(move), 0, 0)).isEmpty
     }
 
-    def findKing():Coordinate = {
-      gameSnapshot.getBoard.rows.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).head.getCoordinate
-    }
 
     def checkBlackBigBoardVictory(): Boolean = {
-      val adjacentCells = gameSnapshot.getBoard.orthogonalCells(findKing())
+      val adjacentCells = gameSnapshot.getBoard.orthogonalCells(findKing(gameSnapshot.getBoard))
 
       fourOrThreeSideCondition(adjacentCells)
     }
 
     def checkBlackSmallBoardVictory(): Boolean = {
-      val kingCoord = findKing()
+      val kingCoord = findKing(gameSnapshot.getBoard)
       val adjacentCells = gameSnapshot.getBoard.orthogonalCells(kingCoord)
 
       checkKingCapturedSmallBoard(kingCoord, adjacentCells)
@@ -125,8 +121,12 @@ object MoveGenerator {
     GameSnapshot(gameSnapshot.getVariant, switchPlayer(), checkWinner(), gameSnapshot.getBoard, Option(move), capturedPieces._1, capturedPieces._2)
   }
 
+  def findKing(board: Board):Coordinate = {
+    board.rows.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).head.getCoordinate
+  }
+
   def kingOnThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
-    kingCoord.equals(gameSnapshot.getBoard.specialCoordinates.last)
+    kingCoord.equals(gameSnapshot.getBoard.centerCoordinates)
 
   def kingNextToThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
     gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).values.map(_.head.getCoordinate)

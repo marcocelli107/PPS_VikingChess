@@ -71,7 +71,7 @@ abstract class MiniMaxActor() extends Actor {
   }
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
-    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, move))
+    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame))
 
 
   def generateChildren(actorState: ActorState): Unit = {
