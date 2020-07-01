@@ -131,18 +131,28 @@ object EvaluationFunctionImpl {
       val board = gameSnapshot.getBoard
 
       def isSquare(list: List[BoardCell]):Boolean = {
-        list.count(cell => (cell.getPiece.equals(Piece.WhitePawn) || cell.getPiece.equals(Piece.WhiteKing))) == 4
+        list.count(cell => cell.getPiece.equals(Piece.WhitePawn) || cell.getPiece.equals(Piece.WhiteKing)) == 4
       }
 
       var score: Double = 0
+      /*
       for {
         i <- 1 until  boardSize
         j <- 1 until boardSize
-        if isSquare(List(board.getCell(Coordinate(i,j)),
-          board.getCell(Coordinate(i,j+1)),
-          board.getCell(Coordinate(i+1,j)),
-          board.getCell(Coordinate(i+1,j+1))))
+        if isSquare(List(board.getCell(Coordinate(i, j)),
+          board.getCell(Coordinate(i, j+1)),
+          board.getCell(Coordinate(i+1, j)),
+          board.getCell(Coordinate(i+1, j+1))))
       } yield score += 1.25 * quadraticDistanceBetweenCells(Coordinate(i,j), centralCoordinate)
+      */
+
+      for { coord <- whitesCoord
+        i = coord.x
+        j = coord.y
+        if isSquare(List(board.getCell(Coordinate(i, j+1)),
+          board.getCell(Coordinate(i+1, j)),
+          board.getCell(Coordinate(i+1, j+1))))
+      } yield score += 1.25 * quadraticDistanceBetweenCells(coord, centralCoordinate)
 
       score.toInt
     }

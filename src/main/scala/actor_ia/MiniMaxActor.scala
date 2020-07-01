@@ -114,8 +114,6 @@ abstract class MiniMaxActor() extends Actor {
   protected def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
     Option.empty
 
-  private def toImmutableMap(mutableHashMap: mutable.HashMap[ActorRef, Move]): immutable.HashMap[ActorRef, Move] = {
+  private def toImmutableMap(mutableHashMap: mutable.HashMap[ActorRef, Move]): immutable.HashMap[ActorRef, Move] =
     collection.immutable.HashMap(mutableHashMap.toSeq:_*)
-  }
 }
-
