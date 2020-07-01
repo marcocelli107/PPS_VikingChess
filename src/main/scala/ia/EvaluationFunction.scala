@@ -204,7 +204,7 @@ object EvaluationFunction {
 
   // Positive score if the white opening in opposite side of black Blockade
   def scoreWhiteOpeningOnOppositeSideOfBlackBlockade(whiteCoord: Coordinate): Int = {
-    val oppositeQuadrant: Seq[Seq[BoardCell]] = findQuadrant(whiteCoord: Coordinate, true)
+    val oppositeQuadrant: Seq[Seq[BoardCell]] = findQuadrant(whiteCoord: Coordinate, oppositQuadrant = true)
     val numberBlackPieceInOppositeKingQuadrant: Int = oppositeQuadrant.flatten.count(cell => cell.getPiece.equals(Piece.BlackPawn))
     val score: Int = numberBlackPieceInOppositeKingQuadrant * 2
     score
@@ -235,8 +235,47 @@ object EvaluationFunction {
     kingAdjacentCells.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * 30
   }
 
-  //Positive score if the pawn is diagonal alignment with other pawns
-  def scoreCordonBlack(pawnCell: BoardCell, closeCell: Seq[BoardCell], score: Int = 0): Int = ???
+  def scoreBlackCordon():Int = {
+
+    def getOtherSide(coordinate: Coordinate):List[Coordinate] = coordinate match {
+      case Coordinate(x,_) if x == boardSize => List(Coordinate(-1,x), Coordinate(1,-1), Coordinate(-1,1))
+      case Coordinate(_,x) if x == boardSize => List(Coordinate(x,-1), Coordinate(1,-1), Coordinate(-1,1))
+      case Coordinate(1,_) => List(Coordinate(-1,1) , Coordinate(boardSize,-1), Coordinate(-1,boardSize))
+      case _ => List(Coordinate(1,-1) , Coordinate(boardSize,-1), Coordinate(-1,boardSize))
+    }
+
+    def isOnAnySides(currentCoord:Coordinate, otherSideCoord: List[Coordinate]):Boolean = otherSideCoord.exists(isOnSide(currentCoord, _))
+
+    def isOnSide(coord:Coordinate, startSideCoord: Coordinate ): Boolean = coord.x == startSideCoord.x || coord.y == startSideCoord.y
+
+    def findNearBlack(c: Coordinate):List[Coordinate] = {
+      val nearCord = List(Coordinate(c.x + 1, c.y),Coordinate(c.x, c.y + 1),
+        Coordinate(c.x -1 , c.y),Coordinate(c.x, c.y - 1),
+        Coordinate(c.x - 1, c.y - 1 ),Coordinate(c.x +1, c.y + 1),
+        Coordinate(c.x - 1, c.y + 1 ),Coordinate(c.x +1, c.y - 1))
+        .filter(coord => coord.x <= boardSize && coord.x >= 1 &&
+          coord.y <= boardSize && coord.y >= 1)
+
+      nearCord.map(board.getCell).filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate)
+    }
+
+    def countPawnInCordon(previousCoord:List[Coordinate], nearPawnsCoords:List[Coordinate], otherSideCoord: List[Coordinate], startSideCoord: Coordinate, count:Int ):Int = nearPawnsCoords match {
+      case Nil => count //false
+      case h::_ if isOnAnySides(h, otherSideCoord) => count + 1 //true
+      case h::t if previousCoord.contains(h) || isOnSide(h, startSideCoord )  => countPawnInCordon(previousCoord, t, otherSideCoord,startSideCoord, count)
+      case h::t => countPawnInCordon( previousCoord, t, otherSideCoord,startSideCoord, count + countPawnInCordon(previousCoord :+ h, findNearBlack(h), otherSideCoord, startSideCoord, count ))
+    }
+    //ToDo tovare un modo per iterare sui quattro lati
+    val prova = board.rows.head
+      .filter(_.getPiece.equals(Piece.BlackPawn))
+      .map(_.getCoordinate)
+      .map( x => countPawnInCordon( List(x), findNearBlack(x), getOtherSide(x),Coordinate(1,-1), 1)).filter(_>=3)
+    println(prova)
+    prova.sum
+
+  }
+
+
 
   /*
   * Jolly rules
@@ -312,6 +351,7 @@ object EvaluationFunction {
 
   def isItDistantFromCornerOf(coord: Coordinate, distance: Int): Boolean = {
 
+    @scala.annotation.tailrec
     def _isItDistantFromTheCornerOf(coord: Coordinate, distance: Int, cornerCoord: List[Coordinate]): Boolean = cornerCoord match {
       case Nil => false
       case h :: _ if quadraticDistanceBetweenCells(h, coord) == distance => true
