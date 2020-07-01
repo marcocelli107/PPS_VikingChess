@@ -1,6 +1,7 @@
 package actor_ia
 
-import model.{GameSnapshot, GameVariant, Piece, Player}
+import model.GameSnapshot.GameSnapshotImpl
+import model.{GameSnapshot, GameVariant, ParserProlog, ParserPrologImpl, Piece, Player, TheoryGame}
 import utils.BoardGame.BoardCell
 import utils.{Coordinate, Move}
 
@@ -105,7 +106,7 @@ object MoveGenerator {
       (adjacentCells(1).nonEmpty &&
         adjacentCells(3).nonEmpty &&
         kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head)) ||
-        (adjacentCells(0).nonEmpty &&
+        (adjacentCells.head.nonEmpty &&
           adjacentCells(2).nonEmpty &&
           kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head))
 
@@ -126,7 +127,7 @@ object MoveGenerator {
     kingCoord.equals(gameSnapshot.getBoard.specialCoordinates.last)
 
   def kingNextToThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
-    gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).map(_.head).contains(kingCoord)
+    gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).map(_.head.getCoordinate).contains(kingCoord)
 
   private def isOwner(pawn: Piece.Value, player: Player.Value): Boolean = (pawn, player) match {
     case (Piece.WhitePawn, Player.White) => true
