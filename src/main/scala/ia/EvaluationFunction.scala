@@ -36,7 +36,8 @@ object EvaluationFunction {
       board = gameSnapshot.getBoard
       boardSize = board.size
       kingCoord = findKing(board.rows)
-      kingOrthogonalCells = board.orthogonalCells(kingCoord)
+      //TODO utilizzare mappa(OrthogonalDirection, List) (togliere .values.toList)
+      kingOrthogonalCells = board.orthogonalCells(kingCoord).values.toList
       kingAdjacentCells = kingOrthogonalCells.map(_.take(1)).map(l => if(l.nonEmpty) Option(l.head) else Option.empty)
       cornerCoordinates = board.cornerCoordinates
       centralCoordinate = board.centerCoordinates

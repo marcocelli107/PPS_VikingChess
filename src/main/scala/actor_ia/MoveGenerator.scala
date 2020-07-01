@@ -2,15 +2,16 @@ package actor_ia
 
 import model.GameSnapshot.GameSnapshotImpl
 import model.{GameSnapshot, GameVariant, ParserProlog, ParserPrologImpl, Piece, Player, TheoryGame}
-import utils.BoardGame.BoardCell
+import utils.BoardGame.{BoardCell, OrthogonalDirection}
+import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 import utils.{Coordinate, Move}
 
 object MoveGenerator {
 
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     def _moves(cell: BoardCell): List[Move] = {
-      gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate)
-        .flatMap(_cutAfterPiece(_, cell))
+      gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
+        .flatMap(_cutAfterPiece(_, cell)).toList
     }
 
     def _cutAfterPiece(sequence: List[BoardCell], cell: BoardCell): List[Move] =
@@ -91,24 +92,24 @@ object MoveGenerator {
       checkKingCapturedSmallBoard(kingCoord, adjacentCells)
     }
 
-    def checkKingCapturedSmallBoard(kingCoord: Coordinate, adjacentCells: List[List[BoardCell]]): Boolean = {
+    def checkKingCapturedSmallBoard(kingCoord: Coordinate, adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean = {
       if(kingOnThrone(gameSnapshot, kingCoord) || kingNextToThrone(gameSnapshot, kingCoord))
         fourOrThreeSideCondition(adjacentCells)
       else
         kingCapturedTwoSides(adjacentCells)
     }
 
-    def fourOrThreeSideCondition(adjacentCells: List[List[BoardCell]]): Boolean =
-      adjacentCells.filter(_.nonEmpty).map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
+    def fourOrThreeSideCondition(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean =
+      adjacentCells.values.filter(_.nonEmpty).map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
         cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4
 
-    def kingCapturedTwoSides(adjacentCells: List[List[BoardCell]]): Boolean =
-      (adjacentCells(1).nonEmpty &&
-        adjacentCells(3).nonEmpty &&
-        kingCapturedInLine(adjacentCells(1).head, adjacentCells(3).head)) ||
-        (adjacentCells.head.nonEmpty &&
-          adjacentCells(2).nonEmpty &&
-          kingCapturedInLine(adjacentCells.head.head, adjacentCells(2).head))
+    def kingCapturedTwoSides(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean =
+      (adjacentCells(OrthogonalDirection.Right).nonEmpty &&
+        adjacentCells(OrthogonalDirection.Left).nonEmpty &&
+        kingCapturedInLine(adjacentCells(OrthogonalDirection.Right).head, adjacentCells(OrthogonalDirection.Left).head)) ||
+        (adjacentCells(OrthogonalDirection.Up).nonEmpty &&
+          adjacentCells(OrthogonalDirection.Down).nonEmpty &&
+          kingCapturedInLine(adjacentCells(OrthogonalDirection.Up).head, adjacentCells(OrthogonalDirection.Down).head))
 
     def kingCapturedInLine(lineCells1: BoardCell, lineCells2: BoardCell): Boolean =
       (move.to.equals(lineCells1.getCoordinate) || move.to.equals(lineCells2.getCoordinate)) &&
@@ -116,7 +117,8 @@ object MoveGenerator {
 
 
     _move()
-    val listCapturesCoordinate = gameSnapshot.getBoard.orthogonalCells(move.to).map(_.take(2)).flatMap(list => _checkCaptures(list))
+
+    val listCapturesCoordinate = gameSnapshot.getBoard.orthogonalCells(move.to).values.map(_.take(2)).flatMap(list => _checkCaptures(list))
     listCapturesCoordinate.foreach(c => gameSnapshot.getBoard.setCell(BoardCell(c, Piece.Empty)))
     val capturedPieces = _incrementCapturedPieces(listCapturesCoordinate.size)
 
@@ -127,7 +129,8 @@ object MoveGenerator {
     kingCoord.equals(gameSnapshot.getBoard.specialCoordinates.last)
 
   def kingNextToThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
-    gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).map(_.head.getCoordinate).contains(kingCoord)
+    gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).values.map(_.head.getCoordinate)
+      .toList.contains(kingCoord)
 
   private def isOwner(pawn: Piece.Value, player: Player.Value): Boolean = (pawn, player) match {
     case (Piece.WhitePawn, Player.White) => true
