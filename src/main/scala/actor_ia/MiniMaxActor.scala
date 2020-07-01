@@ -1,11 +1,12 @@
 package actor_ia
 
 import akka.actor.{Actor, ActorRef, Props}
-import ia.EvaluationFunctionImpl
+import ia.EvaluationFunction
 import model._
 import utils.Move
 
 import scala.collection.mutable
+import scala.collection.immutable
 
 case class InitMsg(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move])
 
@@ -45,8 +46,7 @@ abstract class MiniMaxActor() extends Actor {
     case _: GenerateChildrenMsg => generateChildren(actorState)
   }
 
-  // TODO: passare mappa immutabile
-  def evaluatingChildren(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int, fatherRef: ActorRef): Receive = {
+  def evaluatingChildren(hashMapSonRef: immutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int, fatherRef: ActorRef): Receive = {
     case event: ValueSonMsg => miniMax(hashMapSonRef, numberOfChildren, bestMove, alfa, fatherRef, sender(), event.score)
   }
 
@@ -71,7 +71,7 @@ abstract class MiniMaxActor() extends Actor {
   }
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
-    fatherRef ! ValueSonMsg(EvaluationFunctionImpl().score(currentGame, move))
+    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, move))
 
 
   def generateChildren(actorState: ActorState): Unit = {
@@ -83,7 +83,7 @@ abstract class MiniMaxActor() extends Actor {
         hashMapSonRef += context.actorOf(sonActor) -> possibleMove
     }
 
-    context.become(evaluatingChildren(hashMapSonRef, gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
+    context.become(evaluatingChildren(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
 
     hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
   }
@@ -92,7 +92,7 @@ abstract class MiniMaxActor() extends Actor {
 
   def miniMaxComparison(score: Int, alfa: Int): Boolean
 
-  def miniMax(hashMapSonRef: mutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int,
+  def miniMax(hashMapSonRef: immutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alfa: Int,
               fatherRef: ActorRef, sonRef: ActorRef, score: Int): Unit = {
     val newNumberOfChildren = numberOfChildren - 1
     var newAlfa = alfa
@@ -111,7 +111,9 @@ abstract class MiniMaxActor() extends Actor {
     }
   }
 
-  protected def updateBestMove(hashMapSonRef: mutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
+  protected def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
     Option.empty
-}
 
+  private def toImmutableMap(mutableHashMap: mutable.HashMap[ActorRef, Move]): immutable.HashMap[ActorRef, Move] =
+    collection.immutable.HashMap(mutableHashMap.toSeq:_*)
+}
