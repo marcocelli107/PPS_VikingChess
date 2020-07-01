@@ -158,7 +158,7 @@ object ModelHnefatafl {
     override def startGame(): Unit = {
       if(mode.equals(GameMode.PVE)) {
         initIA()
-        if (playerChosen != storySnapshot.last.getPlayerToMove)
+        if (iaTurn)
           makeMoveIA()
       }
     }
@@ -191,7 +191,7 @@ object ModelHnefatafl {
 
       controller.updateView(storySnapshot.last)
 
-      if(storySnapshot.last.getWinner.equals(Player.None) && iaTurn){
+      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn){
         makeMoveIA()
       }
     }
