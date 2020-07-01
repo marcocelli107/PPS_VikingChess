@@ -60,15 +60,21 @@ abstract class MiniMaxActor() extends Actor {
   }
 
   def newMoveSnapshot(fatherSnapshot: GameSnapshot, move: Option[Move]): GameSnapshot =
-    if(move.nonEmpty)
+    if (move.nonEmpty)
       MoveGenerator.makeMove(fatherSnapshot, move.get)
     else
       fatherSnapshot
 
-  def checkLeafOrBranch(actorState: ActorState): Unit = actorState.depth match {
-    case 0 => context.become(leafState(actorState)); self ! EvaluationMsg()
-    case _ => context.become(branchState(actorState)); self ! GenerateChildrenMsg()
-  }
+  def checkLeafOrBranch(actorState: ActorState): Unit =
+    if (isTerminalNode(actorState.gameSnapshot.getWinner, actorState.depth)) {
+      context.become(leafState(actorState))
+      self ! EvaluationMsg()
+    } else {
+      context.become(branchState(actorState))
+      self ! GenerateChildrenMsg()
+    }
+
+  def isTerminalNode(gameStatus: Player.Val, depth: Int): Boolean = !gameStatus.equals(Player.None) || depth == 0
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
     fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, move))
@@ -77,19 +83,15 @@ abstract class MiniMaxActor() extends Actor {
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(actorState.gameSnapshot.getCopy)
     val hashMapSonRef: mutable.HashMap[ActorRef, Move] = mutable.HashMap.empty
 
-    if(gamePossibleMoves.isEmpty) {
-      context.become(leafState(actorState))
-      self ! EvaluationMsg()
-    } else {
-      for (possibleMove <- gamePossibleMoves) {
-        val sonActor: Props = createChild()
-        hashMapSonRef += context.actorOf(sonActor) -> possibleMove
-      }
-
-      context.become(evaluatingChildren(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
-
-      hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
+    for (possibleMove <- gamePossibleMoves) {
+      val sonActor: Props = createChild()
+      hashMapSonRef += context.actorOf(sonActor) -> possibleMove
     }
+
+    context.become(evaluatingChildren(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alfa, actorState.fatherRef))
+
+    hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
+
   }
 
   def createChild(): Props
@@ -101,12 +103,12 @@ abstract class MiniMaxActor() extends Actor {
     val newNumberOfChildren = numberOfChildren - 1
     var newAlfa = alfa
     var newBestMove = bestMove
-    if(miniMaxComparison(score, alfa)) {
+    if (miniMaxComparison(score, alfa)) {
       newAlfa = score
       newBestMove = updateBestMove(hashMapSonRef, sonRef)
     }
-    if(newNumberOfChildren == 0) {
-      if(newBestMove.nonEmpty)
+    if (newNumberOfChildren == 0) {
+      if (newBestMove.nonEmpty)
         fatherRef ! ReturnBestMoveMsg(newBestMove.get)
       else
         fatherRef ! ValueSonMsg(alfa)
@@ -119,5 +121,5 @@ abstract class MiniMaxActor() extends Actor {
     Option.empty
 
   private def toImmutableMap(mutableHashMap: mutable.HashMap[ActorRef, Move]): immutable.HashMap[ActorRef, Move] =
-    collection.immutable.HashMap(mutableHashMap.toSeq:_*)
+    collection.immutable.HashMap(mutableHashMap.toSeq: _*)
 }
