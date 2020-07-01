@@ -247,14 +247,14 @@ object EvaluationFunctionImpl {
       var whiteScore = 0
       var blackScore = 0
 
-      for (list <- listRowsAndColumns) {
-        isRowOrColumnOwner(list).get match {
+     listRowsAndColumns.foreach(
+        isRowOrColumnOwner(_) match {
           case Piece.WhiteKing => whiteScore += 90
           case Piece.WhitePawn => whiteScore += 10
           case Piece.BlackPawn => blackScore += 10
           case _ =>
         }
-      }
+     )
       (whiteScore, blackScore)
     }
 
@@ -266,15 +266,15 @@ object EvaluationFunctionImpl {
     /* UTILS METHODS */
 
 
-    def isRowOrColumnOwner(cellsSeq: Seq[BoardCell]): Option[Piece.Value] = {
+    def isRowOrColumnOwner(cellsSeq: Seq[BoardCell]): Piece.Value = {
       val pawns: (Seq[BoardCell], Seq[BoardCell]) = cellsSeq.filter(c => !c.getPiece.equals(Piece.Empty)).partition(_.getPiece.equals(Piece.BlackPawn))
       val whiteAndKing: (Seq[BoardCell], Seq[BoardCell]) = pawns._2.partition(_.getPiece.equals(Piece.WhitePawn))
 
       (pawns._1, whiteAndKing._1, whiteAndKing._2) match {
-        case (_, Nil, Nil) => Option(Piece.BlackPawn)
-        case (Nil, _, _) => Option(Piece.WhitePawn)
-        case (Nil, Nil, _) => Option(Piece.WhiteKing)
-        case _ => Option.empty
+        case (_, Nil, Nil) => Piece.BlackPawn
+        case (Nil, _, _) => Piece.WhitePawn
+        case (Nil, Nil, _) => Piece.WhiteKing
+        case _ => Piece.Empty
       }
     }
 
