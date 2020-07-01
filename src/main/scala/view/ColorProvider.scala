@@ -2,77 +2,41 @@ package view
 
 import java.awt.Color
 
-trait ColorProvider {
 
-  def getBlackColor: Color
+object ColorProvider {
 
-  def getHighlightColor: Color
+    def getBlackColor: Color = Color.BLACK
 
-  def getSpecialCellColor: Color
+    def getHighlightColor: Color = Color.LIGHT_GRAY
 
-  def getPawnCellColor: Color
+    def getSpecialCellColor: Color = new Color(46, 50, 100)
 
-  def getNormalCellColor: Color
+    def getPawnCellColor: Color = new Color(153, 203, 205)
 
-  def getPossibleMovesColor: Color
+    def getNormalCellColor: Color = new Color(83, 143, 159)
 
-  def getSpecialCellPossibleMovesColor: Color
+    def getPossibleMovesColor: Color =  new Color(52, 89, 99)
 
-  def getLightBrownColor: Color
+    def getSpecialCellPossibleMovesColor: Color = new Color(34, 57, 64)
 
-  def getBrownColor: Color
+    def getLightBrownColor: Color = new Color(200, 170, 109)
 
-  def getWhiteColor: Color
+    def getBrownColor: Color = new Color(114, 73, 51)
 
-  def getGoldColor: Color
+    def getWhiteColor: Color = new Color(255, 250, 240)
 
-  def getBlackWinColor: Color
+    def getGoldColor: Color = new Color(212, 175, 55)
 
-  def getWhiteWinColor: Color
+    def getBlackWinColor: Color = Color.decode("#953e3e")
 
-  def getLastMoveColor: Color
+    def getWhiteWinColor: Color = Color.decode("#5a7a34")
 
-  def getSpecialCellLastMoveColor: Color
+    def getLastMoveColor: Color = Color.decode("#cdd26a")
 
-  def getSelectedCellColor: Color
+    def getSpecialCellLastMoveColor: Color = Color.decode("#597502")
 
-  def getSpecialCellSelectedCellColor: Color
-}
+    def getSelectedCellColor: Color = Color.decode("#829769")
 
-object ColorProvider extends ColorProvider {
-
-  override def getBlackColor: Color = Color.BLACK
-
-  override def getHighlightColor: Color = Color.LIGHT_GRAY
-
-  override def getSpecialCellColor: Color = new Color(46, 50, 100)
-
-  override def getPawnCellColor: Color = new Color(153, 203, 205)
-
-  override def getNormalCellColor: Color = new Color(83, 143, 159)
-
-  override def getPossibleMovesColor: Color =  new Color(52, 89, 99)
-
-  override def getSpecialCellPossibleMovesColor: Color = new Color(34, 57, 64)
-
-  override def getLightBrownColor: Color = new Color(200, 170, 109)
-
-  override def getBrownColor: Color = new Color(114, 73, 51)
-
-  override def getWhiteColor: Color = new Color(255, 250, 240)
-
-  override def getGoldColor: Color = new Color(212, 175, 55)
-
-  override def getBlackWinColor: Color = Color.decode("#953e3e")
-
-  override def getWhiteWinColor: Color = Color.decode("#5a7a34")
-
-  override def getLastMoveColor: Color = Color.decode("#cdd26a")
-
-  override def getSpecialCellLastMoveColor: Color = Color.decode("#597502")
-
-  override def getSelectedCellColor: Color = Color.decode("#829769")
-
-  override def getSpecialCellSelectedCellColor: Color = Color.decode("#646f40")
+    def getSpecialCellSelectedCellColor: Color = Color.decode("#646f40")
 
 }
