@@ -34,8 +34,8 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 
 
   def pruningAlfaBeta (sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin.Value, move: Move ): Int =  (depth, phase)  match {
-    case (_,_)  if isTerminalNode(sonGameSnapshot) => EvaluationFunction.score(sonGameSnapshot, move)
-    case (0,_)  => EvaluationFunction.score(sonGameSnapshot, move)
+    case (_,_)  if isTerminalNode(sonGameSnapshot) => EvaluationFunction.score(sonGameSnapshot)
+    case (0,_)  => EvaluationFunction.score(sonGameSnapshot)
     case (_, MaxMin.Max) => maximizationPhase(sonGameSnapshot, depth, alfa, beta)
     case  _ => minimizationPhase(sonGameSnapshot, depth, alfa, beta)
   }

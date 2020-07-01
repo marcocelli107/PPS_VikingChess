@@ -270,7 +270,7 @@ object ViewMatch {
           val coordinate: Coordinate = Coordinate(i, j)
           val cell: Cell = setTypeCell(coordinate)
           cell.addActionListener(_ => actionCell(cell))
-          GameFactory.setXYConstraints(limits,i,j)
+          GameFactory.setXYConstraints(limits,j,i)
           cells += coordinate -> cell
           boardPanel.add(cell, limits)
         }

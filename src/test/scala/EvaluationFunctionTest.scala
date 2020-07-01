@@ -1,66 +1,220 @@
-import java.io.FileInputStream
-
-import alice.tuprolog.{Prolog, Theory}
-import ia.EvaluationFunctionImpl.EvaluationFunctionImpl
-import model.TheoryGame
+import actor_ia.MoveGenerator
+import ia.EvaluationFunction
+import model._
 import org.scalatest.FunSuite
+import utils.BoardGame.Board
+import utils.{Coordinate, Move}
 
-class EvaluationFunctionTest extends FunSuite{
+class EvaluationFunctionTest extends FunSuite {
 
-  val prolog: Prolog = new Prolog()
-  val theory: Theory = new Theory(new FileInputStream(TheoryGame.GameRules.toString))
-  //val ef11: EvaluationFunctionImpl =  EvaluationFunctionImpl()
-  //val ef7: EvaluationFunctionImpl =   EvaluationFunctionImpl()
+  val THEORY: String = TheoryGame.GameRules.toString
+  val prolog: ParserProlog = ParserPrologImpl(THEORY)
+  var snapshot: GameSnapshot = _
+  var game: (Player.Val, Player.Val, Board, Int) = _
+
+  test("Tests Score King Near Corner - Brandubh."){
+    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(3,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5),Coordinate(1,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7),Coordinate(2,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4),Coordinate(4,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6),Coordinate(1,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(7,6)))
+
+    assert(EvaluationFunction.score(snapshot).equals(900))
+  }
+
+  test("Tests Score King To Corner In One - Brandubh."){
+    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(3,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5),Coordinate(1,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7),Coordinate(2,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4),Coordinate(4,7)))
+
+    assert(EvaluationFunction.score(snapshot).equals(900))
+  }
+
+  test("Tests Score Capture King In One On Throne - Tablut."){
+    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(1,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(2,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,1), Coordinate(5,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(2,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(5,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,9), Coordinate(4,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,6), Coordinate(2,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(5,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,5), Coordinate(6,8)))
+
+
+    assert(EvaluationFunction.score(snapshot) == -900)
+  }
+
+  test("Tests Score Capture King Near Throne - Tablut."){
+    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(2,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(1,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,1), Coordinate(5,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(2,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,4), Coordinate(6,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(5,4)))
+
+    assert(EvaluationFunction.score(snapshot) == -900)
+  }
+
+  test("Test Score Capture King Far From Throne - Brandubh") {
+    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(6,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(5,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(6,4)))
+
+    assert(EvaluationFunction.score(snapshot) == -900)
+  }
+
+  test("Test Score Capture King Far From Throne - Tawlbwurdd") {
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(9,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,2), Coordinate(9,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,5), Coordinate(7,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,3), Coordinate(9,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,2), Coordinate(9,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(10,6)))
+
+    assert(EvaluationFunction.score(snapshot) == -900)
+  }
+
+  test("Test Score Black Ahead - Brandubh") {
+    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,4), Coordinate(2,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(3,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(3,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(5,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(5,2)))
+
+    assert(EvaluationFunction.score(snapshot) < 0)
+  }
+
+  test("Test Score White Ahead To Rows And Columns Checked - Hnefatafl") {
+    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(7,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,1), Coordinate(5,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,11), Coordinate(5,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(4,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(5,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(3,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(3,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,5), Coordinate(6,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,2), Coordinate(5,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,1), Coordinate(8,2)))
+
+    assert(EvaluationFunction.score(snapshot) > 50)
+  }
+
+  test("Test Score Black Surround King On Three Side - Tawlbwrdd") {
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(3,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(4,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,5), Coordinate(6,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(9,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(9,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,2)))
+
+    assert(EvaluationFunction.score(snapshot) < -100)
+  }
+
+  //TODO Fa una cattura bianca inesistente alla mossa (2,6),(4,6)
   /*
-  test("Tests if King is near corners."){
-    val c1:Coordinate = Coordinate(1,2)
-    val c2:Coordinate = Coordinate(2,1)
-    val c3:Coordinate = Coordinate(1,10)
-    val c4:Coordinate = Coordinate(11,2)
-    val c5:Coordinate = Coordinate(11,10)
-    val c6:Coordinate = Coordinate(10,11)
-    val c7:Coordinate = Coordinate(6,7)
-    val c8:Coordinate = Coordinate(6,6)
-    assert(ef11.scoreKingNearCorners() != 0 )
-    assert(ef11.scoreKingNearCorners( ) != 0 )
-    assert(ef11.scoreKingNearCorners( ) != 0 )
-    assert(ef11.scoreKingNearCorners() != 0 )
-    assert(ef11.scoreKingNearCorners() != 0 )
-    assert(ef11.scoreKingNearCorners() != 0 )
-    assert(ef7.scoreKingNearCorners() != 0 )
-    assert(ef11.scoreKingNearCorners() == 0 )
-  }*/
-/*
-  test("Test Sequence of Free Cells"){
-    var seqEmpty: Seq [BoardCell] = Seq()
-    for ( i <- 1 to 10 ) {
-      seqEmpty = seqEmpty :+ BoardCell( Coordinate(i,3),Piece.Empty )
-    }
-    val seqWithPiece = seqEmpty:+ BoardCell( Coordinate(11,3), Piece.WhiteKing )
-    assert(ef11.isSequenceFreeCells(seqEmpty))
-    assert(!ef11.isSequenceFreeCells(seqWithPiece))
+  test("Test Score Captured Pieces (4 whites / 2 blacks) - Hnefatafl") {
+    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(2,4)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,2), Coordinate(3,4))) //w
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(4,7)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6), Coordinate(3,7))) //b
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(4,6))) //error
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,7), Coordinate(3,5)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6))) //w
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(3,5)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(3,8)))
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(3,7))) //b
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(3,6))) //2w
+    println(snapshot.getNumberCapturedBlacks + ", " + snapshot.getNumberCapturedWhites)
+
+    assert(EvaluationFunction.scoreCapturedBlack(snapshot) == 20 &&
+      EvaluationFunction.scoreCapturedWhite(snapshot) == 60)
   }
+  */
 
+  /*
+  test("Test Score White Tower - Tawlbwrdd") {
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(2,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(3,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(4,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,1), Coordinate(2,1)))
+    println(EvaluationFunction.scoreTower(snapshot))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,5), Coordinate(7,3)))
+    println(EvaluationFunction.scoreTower(snapshot))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,2), Coordinate(10,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,10), Coordinate(4,10)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,4)))
+    println(EvaluationFunction.scoreTower(snapshot))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,9), Coordinate(7,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,8), Coordinate(8,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,9), Coordinate(6,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,8), Coordinate(8,4)))
+    println(EvaluationFunction.scoreTower(snapshot))
 
-  test("Test if King is in free row or column"){
-    var seq1: Seq [BoardCell] = Seq()
-    var seq2: Seq [BoardCell] = Seq()
-    for ( i <- 1 to 10 ) {
-      seq1 = seq1 :+ BoardCell(Coordinate(i,3),Piece.Empty )
-      seq2 = seq2 :+ BoardCell(Coordinate(i,3),Piece.BlackPawn )
-    }
-    val seqKingFreeRoworColumn = seq1 :+ BoardCell(Coordinate(11,3), Piece.WhiteKing )
-    val seqKingNotFreeRoworColumn = seq2 :+ BoardCell(Coordinate(11,3), Piece.WhiteKing  )
-
-      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingNotFreeRoworColumn, seqKingNotFreeRoworColumn)  == 0)
-      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingNotFreeRoworColumn, seqKingFreeRoworColumn) != 0)
-      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) != 0)
-      assert( ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingNotFreeRoworColumn) < ef11.scoreKingIsInFreeRowOrColumn(seqKingFreeRoworColumn, seqKingFreeRoworColumn))
-
+    assert(EvaluationFunction.score(snapshot) > 5)
   }
-*/
-
-
-
+  */
 }

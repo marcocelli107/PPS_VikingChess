@@ -88,14 +88,14 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     val step1 = MoveGenerator.makeMove(snapTablut, Move(Coordinate(9,4), Coordinate(6,4)))
     val step2 = MoveGenerator.makeMove(step1, Move(Coordinate(7,5), Coordinate(7,6)))
     val step3 = MoveGenerator.makeMove(step2, Move(Coordinate(4,9), Coordinate(4,6)))
-    val step4 = MoveGenerator.makeMove(step3, Move(Coordinate(5,7), Coordinate(5,2)))
+    val step4 = MoveGenerator.makeMove(step3, Move(Coordinate(5,7), Coordinate(2,7)))
     val step5 = MoveGenerator.makeMove(step4, Move(Coordinate(8,5), Coordinate(8,6)))
     val step6 = MoveGenerator.makeMove(step5, Move(Coordinate(6,5), Coordinate(7,5)))
     val step7 = MoveGenerator.makeMove(step6, Move(Coordinate(6,9), Coordinate(6,6)))
 
     assert(step7.getBoard.getCell(Coordinate(5,6)).getPiece.equals(Piece.Empty) &&
-      step7.getBoard.getCell(Coordinate(7,6)).getPiece.equals(Piece.Empty))
-    assert(step7.getNumberCapturedWhites == 2)
+      step7.getBoard.getCell(Coordinate(7,6)).getPiece.equals(Piece.Empty) &&
+      step7.getNumberCapturedWhites == 2)
   }
 
 

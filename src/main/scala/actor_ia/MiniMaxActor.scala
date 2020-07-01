@@ -77,7 +77,7 @@ abstract class MiniMaxActor() extends Actor {
   def isTerminalNode(gameStatus: Player.Val, depth: Int): Boolean = !gameStatus.equals(Player.None) || depth == 0
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
-    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, move))
+    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame))
 
   def generateChildren(actorState: ActorState): Unit = {
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(actorState.gameSnapshot.getCopy)
