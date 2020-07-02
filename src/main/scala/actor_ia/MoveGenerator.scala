@@ -40,7 +40,8 @@ object MoveGenerator {
       case l if l.size < 2 => Nil
       case h :: t
         if (!isOwner(h.getPiece, gameSnapshot.getPlayerToMove) && !h.getPiece.equals(Piece.WhiteKing) && !h.getPiece.equals(Piece.Empty)) &&
-        (isOwner(t.head.getPiece, gameSnapshot.getPlayerToMove) || gameSnapshot.getBoard.specialCoordinates.contains(t.head.getCoordinate))
+        (isOwner(t.head.getPiece, gameSnapshot.getPlayerToMove) || (gameSnapshot.getBoard.specialCoordinates.contains(t.head.getCoordinate) &&
+          t.head.getPiece.equals(Piece.Empty)))
         => List(h.getCoordinate)
       case _ => Nil
     }
@@ -114,7 +115,7 @@ object MoveGenerator {
 
     _move()
 
-    val listCapturesCoordinate = gameSnapshot.getBoard.orthogonalCells(move.to).values.map(_.take(2)).flatMap(list => _checkCaptures(list))
+    val listCapturesCoordinate = gameSnapshot.getBoard.orthogonalCells(move.to).values.flatMap(l => _checkCaptures(l.take(2)))
     listCapturesCoordinate.foreach(c => gameSnapshot.getBoard.setCell(BoardCell(c, Piece.Empty)))
     val capturedPieces = _incrementCapturedPieces(listCapturesCoordinate.size)
 
