@@ -172,7 +172,7 @@ object ModelHnefatafl {
     var count = 0
     override def makeMove(move: Move): Unit = {
       count += 1
-      println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
+      //println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
 
       game = parserProlog.makeLegitMove(move)
 
