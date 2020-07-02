@@ -12,6 +12,10 @@ object ScoreProvider {
 
    def KingNearCornerScore: Int = 900
 
+   def KingToCornerScore: Int = 900
+
+   def DrawScore: Int = 0
+
    def KingOnThroneScore: Int = 0
 
    def KingDistanceToCornerDividend: Int = 150
@@ -22,7 +26,9 @@ object ScoreProvider {
 
    def WhitePawnOuterCordon: Int = 10
 
-   def RowOrColumnOwnerScore: Int = 10
+   def BlackRowOrColumnOwnerScore: Int = 5
+
+   def WhiteRowOrColumnOwnerScore: Int = 10
 
    def KingRowOrColumnOwnerScore: Int = 90
 
@@ -32,8 +38,8 @@ object ScoreProvider {
 
    def BlackDiagonalToKing: Int = 25
 
-   def BlackCapturedScore: Int = 10
+   def BlackCapturedScore: Int = 20
 
-   def WhiteCapturedScore: Int = 15
+   def WhiteCapturedScore: Int = 50
 
 }

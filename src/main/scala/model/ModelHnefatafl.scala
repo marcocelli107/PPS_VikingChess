@@ -3,7 +3,7 @@ package model
 import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg, MoveGenerator}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.{MiniMax, MiniMaxImpl}
+import ia.{EvaluationFunction, MiniMax, MiniMaxImpl}
 import model.GameSnapshot.GameSnapshotImpl
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
@@ -169,9 +169,9 @@ object ModelHnefatafl {
       else ListBuffer.empty
     }
 
-    var count = 0
+
     override def makeMove(move: Move): Unit = {
-      count += 1
+
       //println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
 
       game = parserProlog.makeLegitMove(move)
