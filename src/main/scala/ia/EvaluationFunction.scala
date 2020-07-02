@@ -2,10 +2,11 @@ package ia
 
 
 import actor_ia.MoveGenerator
-
 import model._
 import utils.BoardGame.{Board, BoardCell}
 import utils.{Coordinate, Move}
+
+import scala.collection.mutable.ListBuffer
 
 object EvaluationFunction {
 
@@ -235,13 +236,22 @@ object EvaluationFunction {
     kingAdjacentCells.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * 30
   }
 
-  def scoreBlackCordon():Int = {
-
+  def scoreBlackCordon(board: Board):Int = {
+    val boardSize = board.size
+    val blackCoords = board.rows.flatten.filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate).toList
     def getOtherSide(coordinate: Coordinate):List[Coordinate] = coordinate match {
       case Coordinate(x,_) if x == boardSize => List(Coordinate(-1,x), Coordinate(1,-1), Coordinate(-1,1))
       case Coordinate(_,x) if x == boardSize => List(Coordinate(x,-1), Coordinate(1,-1), Coordinate(-1,1))
       case Coordinate(1,_) => List(Coordinate(-1,1) , Coordinate(boardSize,-1), Coordinate(-1,boardSize))
-      case _ => List(Coordinate(1,-1) , Coordinate(boardSize,-1), Coordinate(-1,boardSize))
+      case Coordinate(_,1) => List(Coordinate(1,-1) , Coordinate(boardSize,-1), Coordinate(-1,boardSize))
+      case _ => List(Coordinate(1,-1) , Coordinate(-1,1), Coordinate(boardSize,-1), Coordinate(-1,boardSize))
+    }
+
+    def getMySide(coordinate: Coordinate):Coordinate = coordinate match {
+      case Coordinate(x,_) if x == boardSize => Coordinate(x,-1)
+      case Coordinate(_,x) if x == boardSize => Coordinate(-1,x)
+      case Coordinate(1,_) => Coordinate(1,-1)
+      case _ => Coordinate(-1,1)
     }
 
     def isOnAnySides(currentCoord:Coordinate, otherSideCoord: List[Coordinate]):Boolean = otherSideCoord.exists(isOnSide(currentCoord, _))
@@ -259,19 +269,44 @@ object EvaluationFunction {
       nearCord.map(board.getCell).filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate)
     }
 
+    var endingCordonCoords: ListBuffer[Coordinate] = ListBuffer.empty
+
     def countPawnInCordon(previousCoord:List[Coordinate], nearPawnsCoords:List[Coordinate], otherSideCoord: List[Coordinate], startSideCoord: Coordinate, count:Int ):Int = nearPawnsCoords match {
-      case Nil => count //false
-      case h::_ if isOnAnySides(h, otherSideCoord) => count + 1 //true
-      case h::t if previousCoord.contains(h) || isOnSide(h, startSideCoord )  => countPawnInCordon(previousCoord, t, otherSideCoord,startSideCoord, count)
+      case Nil =>  count
+      case h::_ if isOnAnySides(h, otherSideCoord) => endingCordonCoords += h ;  count + 1
+      case h::t if previousCoord.contains(h) || isOnSide(h, startSideCoord ) || endingCordonCoords.contains(h) => endingCordonCoords += h;
+        countPawnInCordon(previousCoord, t, otherSideCoord,startSideCoord, count)
       case h::t => countPawnInCordon( previousCoord, t, otherSideCoord,startSideCoord, count + countPawnInCordon(previousCoord :+ h, findNearBlack(h), otherSideCoord, startSideCoord, count ))
     }
+
+    def countPawnInCordon2( nearPawnsCoords:List[Coordinate], startCoord: Coordinate, otherSideCoord: List[Coordinate], step:Int, count:Int ):Int = nearPawnsCoords match {
+      case Nil => count
+      case h::_ if  (step > 3 && h.equals(startCoord))  ||
+                    isOnAnySides(h, otherSideCoord) => endingCordonCoords += h ;  count + 1
+      case h::t if  isOnSide(h, getMySide(startCoord) ) ||
+                    endingCordonCoords.contains(h) => endingCordonCoords += h
+        countPawnInCordon2(t, startCoord, otherSideCoord, step, count);
+      case h::t => endingCordonCoords += h ;
+        countPawnInCordon2(t, startCoord, otherSideCoord, step, count + countPawnInCordon2( findNearBlack(h), startCoord, otherSideCoord, step + 1, count ))
+    }
+
+    //val sides = List( board.rows.head, board.rows.last, board.rows.transpose.last,board.rows.transpose.last )
+    //var blackInCordon:List[Int] = List.empty
+   /* for (side <- sides){
+      blackInCordon = blackInCordon ++ side.filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate).filter( !endingCordonCoords.contains(_))
+        .map(x => countPawnInCordon( List(x), findNearBlack(x), getOtherSide(x), getMySide(x), 1) )
+    }*/
+    val tryinnerCordon= blackCoords.map(coord =>  countPawnInCordon2( findNearBlack(coord), coord, getOtherSide(coord),0, 1   )).filter(_>2).toList
+
+    println(tryinnerCordon)
+    tryinnerCordon.sum
     //ToDo tovare un modo per iterare sui quattro lati
-    val prova = board.rows.head
+   /* val prova = board.rows.head
       .filter(_.getPiece.equals(Piece.BlackPawn))
       .map(_.getCoordinate)
-      .map( x => countPawnInCordon( List(x), findNearBlack(x), getOtherSide(x),Coordinate(1,-1), 1)).filter(_>=3)
+      .map( x => countPawnInCordon( List(x), findNearBlack(x), getOtherSide(x), getMySide(x), 1))
     println(prova)
-    prova.sum
+    prova.sum*/
 
   }
 
@@ -409,10 +444,47 @@ object EvaluationFunction {
 object blabla extends App{
   val THEORY: String = TheoryGame.GameRules.toString
   val game: ParserProlog = ParserPrologImpl(THEORY)
-  val initGame = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
-  val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
+  val initGame = game.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
+  val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 
-  val newGs = MoveGenerator.makeMove(gameSnapshot, Move(Coordinate(6,6), Coordinate(4,3)))
 
-  println(EvaluationFunction.score(newGs))
+ /* var newGs = MoveGenerator.makeMove(gameSnapshot, Move(Coordinate(2,6), Coordinate(2,3)))
+   newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,2), Coordinate(3,2)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(4,1), Coordinate(4,2)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(5,1), Coordinate(5,3)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,1), Coordinate(6,2)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(7,1), Coordinate(7,2)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(8,1), Coordinate(8,2)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(10,6), Coordinate(10,3)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(11,8), Coordinate(9,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(9,8), Coordinate(9,2)))*/
+
+ var newGs = MoveGenerator.makeMove(gameSnapshot, Move(Coordinate(6,3), Coordinate(4,3)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(4,6), Coordinate(4,5)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(3,6), Coordinate(3,4)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,4), Coordinate(5,4)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(7,2), Coordinate(8,2)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(7,5), Coordinate(7,4)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(9,6), Coordinate(9,3)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(8,6), Coordinate(8,4)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(10,5), Coordinate(10,4)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(7,7), Coordinate(8,7)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(10,7), Coordinate(10,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,8), Coordinate(8,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,9), Coordinate(9,9)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,7), Coordinate(6,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(7,10), Coordinate(8,10)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(5,7), Coordinate(4,7)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(2,7), Coordinate(2,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(8,7), Coordinate(6,7)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(5,11), Coordinate(3,11)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(4,7), Coordinate(4,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(3,11), Coordinate(3,9)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(6,8), Coordinate(5,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(1,7), Coordinate(2,7)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(4,8), Coordinate(4,7)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(2,8), Coordinate(3,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(5,8), Coordinate(6,8)))
+  newGs = MoveGenerator.makeMove(newGs, Move(Coordinate(3,9), Coordinate(4,9)))
+  println(EvaluationFunction.scoreBlackCordon(newGs.getBoard))
 }
