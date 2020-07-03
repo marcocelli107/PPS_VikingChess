@@ -62,7 +62,7 @@ trait Menu {
     *
     * @return level
     */
-  def getDifficult: Level.Val
+  def getDifficulty: Level.Val
 
   /**
     * Initializes the game menù.
@@ -127,40 +127,12 @@ object Menu {
       panelVariantTablut = MenuFactory.createSubMenuVariantPanel
       panelVariantBrandubh = MenuFactory.createSubMenuVariantPanel
 
-      labelHnefatafl = MenuFactory.createLabelBoardHnefatafl
-      GameFactory.resetXConstraints(limits)
-      panelVariantHnefatafl.add(labelHnefatafl, limits)
-      hnefatafl = MenuFactory.createVariantButton("Hnefatafl (11 x 11)")
-      hnefatafl.addActionListener(chooseVariantListener("Hnefatafl"))
-      GameFactory.incrementXConstraints(limits)
-      panelVariantHnefatafl.add(hnefatafl, limits)
+      initVariantButton(panelVariantHnefatafl, MenuFactory.createVariantButton("Hnefatafl (11 x 11)"), MenuFactory.createLabelBoardHnefatafl, "Hnefatafl")
+      initVariantButton(panelVariantTawlbwrdd, MenuFactory.createVariantButton("Tawlbwrdd (11 x 11)"), MenuFactory.createLabelBoardTawlbwrdd, "Tawlbwrdd")
+      initVariantButton(panelVariantTablut, MenuFactory.createVariantButton("Tablut (9 x 9)"), MenuFactory.createLabelBoardTablut, "Tablut")
+      initVariantButton(panelVariantBrandubh, MenuFactory.createVariantButton("Brandubh (7 x 7)"), MenuFactory.createLabelBoardBrandubh, "Brandubh")
 
-      labelTawlbwrdd = MenuFactory.createLabelBoardTawlbwrdd
-      GameFactory.resetXConstraints(limits)
-      panelVariantTawlbwrdd.add(labelTawlbwrdd, limits)
-      tawlbwrdd = MenuFactory.createVariantButton("Tawlbwrdd (11 x 11)")
-      tawlbwrdd.addActionListener(chooseVariantListener("Tawlbwrdd"))
-      GameFactory.incrementXConstraints(limits)
-      panelVariantTawlbwrdd.add(tawlbwrdd, limits)
-
-      labelTablut = MenuFactory.createLabelBoardTablut
-      GameFactory.resetXConstraints(limits)
-      panelVariantTablut.add(labelTablut, limits)
-      tablut = MenuFactory.createVariantButton("Tablut (9 x 9)")
-      tablut.addActionListener(chooseVariantListener("Tablut"))
-      GameFactory.incrementXConstraints(limits)
-      panelVariantTablut.add(tablut, limits)
-
-      labelBrandubh = MenuFactory.createLabelBoardBrandubh
-      GameFactory.resetXConstraints(limits)
-      panelVariantBrandubh.add(labelBrandubh, limits)
-      brandubh = MenuFactory.createVariantButton("Brandubh (7 x 7)")
-      brandubh.addActionListener(chooseVariantListener("Brandubh"))
-      GameFactory.incrementXConstraints(limits)
-      panelVariantBrandubh.add(brandubh, limits)
-
-      returnToMenu = MenuFactory.createMainButton("Previous Menu")
-      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(variantsPanel, menuPanel))
+      initReturnButton(variantsPanel, menuPanel, "Previous Menu")
 
       variantsPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       variantsPanel.add(panelVariantHnefatafl)
@@ -174,6 +146,14 @@ object Menu {
       variantsPanel
     }
 
+    private def initVariantButton(myPanel: JPanel, variantButton: JButton, label: JLabel, text: String): Unit = {
+      GameFactory.resetXConstraints(limits)
+      myPanel.add(label, limits)
+      variantButton.addActionListener(chooseVariantListener(text))
+      GameFactory.incrementXConstraints(limits)
+      myPanel.add(variantButton, limits)
+    }
+
     override def initDiffMenu: JPanel = {
       diffPanel = MenuFactory.createMenuPanel("Choose Difficulty: ")
 
@@ -182,40 +162,12 @@ object Menu {
       panelLevelStandard = MenuFactory.createSubMenuLevelPanel
       panelLevelAdvanced = MenuFactory.createSubMenuLevelPanel
 
-      labelNewcomer = MenuFactory.createLabelNewcomer
-      GameFactory.resetXConstraints(limits)
-      panelLevelNewcomer.add(labelNewcomer, limits)
-      newcomer = MenuFactory.createLevelButton("Newcomer")
-      newcomer.addActionListener(chooseLevelIAListener("Newcomer"))
-      GameFactory.incrementXConstraints(limits)
-      panelLevelNewcomer.add(newcomer, limits)
+      initDiffButton(panelLevelNewcomer, MenuFactory.createLevelButton("Newcomer"), MenuFactory.createLabelNewcomer, "Newcomer")
+      initDiffButton(panelLevelAmateur, MenuFactory.createLevelButton("Amateur"), MenuFactory.createLabelAmateur,"Amateur")
+      initDiffButton(panelLevelStandard, MenuFactory.createLevelButton("Standard"), MenuFactory.createLabelStandard, "Standard")
+      initDiffButton(panelLevelAdvanced, MenuFactory.createLevelButton("Advanced"), MenuFactory.createLabelAdvanced, "Advanced")
 
-      labelAmateur = MenuFactory.createLabelAmateur
-      GameFactory.resetXConstraints(limits)
-      panelLevelAmateur.add(labelAmateur, limits)
-      amateur = MenuFactory.createLevelButton("Amateur")
-      amateur.addActionListener(chooseLevelIAListener("Amateur"))
-      GameFactory.incrementXConstraints(limits)
-      panelLevelAmateur.add(amateur, limits)
-
-      labelStandard = MenuFactory.createLabelStandard
-      GameFactory.resetXConstraints(limits)
-      panelLevelStandard.add(labelStandard, limits)
-      standard = MenuFactory.createLevelButton("Standard")
-      standard.addActionListener(chooseLevelIAListener("Standard"))
-      GameFactory.incrementXConstraints(limits)
-      panelLevelStandard.add(standard, limits)
-
-      labelAdvanced = MenuFactory.createLabelAdvanced
-      GameFactory.resetXConstraints(limits)
-      panelLevelAdvanced.add(labelAdvanced, limits)
-      advanced = MenuFactory.createLevelButton("Advanced")
-      advanced.addActionListener(chooseLevelIAListener("Advanced"))
-      GameFactory.incrementXConstraints(limits)
-      panelLevelAdvanced.add(advanced, limits)
-
-      returnToMenu = MenuFactory.createMainButton("Previous Menu")
-      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(diffPanel, variantsPanel))
+      initReturnButton(diffPanel, variantsPanel, "Previous Menu")
 
       diffPanel.add(Box.createRigidArea(DIMENSION_PANEL))
       diffPanel.add(panelLevelNewcomer)
@@ -228,30 +180,24 @@ object Menu {
       diffPanel
     }
 
+    private def initDiffButton(myPanel: JPanel, diffButton: JButton, label: JLabel, text: String): Unit = {
+      GameFactory.resetXConstraints(limits)
+      myPanel.add(label, limits)
+      diffButton.addActionListener(chooseLevelIAListener(text))
+      GameFactory.incrementXConstraints(limits)
+      myPanel.add(diffButton, limits)
+    }
+
     override def initPlayerChoiceMenu: JPanel = {
       playerChoicePanel = MenuFactory.createMenuPanel("Choose Player: ")
 
       panelChoseWhite = MenuFactory.createSubMenuPlayerPanel
       panelChoseBlack = MenuFactory.createSubMenuPlayerPanel
 
-      labelWhiteChose = MenuFactory.createLabelWhitePlayer
-      GameFactory.resetXConstraints(limits)
-      panelChoseWhite.add(labelWhiteChose,limits)
-      whiteButton = MenuFactory.createPlayerButton("White Pawns")
-      whiteButton.addActionListener(setPlayer("White"))
-      GameFactory.incrementXConstraints(limits)
-      panelChoseWhite.add(whiteButton,limits)
+      initPlayerChoiceButton(panelChoseWhite, MenuFactory.createPlayerButton("White Pawns"), MenuFactory.createLabelWhitePlayer, "White")
+      initPlayerChoiceButton(panelChoseBlack, MenuFactory.createPlayerButton("Black Pawns"), MenuFactory.createLabelBlackPlayer, "Black")
 
-      labelBlackChose = MenuFactory.createLabelBlackPlayer
-      GameFactory.resetXConstraints(limits)
-      panelChoseBlack.add(labelBlackChose,limits)
-      blackButton = MenuFactory.createPlayerButton("Black Pawns")
-      blackButton.addActionListener(setPlayer("Black"))
-      GameFactory.incrementXConstraints(limits)
-      panelChoseBlack.add(blackButton,limits)
-
-      returnToMenu = MenuFactory.createMainButton("Previous Menu")
-      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(playerChoicePanel, variantsPanel))
+      initReturnButton(playerChoicePanel, variantsPanel, "Previous Menu")
 
       playerChoicePanel.add(Box.createRigidArea(DIMENSION_PANEL))
       playerChoicePanel.add(panelChoseWhite)
@@ -262,11 +208,24 @@ object Menu {
       playerChoicePanel
     }
 
+    private def initPlayerChoiceButton(myPanel: JPanel, diffButton: JButton, label: JLabel, text: String): Unit = {
+      GameFactory.resetXConstraints(limits)
+      myPanel.add(label, limits)
+      diffButton.addActionListener(setPlayer(text))
+      GameFactory.incrementXConstraints(limits)
+      myPanel.add(diffButton, limits)
+    }
+
+    private def initReturnButton(previousPanel: JPanel, nextPanel: JPanel, text: String): Unit = {
+      returnToMenu = MenuFactory.createMainButton(text)
+      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(previousPanel, nextPanel))
+    }
+
     override def getBoardVariant: GameVariant.Val = boardVariant
 
     override def getGameMode: GameMode.Value = gameMode
 
-    override def getDifficult: Level.Val = levelIA
+    override def getDifficulty: Level.Val = levelIA
 
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = MenuFactory.createMenuPanel("Choose Option: ")
@@ -276,8 +235,8 @@ object Menu {
       restartGame = MenuFactory.createMainButton("Restart Match")
       restartGame.addActionListener((_: ActionEvent) => {view.initOrRestoreGUI(player); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
 
-      returnToMenu = MenuFactory.createMainButton("Leave Match")
-      returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, menuPanel))
+      initReturnButton(inGameMenuPanel, menuPanel, "Leave Match")
+
       quitGame = MenuFactory.createMainButton("Quit Game")
       quitGame.addActionListener((_: ActionEvent) => System.exit(0))
       inGameMenuPanel.add(Box.createRigidArea(DIMENSION_PANEL))
