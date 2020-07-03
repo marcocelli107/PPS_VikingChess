@@ -1,10 +1,13 @@
 import actor_ia.{MoveGenerator, ScoreProvider}
 import ia.EvaluationFunction
 import model._
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
+@RunWith(classOf[JUnitRunner])
 class EvaluationFunctionTest extends FunSuite {
 
   val THEORY: String = TheoryGame.GameRules.toString
@@ -187,7 +190,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,5), Coordinate(10,4)))
 
     EvaluationFunction.usefulValues(snapshot)
-    assert(EvaluationFunction.scoreBlackCordon() == 75)
+    assert(EvaluationFunction.scoreBlackCordon() == 90)
   }
 
   test("Test Score Cordon Black in 4 Sides - Tawlbwrdd") {

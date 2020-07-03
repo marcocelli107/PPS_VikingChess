@@ -1,6 +1,8 @@
 
 import model.{GameVariant, ParserProlog, ParserPrologImpl, Player, TheoryGame}
+import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
 import utils.{Coordinate, Move}
 
@@ -11,6 +13,7 @@ import scala.collection.mutable.ListBuffer
   *   @author Giovanni Maria Speciale
   */
 
+@RunWith(classOf[JUnitRunner])
 class ParserTests extends FunSuite with MockFactory with Matchers {
 
   val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
