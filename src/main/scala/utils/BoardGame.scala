@@ -11,9 +11,19 @@ import scala.collection.immutable.HashMap
 
 object Coordinate {
   val COORD_STRING: String = "p"
+
+  implicit val coordinateOrdering = new Ordering[Coordinate] {
+    def compare(a: Coordinate, b: Coordinate): Int = {
+      a.x compare b.x match {
+        case 0 => a.y compare b.y
+        case c => c
+      }
+    }
+  }
+
 }
 
-case class Coordinate(x: Int, y: Int)  {
+case class Coordinate(x: Int, y: Int) {
   override def toString: String = Coordinate.COORD_STRING + "(" + x + "," + y + ")"
 }
 

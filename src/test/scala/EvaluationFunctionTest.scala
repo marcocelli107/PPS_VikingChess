@@ -1,4 +1,4 @@
-import actor_ia.MoveGenerator
+import actor_ia.{MoveGenerator, ScoreProvider}
 import ia.EvaluationFunction
 import model._
 import org.scalatest.FunSuite
@@ -186,7 +186,8 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(4,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,5), Coordinate(10,4)))
 
-    assert(EvaluationFunction.scoreBlackCordon(snapshot.getBoard) == 75)
+    EvaluationFunction.usefulValues(snapshot)
+    assert(EvaluationFunction.scoreBlackCordon() == 75)
   }
 
   test("Test Score Cordon Black in 4 Sides - Tawlbwrdd") {
@@ -220,7 +221,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,8), Coordinate(6,8)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,9), Coordinate(4,9)))
 
-    assert(EvaluationFunction.scoreBlackCordon(snapshot.getBoard) == 110)
+    val blackPawnsInCordon: Int = 22
+    EvaluationFunction.usefulValues(snapshot)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn)
   }
 
   //TODO DEV ESSERE PIU ALTO DEI PRECEDENTI
@@ -273,7 +276,8 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(7,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,7), Coordinate(11,10)))
 
-    assert(EvaluationFunction.scoreBlackCordon(snapshot.getBoard) == 95)
+    EvaluationFunction.usefulValues(snapshot)
+    assert(EvaluationFunction.scoreBlackCordon() == 95)
   }
 
   test("Test Initial Score Is Better For Blacks") {
