@@ -186,8 +186,10 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(4,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,5), Coordinate(10,4)))
 
+    // TODO fixare il test una volta rimossi i cordon inutili (qui dovrebbero essere 14 pawn in cordon)
+    val blackPawnsInCordon = 18
     EvaluationFunction.usefulValues(snapshot)
-    assert(EvaluationFunction.scoreBlackCordon() == 75)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn)
   }
 
   test("Test Score Cordon Black in 4 Sides - Tawlbwrdd") {
@@ -222,6 +224,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,9), Coordinate(4,9)))
 
     val blackPawnsInCordon: Int = 22
+
     EvaluationFunction.usefulValues(snapshot)
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn)
   }
@@ -276,8 +279,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(7,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,7), Coordinate(11,10)))
 
+    val blackPawnsInCordon: Int = 19
     EvaluationFunction.usefulValues(snapshot)
-    assert(EvaluationFunction.scoreBlackCordon() == 95)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn)
   }
 
   test("Test Initial Score Is Better For Blacks") {

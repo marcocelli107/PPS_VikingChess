@@ -113,6 +113,8 @@ object BoardGame {
 
     def getCopy: Board
 
+    def consoleRepresentation: String
+
   }
 
   object Board {
@@ -162,6 +164,10 @@ object BoardGame {
       override def centerCoordinates: Coordinate = Coordinate(size / 2 + 1, size / 2 + 1)
 
       override def getCopy: Board = BoardImpl(allCells)
+
+      override def consoleRepresentation: String =
+        rows.map(_.map(_.getPiece.pieceString).flatMap(e => if(e == Piece.Empty.pieceString) "_" else e)
+          .mkString("  ") + "\n").mkString
     }
 
   }

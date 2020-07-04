@@ -381,33 +381,34 @@ object EvaluationFunction {
   }
 
   def scoreBlackCordon(): Int = {
-    var cordons: ListBuffer[ListBuffer[Coordinate]] = ListBuffer.empty
+    var cordons: Seq[Seq[Coordinate]] = Seq.empty
 
     blackCoords.foreach(b => {
       if (!cordons.flatten.contains(b))
-        cordons += createCordon(b, ListBuffer.empty)
+        cordons :+= createCordon(b, Seq.empty)
     })
     cordons.distinct.filter(_.size >= 3).flatten.size * ScoreProvider.CordonPawn
   }
 
-  def createCordon(fromCoordinate: Coordinate, cordon: ListBuffer[Coordinate]): ListBuffer[Coordinate] = {
-    def _createCordon(fromCoordinate: Coordinate, cordon: ListBuffer[Coordinate]): ListBuffer[Coordinate] = {
-      var currentCordon: ListBuffer[Coordinate] = cordon
-      currentCordon += fromCoordinate
-      for (c <- findNearBlacks(fromCoordinate)) {
-        if (!cordon.contains(c)) {
-          currentCordon = (currentCordon ++ _createCordon(c, currentCordon)).distinct
-        }
+  def createCordon(fromCoordinate: Coordinate, cordon: Seq[Coordinate]): Seq[Coordinate] = {
+
+    def _createCordon(fromCoordinate: Coordinate, cordon: Seq[Coordinate]): Seq[Coordinate] = {
+      @annotation.tailrec
+      def _explore(coordinates: Seq[Coordinate], cordon: Seq[Coordinate]): Seq[Coordinate] =
+        coordinates match {
+          case Seq() => cordon
+          case _ =>
+            val nears = coordinates.flatMap(c => findNearBlacks(c).filter(!cordon.contains(_)))
+            _explore(nears, (cordon ++ nears).distinct)
       }
-      currentCordon
+      _explore(ListBuffer(fromCoordinate), cordon)
     }
 
     val result = _createCordon(fromCoordinate, cordon)
     result.filter(c => !isRedundant(c, result)).sorted
-
   }
 
-  def isRedundant(coordinate: Coordinate, cordon: ListBuffer[Coordinate]): Boolean = {
+  def isRedundant(coordinate: Coordinate, cordon: Seq[Coordinate]): Boolean = {
     val cycles = get3CycleCoordinates(coordinate)
     for (d <- OrthogonalDirection.values) {
       if (cycles(d).size == 2 && isSubList(cycles(d), cordon))
@@ -570,20 +571,4 @@ object blabla extends App {
   val l1: ListBuffer[Int] = ListBuffer(2, 3,1 ,5, 4)
   val l2: ListBuffer[Int] = (l ++ l1).distinct
   println(EvaluationFunction.isSubList(l, l1))*/
-
-  val game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
-  var snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,8)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6), Coordinate(3,4)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,4)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,2), Coordinate(8,2)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(6,3)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(9,3)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(4,7)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,5), Coordinate(10,4)))
-
-  EvaluationFunction.usefulValues(snapshot)
-  println(EvaluationFunction.scoreBlackCordon())
-
 }
