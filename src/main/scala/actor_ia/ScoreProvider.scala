@@ -24,19 +24,27 @@ object ScoreProvider {
 
    def ErroneousBarricade: Int = 20
 
+   def RightBarricade: Int = 20
+
    def WhitePawnOuterCordon: Int = 10
 
-   def BlackRowOrColumnOwnerScore: Int = 5
+   def BlackFirstLastRowOrColumnOwnerScore: Int = 5
 
-   def WhiteRowOrColumnOwnerScore: Int = 10
+   def WhiteFirstLastRowOrColumnOwnerScore: Int = 10
 
-   def KingRowOrColumnOwnerScore: Int = 90
+   def KingFirstLastRowOrColumnOwnerScore: Int = 90
+
+   def KingRowOrColumnOwnerScore: Int = 25
+
+   def KingRowAndColumnOwnerScore: Int = 50
 
    def BlackNearKing: Int = 30
 
    def CordonPawn: Int = 5
 
-   def CorrectCordonScore: Int = 30
+   def RightCordon: Int = 30
+
+   def WrongCordon: Int = 30
 
    def BlackDiagonalToKing: Int = 25
 
