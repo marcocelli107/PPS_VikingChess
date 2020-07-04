@@ -7,7 +7,6 @@ import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import utils.{Coordinate, Move}
 
 import scala.collection.immutable.HashMap
-import scala.collection.mutable.ListBuffer
 
 object EvaluationFunction {
 
@@ -22,6 +21,7 @@ object EvaluationFunction {
   private var whiteCoords: Seq[Coordinate] = _
   private var gamePossibleMoves: Seq[Move] = _
   private var board: Board = _
+  private var boardTranspose: Board = _
 
   def score(snapshot: GameSnapshot): Int = snapshot.getWinner match {
     case Player.Black => -ScoreProvider.BlackWinScore
@@ -33,6 +33,7 @@ object EvaluationFunction {
 
   def usefulValues(gameSnapshot: GameSnapshot): Unit = {
     board = gameSnapshot.getBoard
+    boardTranspose = Board(board.rows.transpose)
     boardSize = board.size
     kingCoord = MoveGenerator.findKing(board)
 
@@ -381,19 +382,22 @@ object EvaluationFunction {
   }
 
   def scoreBlackCordon(): Int = {
-    var cordons: ListBuffer[ListBuffer[Coordinate]] = ListBuffer.empty
+    var cordons: Seq[Seq[Coordinate]] = Seq.empty
 
     blackCoords.foreach(b => {
       if (!cordons.flatten.contains(b))
-        cordons += createCordon(b, ListBuffer.empty)
+        cordons =  cordons :+ createCordon(b, Seq.empty)
     })
-    cordons.distinct.filter(_.size >= 3).flatten.size * ScoreProvider.CordonPawn
+    val listCordons = cordons.distinct.filter(_.size > 5)
+    var score = 0
+    listCordons.foreach( cordon =>  { if (isCorrectCordon(cordon)) score += actor_ia.ScoreProvider.CorrectCordonScore})
+    listCordons.flatten.size * ScoreProvider.CordonPawn + score
   }
 
-  def createCordon(fromCoordinate: Coordinate, cordon: ListBuffer[Coordinate]): ListBuffer[Coordinate] = {
-    def _createCordon(fromCoordinate: Coordinate, cordon: ListBuffer[Coordinate]): ListBuffer[Coordinate] = {
-      var currentCordon: ListBuffer[Coordinate] = cordon
-      currentCordon += fromCoordinate
+  def createCordon(fromCoordinate: Coordinate, cordon: Seq[Coordinate]): Seq[Coordinate] = {
+    def _createCordon(fromCoordinate: Coordinate, cordon: Seq[Coordinate]): Seq[Coordinate] = {
+      var currentCordon: Seq[Coordinate] = cordon
+      currentCordon = currentCordon :+ fromCoordinate
       for (c <- findNearBlacks(fromCoordinate)) {
         if (!cordon.contains(c)) {
           currentCordon = (currentCordon ++ _createCordon(c, currentCordon)).distinct
@@ -407,7 +411,7 @@ object EvaluationFunction {
 
   }
 
-  def isRedundant(coordinate: Coordinate, cordon: ListBuffer[Coordinate]): Boolean = {
+  def isRedundant(coordinate: Coordinate, cordon: Seq[Coordinate]): Boolean = {
     val cycles = get3CycleCoordinates(coordinate)
     for (d <- OrthogonalDirection.values) {
       if (cycles(d).size == 2 && isSubList(cycles(d), cordon))
@@ -460,8 +464,8 @@ object EvaluationFunction {
   /*def filterOutOfBoardCoords(list: List[Coordinate]): List[Coordinate] =
     list.filter(coord => coord.x <= boardSize && coord.x >= 1 && coord.y <= boardSize && coord.y >= 1)*/
 
-  def findNearBlacks(c: Coordinate): List[Coordinate] = {
-    List(Coordinate(c.x + 1, c.y), Coordinate(c.x, c.y + 1),
+  def findNearBlacks(c: Coordinate): Seq[Coordinate] = {
+    Seq(Coordinate(c.x + 1, c.y), Coordinate(c.x, c.y + 1),
       Coordinate(c.x - 1, c.y), Coordinate(c.x, c.y - 1),
       Coordinate(c.x - 1, c.y - 1), Coordinate(c.x + 1, c.y + 1),
       Coordinate(c.x - 1, c.y + 1), Coordinate(c.x + 1, c.y - 1))
@@ -487,7 +491,7 @@ object EvaluationFunction {
     list.map(board.getCell).filter(_.getPiece.equals(Piece.BlackPawn)).map(_.getCoordinate)
 
 */
-  def getOtherSides(coordinate: Coordinate): List[OrthogonalDirection] = coordinate match {
+  def getOtherSides(coordinate: Coordinate): Seq[OrthogonalDirection] = coordinate match {
     case coordinate if isOnSide(coordinate, OrthogonalDirection.Up) =>
       List(OrthogonalDirection.Right, OrthogonalDirection.Down, OrthogonalDirection.Left)
     case coordinate if isOnSide(coordinate, OrthogonalDirection.Right) =>
@@ -507,7 +511,7 @@ object EvaluationFunction {
     case _ => false
   }
 
-  def isOnAnySides(coordinate: Coordinate, sides: List[OrthogonalDirection]): Boolean = sides.exists(isOnSide(coordinate, _))
+  def isOnAnySides(coordinate: Coordinate, sides: Seq[OrthogonalDirection]): Boolean = sides.exists(isOnSide(coordinate, _))
 
   /**
    * No black piece can sit on a corner so no double sides.
@@ -520,36 +524,67 @@ object EvaluationFunction {
     case _ => Option.empty
   }
 
-  def splitBoardWithCordon(cordon: List[Coordinate]): List[List[BoardCell]] = ???
+  def isCorrectCordon(cordon: Seq[Coordinate]):Boolean = {
+    if(isCircleCordon(cordon)){
+      val (_,inn) =  splitBoardWithCircleCordon(cordon)
+      return isCorrectCircleCordon(inn)
+    }
+    true
+  }
 
-  def splitBoardWithCircleCordon(cordon: List[Coordinate]): (List[BoardCell], List[BoardCell]) ={
+  def isCorrectCircleCordon(innerCells: Seq[BoardCell]):Boolean = innerCells.count(_.getPiece.equals(Piece.Empty)) == 0 ||
+    innerCells.count(cell => cell.getPiece.equals(Piece.WhiteKing) || cell.getPiece.equals(Piece.WhitePawn)) > 3
 
+  def splitBoardWithCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
+
+    if(isCircleCordon(cordon)){
+       splitBoardWithCircleCordon(cordon)
+    }else if(isHorizontalCordon(cordon)){
+     splitBoardWithNotCircleCordon(cordon, boardTranspose)
+    }else{
+      splitBoardWithNotCircleCordon(cordon, board)
+    }
+
+  }
+
+  def splitBoardWithCircleCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) ={
 
   @scala.annotation.tailrec
-  def _splitBoarWithCircleCordon(cordon: List[Coordinate], output: List[(List[BoardCell],List[BoardCell])]):List[(List[BoardCell],List[BoardCell])] = cordon match {
+  def _splitBoarWithCircleCordon(cordon: Seq[Coordinate], output: Seq[(Seq[BoardCell],Seq[BoardCell])]):Seq[(Seq[BoardCell],Seq[BoardCell])] = cordon match {
     case Nil => output
-    case h1::h2::t if h1.x == h2.x  => _splitBoarWithCircleCordon(t, output :+ getRightAndLeft(h1,h2))
+    case h1::h2::t if  h1.x == h2.x  => _splitBoarWithCircleCordon(t, output :+ getRightAndLeft(h1,h2))
     case _::t => _splitBoarWithCircleCordon(t, output)
-  }
-    def getRightAndLeft( right: Coordinate, left: Coordinate): (List[BoardCell],List[BoardCell]) =
-      (getSpecificOrthogonalCell(right, OrthogonalDirection.Right), getSpecificOrthogonalCell(left, OrthogonalDirection.Left))
 
-    val inner = _splitBoarWithCircleCordon(cordon, List.empty).flatMap(elem => elem._1.intersect(elem._2))
-    val external = board.rows.flatten.diff(inner).toList
+  }
+    def getRightAndLeft( right: Coordinate, left: Coordinate): (Seq[BoardCell],Seq[BoardCell]) =
+      (getSpecificOrthogonalCell(right, OrthogonalDirection.Right, board), getSpecificOrthogonalCell(left, OrthogonalDirection.Left, board))
+
+    val inner = _splitBoarWithCircleCordon(cordon, Seq.empty).flatMap(elem => elem._1.intersect(elem._2)).toList
+    val external = board.rows.flatten.diff(inner).filter(c => !cordon.contains(c.getCoordinate)).toList
 
     (external,inner)
 
   }
 
-  def getSpecificOrthogonalCell(coord: Coordinate, orthogonalDirection: OrthogonalDirection):List[BoardCell] = {
-    val map = board.orthogonalCells(coord)
+
+  def splitBoardWithNotCircleCordon( cordon: Seq[Coordinate], board: Board) : (Seq[BoardCell], Seq[BoardCell]) = {
+    val leftCordonCell: Seq[BoardCell] = cordon.flatMap(getSpecificOrthogonalCell(_, OrthogonalDirection.Left, board)).toSeq
+    val rightCordonCell: Seq[BoardCell] = board.rows.flatten.diff(leftCordonCell).filter(cell => !cordon.contains( cell.getCoordinate)).toSeq
+    (leftCordonCell, rightCordonCell)
+  }
+
+  def getSpecificOrthogonalCell(coord: Coordinate, orthogonalDirection: OrthogonalDirection, localBoard: Board ):Seq[BoardCell] = {
+    val map = localBoard.orthogonalCells(coord)
     if( map.keySet.contains(orthogonalDirection)){
       return map(orthogonalDirection)
     }
-    List.empty
+    Seq.empty
   }
 
-  def isCircleCordon( cordon: List[Coordinate]): Boolean = findNearBlacks(cordon.last).contains(cordon.head)
+  def isCircleCordon( cordon: Seq[Coordinate]): Boolean =
+    cordon.count(findNearBlacks(_).count(cordon.contains(_)) >= 2) == cordon.size
+
+  def isHorizontalCordon( cordon: Seq[Coordinate]): Boolean = cordon.head.x == cordon.last.x
 
 }
 

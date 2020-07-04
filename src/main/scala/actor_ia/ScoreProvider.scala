@@ -36,6 +36,8 @@ object ScoreProvider {
 
    def CordonPawn: Int = 5
 
+   def CorrectCordonScore: Int = 30
+
    def BlackDiagonalToKing: Int = 25
 
    def BlackCapturedScore: Int = 20
