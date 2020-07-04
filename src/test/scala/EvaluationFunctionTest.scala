@@ -1,13 +1,11 @@
 import actor_ia.{MoveGenerator, ScoreProvider}
 import ia.EvaluationFunction
 import model._
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
-@RunWith(classOf[JUnitRunner])
+//@RunWith(classOf[JUnitRunner])
 class EvaluationFunctionTest extends FunSuite {
 
   val THEORY: String = TheoryGame.GameRules.toString
@@ -378,12 +376,11 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackPawnsInCordon: Int = 9
     EvaluationFunction.usefulValues(snapshot)
-    println(snapshot.getBoard.consoleRepresentation)
 
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade)
   }
 
-  /*test("Test Horizontal Barricade - Tawlbwrdd") {
+  test("Test Horizontal Barricade - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -409,7 +406,7 @@ class EvaluationFunctionTest extends FunSuite {
     EvaluationFunction.usefulValues(snapshot)
     println(snapshot.getBoard.consoleRepresentation)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade)
-  }*/
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - 10)
+  }
 
 }

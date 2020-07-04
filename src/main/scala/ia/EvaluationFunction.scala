@@ -1,7 +1,6 @@
 package ia
 
 import actor_ia.{MoveGenerator, ScoreProvider}
-import ia.EvaluationFunction._
 import model._
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
@@ -22,7 +21,6 @@ object EvaluationFunction {
   private var whiteCoords: Seq[Coordinate] = _
   private var gamePossibleMoves: Seq[Move] = _
   private var board: Board = _
-  private var boardTranspose: Board = _
 
   def score(snapshot: GameSnapshot): Int = snapshot.getWinner match {
     case Player.Black => -ScoreProvider.BlackWinScore
@@ -33,7 +31,6 @@ object EvaluationFunction {
 
   def usefulValues(gameSnapshot: GameSnapshot): Unit = {
     board = gameSnapshot.getBoard
-    boardTranspose = Board(board.rows.transpose)
     boardSize = board.size
     kingCoord = MoveGenerator.findKing(board)
 
@@ -548,12 +545,14 @@ object EvaluationFunction {
   def checkNotCircleCordon(cordon: Seq[Coordinate]): Int = {
     if(isCorrectNotCircleCordon(cordon)) {
       var sequences: (Seq[BoardCell],Seq[BoardCell]) = (Seq.empty,Seq.empty)
+
       if (isHorizontalCordon(cordon))
-        sequences = splitBoardWithNotCircleCordon(cordon, boardTranspose)
+        sequences = splitBoardWithHorizontalCordon(cordon)
       else
-        sequences = splitBoardWithNotCircleCordon(cordon, board)
+        sequences = splitBoardWithVerticalCordon(cordon)
+      println(controlEmptyPortion(sequences._1) )
+      println(controlEmptyPortion(sequences._2))
       if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)){
-        println(sequences._1, sequences._2)
         cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade
       }
       else
@@ -569,7 +568,7 @@ object EvaluationFunction {
     innerCells.count(_.getPiece.equals(Piece.WhitePawn)) > 3 || innerCells.exists(_.getPiece.equals(Piece.WhiteKing))
 
   def isCorrectNotCircleCordon(cordon: Seq[Coordinate]): Boolean =
-    cordon.filter(isOnAnySides(_)).map(getCurrentSide).distinct.size >= 2
+    cordon.filter(isOnAnySides(_)).map(getCurrentSide).filter(_.nonEmpty).map(_.get).distinct.size >= 2
     //cordon.count(getCurrentSide(_).get.equals(getCurrentSide(cordon.head).get)) == cordon.size
 
   /*
@@ -605,10 +604,15 @@ object EvaluationFunction {
     (external,inner)
 
   }
+  def splitBoardWithHorizontalCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
+    splitBoardWithNotCircleCordon(cordon,OrthogonalDirection.Up)  }
 
+  def splitBoardWithVerticalCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
+    splitBoardWithNotCircleCordon(cordon,OrthogonalDirection.Left)
+  }
 
-  def splitBoardWithNotCircleCordon(cordon: Seq[Coordinate], board: Board) : (Seq[BoardCell], Seq[BoardCell]) = {
-    val leftCordonCells: Seq[BoardCell] = cordon.flatMap(getSpecificOrthogonalCell(_, OrthogonalDirection.Left, board)).toList
+  def splitBoardWithNotCircleCordon(cordon: Seq[Coordinate], orthogonalDirection: OrthogonalDirection) : (Seq[BoardCell], Seq[BoardCell]) = {
+    val leftCordonCells: Seq[BoardCell] = cordon.flatMap(getSpecificOrthogonalCell(_, orthogonalDirection, board)).toList
     val rightCordonCells: Seq[BoardCell] = board.rows.flatten.diff(leftCordonCells).filter(cell => !cordon.contains( cell.getCoordinate)).toList
     (leftCordonCells, rightCordonCells)
   }
@@ -624,8 +628,13 @@ object EvaluationFunction {
   def isCircleCordon( cordon: Seq[Coordinate]): Boolean =
     cordon.count(findNearBlacks(_).count(cordon.contains(_)) >= 2) == cordon.size
 
-  def isHorizontalCordon( cordon: Seq[Coordinate]): Boolean = cordon.head.x == cordon.last.x
-
+  def isHorizontalCordon( cordon: Seq[Coordinate]): Boolean = //cordon.head.x == cordon.last.x
+    cordon.filter(isOnAnySides(_))
+      .map(getCurrentSide)
+      .filter(_.nonEmpty)
+      .map(_.get)
+      .distinct
+      .count(c => c.equals(OrthogonalDirection.Left)  || c.equals(OrthogonalDirection.Right)) >= 2
 }
 
 object blabla extends App {
