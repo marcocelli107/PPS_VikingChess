@@ -1,10 +1,13 @@
 import actor_ia.MoveGenerator
 import model.GameSnapshot.GameSnapshotImpl
 import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, Player, TheoryGame}
+import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
 import utils.{BoardGame, Coordinate, Move}
 
+@RunWith(classOf[JUnitRunner])
 class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   val THEORY: String = TheoryGame.GameRules.toString
