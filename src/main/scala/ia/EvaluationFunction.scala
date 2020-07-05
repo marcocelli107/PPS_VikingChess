@@ -14,6 +14,7 @@ object EvaluationFunction {
   private var kingCoord: Coordinate = _
   private var cornerCoordinates: List[Coordinate] = _
   private var centralCoordinate: Coordinate = _
+  private var quadrants: Seq[Seq[Seq[BoardCell]]] = _
   private var kingOrthogonalCells: Map[OrthogonalDirection, List[BoardCell]] = _
   private var kingAdjacentCells: Map[OrthogonalDirection, Option[BoardCell]] = _
   private var blackCoords: Seq[Coordinate] = _
@@ -344,7 +345,6 @@ object EvaluationFunction {
   def quadraticDistanceBetweenCells(start: Coordinate, end: Coordinate): Int = (scala.math.pow(start.x - end.x, 2) + scala.math.pow(start.y - end.y, 2)).toInt
 
   def findCloserCorner(coord: Coordinate): Coordinate = {
-    @scala.annotation.tailrec
     def _getCloserCorner(closerCornerCord: Coordinate, closerDist: Int, cells: Seq[Coordinate] = cornerCoordinates): Coordinate = cells match {
       case Nil => closerCornerCord
       case h :: t =>
@@ -687,12 +687,11 @@ object blabla extends App {
   var game = prolog.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
   var snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
   EvaluationFunction.usefulValues(snapshot)
-
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(1,2)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,1)))
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,7), Coordinate(1,10)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(3,4)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,7), Coordinate(2,11)))
 
-
-  println(MoveGenerator.findKing(snapshot.getBoard))
-  println(EvaluationFunction.scoreBlackOnKingDiagonal())
+  println(EvaluationFunction.wrongBarricadeScore())
 
 }
