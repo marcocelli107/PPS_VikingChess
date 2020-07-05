@@ -54,4 +54,7 @@ object ScoreProvider {
 
    def WhiteCapturedScore: Int = 50
 
+   def LastBlackMoveCatchableInOne: Int = 10
+
+   def LastWhiteMoveCatchableInOne: Int = 15
 }

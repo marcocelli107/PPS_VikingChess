@@ -473,9 +473,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(1,10)))
 
     EvaluationFunction.usefulValues(snapshot)
-    val wrongBarricade = EvaluationFunction.wrongBarricadeScore()
+    val wrongBarricade = EvaluationFunction.scoreWrongBarricade()
 
-    assert(wrongBarricade._2 == -2 * ScoreProvider.WrongBarricade && wrongBarricade._1 == - ScoreProvider.WrongBarricade)
+    assert(wrongBarricade._2 == 2 * ScoreProvider.WrongBarricade && wrongBarricade._1 == ScoreProvider.WrongBarricade)
   }
 
   test("Tests Score Two Black on King's diagonal - Tablut."){
