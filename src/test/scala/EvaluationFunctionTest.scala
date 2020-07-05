@@ -427,7 +427,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(1,10)))
 
     EvaluationFunction.usefulValues(snapshot)
-    val wrongBarricade = EvaluationFunction.wrongBarricadeScore()
+    val wrongBarricade = EvaluationFunction.scoreWrongBarricade()
 
     assert(wrongBarricade._2 == -40 && wrongBarricade._1 == -20)
   }

@@ -36,8 +36,7 @@ object EvaluationFunction {
 
     kingOrthogonalCells = board.orthogonalCells(kingCoord)
 
-    kingAdjacentCells = kingOrthogonalCells.map { case (k, v) => (k, v.take(1)) }
-      .map { case (k, v) => if (v.nonEmpty) (k, Option(v.head)) else (k, Option.empty) }
+    kingAdjacentCells = mappingOrthogonalToAdjacent(kingOrthogonalCells)
 
     cornerCoordinates = board.cornerCoordinates
     centralCoordinate = board.centerCoordinates
@@ -64,10 +63,12 @@ object EvaluationFunction {
       println("PossibleKingCaptureInOne")
     }
     if (score == 0) {
-      val scoreRowOrColumnFree = scoreOwnerFirstLastThreeRowsOrColumns()
+      val scoreRowOrColumnFree: (Int, Int) = scoreOwnerFirstLastThreeRowsOrColumns()
+      val scoreErrouneousBarricade: (Int, Int) = scoreWrongBarricade()
       println("RowsColumnsOwned(Whites,Blacks): " + scoreRowOrColumnFree)
-      score -= computeBlackBetterPositions(gameSnapshot) + scoreRowOrColumnFree._2
-      score += computeWhiteBetterPositions(gameSnapshot) + scoreRowOrColumnFree._1
+      println("WrongBarricade(Whites, Blacks)" + scoreWrongBarricade)
+      score -= computeBlackBetterPositions(gameSnapshot) + scoreRowOrColumnFree._2 - scoreErrouneousBarricade._2
+      score += computeWhiteBetterPositions(gameSnapshot) + scoreRowOrColumnFree._1 - scoreErrouneousBarricade._1
     }
     score
   }
@@ -108,12 +109,7 @@ object EvaluationFunction {
       returnValue = kingCapturedInOneBigBoard()
     }
     else
-      for (i <- kingAdjacentCells.keys)
-        if (kingAdjacentCells(i).nonEmpty &&
-          kingAdjacentCells(i).get.getPiece.equals(Piece.BlackPawn) &&
-          kingAdjacentCells(oppositeOrthogonalDirection(i)).nonEmpty &&
-          gamePossibleMoves.map(_.to).contains(kingAdjacentCells(oppositeOrthogonalDirection(i)).get.getCoordinate))
-          returnValue = true
+      returnValue = checkOrthogonalEmptyCells(Piece.BlackPawn, kingAdjacentCells)
     returnValue
   }
 
@@ -174,12 +170,15 @@ object EvaluationFunction {
     println("Black Surround The King: " + scoreBlackSurroundTheKing())
     println("Black Captured White: " + scoreCapturedWhite(gameSnapshot))
     println("Black Cordon: " + scoreBlackCordon())
+    println("Black On King Diagonal: " + scoreBlackOnKingDiagonal())
     println("***********")
 
     scoreBlackSurroundTheKing() +
       scoreCapturedWhite(gameSnapshot) +
       //TODO review Cordon-Barricade Functionality and Score
       +scoreBlackCordon()
+      +scoreBlackOnKingDiagonal()
+
 
   }
 
@@ -203,6 +202,35 @@ object EvaluationFunction {
     }
 
     _scoreKingIsInFreeRowOrColumn()
+  }
+
+  def lastPawnMovedCathableInOne(gameSnapshot: GameSnapshot): Int = {
+
+    val adjOrthogonalCells = mappingOrthogonalToAdjacent(board.orthogonalCells(gameSnapshot.getLastMove.get.to))
+
+    if(gameSnapshot.getPlayerToMove.equals(Player.Black) && checkOrthogonalEmptyCells(Piece.BlackPawn, adjOrthogonalCells))
+      ScoreProvider.LastWhiteMoveCatchableInOne
+    else if (gameSnapshot.getPlayerToMove.equals(Player.White) && checkOrthogonalEmptyCells(Piece.WhitePawn, adjOrthogonalCells))
+      ScoreProvider.LastBlackMoveCatchableInOne
+    else 0
+  }
+
+  def checkOrthogonalEmptyCells(piece: Piece.Value, adjOrthogonalCells: Map[OrthogonalDirection, Option[BoardCell]]): Boolean = {
+    var returnValue = false
+
+    for (i <- adjOrthogonalCells.keys) {
+      if(adjOrthogonalCells(i).nonEmpty &&
+      adjOrthogonalCells(i).get.getPiece.equals(piece) &&
+      adjOrthogonalCells(oppositeOrthogonalDirection(i)).nonEmpty &&
+      gamePossibleMoves.map(_.to).contains(adjOrthogonalCells(oppositeOrthogonalDirection(i)).get.getCoordinate))
+        returnValue = true
+    }
+    returnValue
+  }
+
+  private def mappingOrthogonalToAdjacent(orthogonal: Map[OrthogonalDirection, List[BoardCell]]): Map[OrthogonalDirection, Option[BoardCell]] = {
+    orthogonal.map { case (k, v) => (k, v.take(1)) }
+      .map { case (k, v) => if (v.nonEmpty) (k, Option(v.head)) else (k, Option.empty) }
   }
 
   // Positive score if king moves to a free corner.
@@ -253,12 +281,12 @@ object EvaluationFunction {
     (whiteScore, blackScore)
   }
 
-  def wrongBarricadeScore(): (Int, Int) = {
+  def scoreWrongBarricade(): (Int, Int) = {
     var whiteScore = 0
     var blackScore = 0
     board.cornerCoordinates.flatMap(c => getOrthogonalCoords(c)).filter(p => p._2 != Option.empty).grouped(2).foreach {
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.BlackPawn) => blackScore += -ScoreProvider.WrongBarricade
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.WhitePawn) => whiteScore += -ScoreProvider.WrongBarricade
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.BlackPawn) => blackScore += ScoreProvider.WrongBarricade
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.WhitePawn) => whiteScore += ScoreProvider.WrongBarricade
       case _ =>
     }
     (whiteScore, blackScore)
@@ -682,14 +710,15 @@ object blabla extends App {
   println(EvaluationFunction.isSubList(l, l1))*/
 
 
-  var game = prolog.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
-  var snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+  var game = prolog.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
+  var snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
   EvaluationFunction.usefulValues(snapshot)
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(1,2)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,1)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,7), Coordinate(1,10)))
-  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,7), Coordinate(2,11)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(2,5)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(3,5)))
 
-  println(EvaluationFunction.wrongBarricadeScore())
+  EvaluationFunction.usefulValues(snapshot)
+
+  println(EvaluationFunction.lastPawnMovedCathableInOne(snapshot))
 
 }
