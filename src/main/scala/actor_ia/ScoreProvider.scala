@@ -46,6 +46,8 @@ object ScoreProvider {
 
    def WrongCordon: Int = 30
 
+   def WrongBarricade: Int = 30
+
    def BlackDiagonalToKing: Int = 25
 
    def BlackCapturedScore: Int = 20

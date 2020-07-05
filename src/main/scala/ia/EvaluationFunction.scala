@@ -14,7 +14,6 @@ object EvaluationFunction {
   private var kingCoord: Coordinate = _
   private var cornerCoordinates: List[Coordinate] = _
   private var centralCoordinate: Coordinate = _
-  private var quadrants: Seq[Seq[Seq[BoardCell]]] = _
   private var kingOrthogonalCells: Map[OrthogonalDirection, List[BoardCell]] = _
   private var kingAdjacentCells: Map[OrthogonalDirection, Option[BoardCell]] = _
   private var blackCoords: Seq[Coordinate] = _
@@ -253,6 +252,23 @@ object EvaluationFunction {
     (whiteScore, blackScore)
   }
 
+  def wrongBarricadeScore(): (Int, Int) = {
+    var whiteScore = 0
+    var blackScore = 0
+    board.cornerCoordinates.flatMap(c => getOrthogonalCoords(c)).filter(p => p._2 != Option.empty).grouped(2).foreach {
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.BlackPawn) => blackScore += -ScoreProvider.WrongBarricade
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.WhitePawn) => whiteScore += -ScoreProvider.WrongBarricade
+      case _ =>
+    }
+    (whiteScore, blackScore)
+  }
+
+  def wrongBarricadeType(coord1: BoardCell, coord2: BoardCell): Piece.Value = (coord1.getPiece, coord2.getPiece) match {
+    case (Piece.BlackPawn, Piece.BlackPawn) => Piece.BlackPawn
+    case (Piece.WhitePawn, Piece.WhitePawn) => Piece.WhitePawn
+    case _ => Piece.Empty
+  }
+
 
   /* UTILS METHODS */
 
@@ -328,6 +344,7 @@ object EvaluationFunction {
   def quadraticDistanceBetweenCells(start: Coordinate, end: Coordinate): Int = (scala.math.pow(start.x - end.x, 2) + scala.math.pow(start.y - end.y, 2)).toInt
 
   def findCloserCorner(coord: Coordinate): Coordinate = {
+    @scala.annotation.tailrec
     def _getCloserCorner(closerCornerCord: Coordinate, closerDist: Int, cells: Seq[Coordinate] = cornerCoordinates): Coordinate = cells match {
       case Nil => closerCornerCord
       case h :: t =>
@@ -375,6 +392,16 @@ object EvaluationFunction {
   //Positive score if the black pieces surround The King
   def scoreBlackSurroundTheKing(): Int = {
     kingAdjacentCells.values.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * ScoreProvider.BlackNearKing
+  }
+
+  def scoreBlackOnKingDiagonal(): Int = {
+    var score = 0
+    kingCoord = MoveGenerator.findKing(board)
+    findNearBlacks(kingCoord).filter(c => (c.x != kingCoord.x) && (c.y != kingCoord.y)).foreach(c => board.getCell(c).getPiece match {
+      case Piece.BlackPawn => score += 25
+      case _ =>
+    })
+    score
   }
 
   def scoreBlackCordon(): Int = {
@@ -655,5 +682,17 @@ object blabla extends App {
   val l1: ListBuffer[Int] = ListBuffer(2, 3,1 ,5, 4)
   val l2: ListBuffer[Int] = (l ++ l1).distinct
   println(EvaluationFunction.isSubList(l, l1))*/
+
+
+  var game = prolog.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
+  var snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+  EvaluationFunction.usefulValues(snapshot)
+
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,7), Coordinate(1,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(3,4)))
+
+
+  println(MoveGenerator.findKing(snapshot.getBoard))
+  println(EvaluationFunction.scoreBlackOnKingDiagonal())
 
 }
