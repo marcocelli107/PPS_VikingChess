@@ -1,7 +1,9 @@
 import actor_ia.{MoveGenerator, ScoreProvider}
 import ia.EvaluationFunction
 import model._
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
@@ -199,7 +201,11 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon = 14
     EvaluationFunction.usefulValues(snapshot)
 <<<<<<< HEAD
+    assert(EvaluationFunction.scoreBlackCordon() == 90)
+=======
+<<<<<<< HEAD
     assert(EvaluationFunction.scoreBlackCordon() == 70)
+>>>>>>> 3818d2889b6a295f0736e7b65223c9e807a1b96b
   }
 =======
 >>>>>>> ce246409ff78cf8260460b62592bd2fa472ecde1
