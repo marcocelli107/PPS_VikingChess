@@ -413,4 +413,44 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - ScoreProvider.WrongCordon)
   }
 
+  test("Tests Score Wrong Barricade - Tawlbwrdd."){
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(1,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,11)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(2,11)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(10,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,8), Coordinate(1,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,2), Coordinate(11,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(1,10)))
+
+    EvaluationFunction.usefulValues(snapshot)
+    val wrongBarricade = EvaluationFunction.wrongBarricadeScore()
+
+    assert(wrongBarricade._2 == -40 && wrongBarricade._1 == -20)
+  }
+
+  test("Tests Score Black on King's diagonal - Tablut."){
+    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(2,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(2,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(4,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(1,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(2,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(3,4)))
+
+    EvaluationFunction.usefulValues(snapshot)
+    val blackOnDiagonalScore = EvaluationFunction.scoreBlackOnKingDiagonal()
+
+    assert(blackOnDiagonalScore == 50)
+  }
+
 }
