@@ -14,7 +14,7 @@ object EvaluationFunction {
   private var kingCoord: Coordinate = _
   private var cornerCoordinates: List[Coordinate] = _
   private var centralCoordinate: Coordinate = _
-  private var quadrants: Seq[Seq[Seq[BoardCell]]] = _
+ // private var quadrants: Seq[Seq[Seq[BoardCell]]] = _
   private var kingOrthogonalCells: Map[OrthogonalDirection, List[BoardCell]] = _
   private var kingAdjacentCells: Map[OrthogonalDirection, Option[BoardCell]] = _
   private var blackCoords: Seq[Coordinate] = _
@@ -120,15 +120,13 @@ object EvaluationFunction {
     case OrthogonalDirection.Left => OrthogonalDirection.Right
   }
 
-  def scoreKingOnThrone(/*gameSnapshot: GameSnapshot*/): Int = {
+  def scoreKingOnThrone(): Int = {
     if (kingCoord.equals(board.centerCoordinates)) ScoreProvider.KingOnThroneScore
     else if (quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord)) == 0) ScoreProvider.KingDistanceToCornerDividend
     else ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord))
   }
 
-  def scoreTower(/*gameSnapshot: GameSnapshot*/): Int = {
-    //val board = gameSnapshot.getBoard
-
+  def scoreTower(): Int = {
     def isSquare(list: List[BoardCell]): Boolean = {
       list.count(cell => cell.getPiece.equals(Piece.WhitePawn) || cell.getPiece.equals(Piece.WhiteKing)) == 3
     }
@@ -152,16 +150,18 @@ object EvaluationFunction {
   def computeWhiteBetterPositions(gameSnapshot: GameSnapshot): Int = {
 
     println("***********")
-    println("White King In Throne: " + scoreKingOnThrone(/*gameSnapshot*/))
-    println("White Tower: " + scoreTower(/*gameSnapshot*/))
+    println("White King In Throne: " + scoreKingOnThrone())
+    println("White Tower: " + scoreTower())
     println("King in Free Row or Column: " + scoreKingIsInFreeRowOrColumn())
     println("White Captured Black: " + scoreCapturedBlack(gameSnapshot))
+    println("Last Black Moved capture In One: " + scoreBlackOnKingDiagonal())
     println("***********")
 
-    scoreKingOnThrone(/*gameSnapshot*/) +
-      scoreTower(/*gameSnapshot*/) +
-      scoreKingIsInFreeRowOrColumn() +
-      scoreCapturedBlack(gameSnapshot)
+    scoreKingOnThrone() +
+    scoreTower() +
+    scoreKingIsInFreeRowOrColumn() +
+    scoreCapturedBlack(gameSnapshot) +
+    scoreLastPawnMovedCathableInOne(gameSnapshot)
   }
 
   def computeBlackBetterPositions(gameSnapshot: GameSnapshot): Int = {
@@ -171,15 +171,14 @@ object EvaluationFunction {
     println("Black Captured White: " + scoreCapturedWhite(gameSnapshot))
     println("Black Cordon: " + scoreBlackCordon())
     println("Black On King Diagonal: " + scoreBlackOnKingDiagonal())
+    println("Last White Moved capture In One: " + scoreBlackOnKingDiagonal())
     println("***********")
 
     scoreBlackSurroundTheKing() +
-      scoreCapturedWhite(gameSnapshot) +
-      //TODO review Cordon-Barricade Functionality and Score
-      +scoreBlackCordon()
-      +scoreBlackOnKingDiagonal()
-
-
+    scoreCapturedWhite(gameSnapshot) +
+    scoreBlackCordon() +
+    scoreBlackOnKingDiagonal() +
+    scoreLastPawnMovedCathableInOne(gameSnapshot)
   }
 
   /**
@@ -204,14 +203,19 @@ object EvaluationFunction {
     _scoreKingIsInFreeRowOrColumn()
   }
 
-  def lastPawnMovedCathableInOne(gameSnapshot: GameSnapshot): Int = {
+  def scoreLastPawnMovedCathableInOne(gameSnapshot: GameSnapshot): Int = {
 
-    val adjOrthogonalCells = mappingOrthogonalToAdjacent(board.orthogonalCells(gameSnapshot.getLastMove.get.to))
+    val lastMove = gameSnapshot.getLastMove
 
-    if(gameSnapshot.getPlayerToMove.equals(Player.Black) && checkOrthogonalEmptyCells(Piece.BlackPawn, adjOrthogonalCells))
-      ScoreProvider.LastWhiteMoveCatchableInOne
-    else if (gameSnapshot.getPlayerToMove.equals(Player.White) && checkOrthogonalEmptyCells(Piece.WhitePawn, adjOrthogonalCells))
-      ScoreProvider.LastBlackMoveCatchableInOne
+    if(lastMove.nonEmpty) {
+      val adjOrthogonalCells = mappingOrthogonalToAdjacent(board.orthogonalCells(gameSnapshot.getLastMove.get.to))
+
+      if (gameSnapshot.getPlayerToMove.equals(Player.Black) && checkOrthogonalEmptyCells(Piece.BlackPawn, adjOrthogonalCells))
+        ScoreProvider.LastWhiteMoveCatchableInOne
+      else if (gameSnapshot.getPlayerToMove.equals(Player.White) && checkOrthogonalEmptyCells(Piece.WhitePawn, adjOrthogonalCells))
+        ScoreProvider.LastBlackMoveCatchableInOne
+      else 0
+    }
     else 0
   }
 
@@ -256,13 +260,6 @@ object EvaluationFunction {
     }
   */
 
-
-  // TODO ERA SOTTO
-
-
-  /*
-  * Jolly rules
-  */
 
   def scoreOwnerFirstLastThreeRowsOrColumns(): (Int, Int) = {
     val boardTranspose = board.rows.toList.transpose
@@ -373,6 +370,7 @@ object EvaluationFunction {
   def quadraticDistanceBetweenCells(start: Coordinate, end: Coordinate): Int = (scala.math.pow(start.x - end.x, 2) + scala.math.pow(start.y - end.y, 2)).toInt
 
   def findCloserCorner(coord: Coordinate): Coordinate = {
+    @scala.annotation.tailrec
     def _getCloserCorner(closerCornerCord: Coordinate, closerDist: Int, cells: Seq[Coordinate] = cornerCoordinates): Coordinate = cells match {
       case Nil => closerCornerCord
       case h :: t =>
@@ -407,9 +405,6 @@ object EvaluationFunction {
 */
   def isSequenceFreeCells(seq: Seq[BoardCell]): Boolean =
     seq.count(boardCell => !boardCell.getPiece.equals(Piece.Empty)) == 0
-
-
-  // TODO QUI PARTIVA
 
 
   /**
@@ -593,7 +588,8 @@ object EvaluationFunction {
   def checkCircleCordon(cordon: Seq[Coordinate]): Int = {
     val (_,inn) = splitBoardWithCircleCordon(cordon)
     if(isCorrectCircleCordon(inn))
-      cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightCordon
+      cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightCordon +
+      + inn.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon
     else
       cordon.size * ScoreProvider.CordonPawn - ScoreProvider.WrongCordon
   }
@@ -606,11 +602,16 @@ object EvaluationFunction {
         sequences = splitBoardWithHorizontalCordon(cordon)
       else
         sequences = splitBoardWithVerticalCordon(cordon)
-      if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)){
+      if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)) {
         cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade
       }
       else
-        0
+        if(sequences._1.map(_.getCoordinate).contains(board.centerCoordinates))
+        (cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade) -
+          - (sequences._2.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon)
+      else
+        (cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade) -
+          - (sequences._1.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon)
     } else
       0
   }
@@ -695,21 +696,6 @@ object blabla extends App {
   val THEORY: String = TheoryGame.GameRules.toString
   val prolog: ParserProlog = ParserPrologImpl(THEORY)
 
-  /*
-  val game = prolog.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
-  val snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game_3, Option.empty, 0, 0)
-  EvaluationFunction.usefulValues(snapshot)
-  println(EvaluationFunction.getOtherSides(Coordinate(6,6)))
-  println(EvaluationFunction.isOnSide(Coordinate(11,1), OrthogonalDirection.Down))
-  println(EvaluationFunction.isOnAnySides(Coordinate(11,2), List(OrthogonalDirection.Up, OrthogonalDirection.Right, OrthogonalDirection.Left)))
-  println(EvaluationFunction.getCurrentSide(Coordinate(6,6)))
-
-  var l: ListBuffer[Int] = ListBuffer(1, 2, 3, 4)
-  val l1: ListBuffer[Int] = ListBuffer(2, 3,1 ,5, 4)
-  val l2: ListBuffer[Int] = (l ++ l1).distinct
-  println(EvaluationFunction.isSubList(l, l1))*/
-
-
   var game = prolog.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
   var snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
   EvaluationFunction.usefulValues(snapshot)
@@ -718,7 +704,5 @@ object blabla extends App {
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(3,5)))
 
   EvaluationFunction.usefulValues(snapshot)
-
-  println(EvaluationFunction.lastPawnMovedCathableInOne(snapshot))
 
 }
