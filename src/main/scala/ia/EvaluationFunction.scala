@@ -565,7 +565,8 @@ object EvaluationFunction {
   def checkCircleCordon(cordon: Seq[Coordinate]): Int = {
     val (_,inn) = splitBoardWithCircleCordon(cordon)
     if(isCorrectCircleCordon(inn))
-      cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightCordon
+      cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightCordon +
+      + inn.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon
     else
       cordon.size * ScoreProvider.CordonPawn - ScoreProvider.WrongCordon
   }
@@ -578,11 +579,16 @@ object EvaluationFunction {
         sequences = splitBoardWithHorizontalCordon(cordon)
       else
         sequences = splitBoardWithVerticalCordon(cordon)
-      if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)){
+      if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)) {
         cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade
       }
       else
-        0
+        if(sequences._1.map(_.getCoordinate).contains(board.centerCoordinates))
+        (cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade) -
+          - (sequences._2.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon)
+      else
+        (cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade) -
+          - (sequences._1.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon)
     } else
       0
   }
