@@ -253,6 +253,23 @@ object EvaluationFunction {
     (whiteScore, blackScore)
   }
 
+  def wrongBarricadeScore(): (Int, Int) = {
+    var whiteScore = 0
+    var blackScore = 0
+    board.cornerCoordinates.flatMap(c => getOrthogonalCoords(c)).filter(p => p._2 != Option.empty).grouped(2).foreach {
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.BlackPawn) => blackScore += -ScoreProvider.WrongBarricade
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.WhitePawn) => whiteScore += -ScoreProvider.WrongBarricade
+      case _ =>
+    }
+    (whiteScore, blackScore)
+  }
+
+  def wrongBarricadeType(coord1: BoardCell, coord2: BoardCell): Piece.Value = (coord1.getPiece, coord2.getPiece) match {
+    case (Piece.BlackPawn, Piece.BlackPawn) => Piece.BlackPawn
+    case (Piece.WhitePawn, Piece.WhitePawn) => Piece.WhitePawn
+    case _ => Piece.Empty
+  }
+
 
   /* UTILS METHODS */
 
@@ -377,6 +394,16 @@ object EvaluationFunction {
     kingAdjacentCells.values.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * ScoreProvider.BlackNearKing
   }
 
+  //TODO expand method for all diagonal cells
+  def scoreBlackOnKingDiagonal(): Int = {
+    var score = 0
+    findNearBlacks(kingCoord).filter(c => (c.x != kingCoord.x) && (c.y != kingCoord.y)).foreach(c => board.getCell(c).getPiece match {
+      case Piece.BlackPawn => score += 25
+      case _ =>
+    })
+    score
+  }
+
   def scoreBlackCordon(): Int = {
     var cordons: Seq[Seq[Coordinate]] = Seq.empty
 
@@ -409,6 +436,7 @@ object EvaluationFunction {
 
     val result = _createCordon(fromCoordinate, cordon)
     result.filter(c => !isRedundant(c, result)).sorted
+
   }
 
   def isRedundant(coordinate: Coordinate, cordon: Seq[Coordinate]): Boolean = {
@@ -550,8 +578,6 @@ object EvaluationFunction {
         sequences = splitBoardWithHorizontalCordon(cordon)
       else
         sequences = splitBoardWithVerticalCordon(cordon)
-      println(controlEmptyPortion(sequences._1) )
-      println(controlEmptyPortion(sequences._2))
       if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)){
         cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade
       }
@@ -600,10 +626,10 @@ object EvaluationFunction {
     val inner = _splitBoardWithCircleCordon(cordon, Seq.empty).flatMap(elem => elem._1.intersect(elem._2)).toList
 
     val external = board.rows.flatten.diff(inner).filter(c => !cordon.contains(c.getCoordinate)).toList
-
     (external,inner)
 
   }
+
   def splitBoardWithHorizontalCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
     splitBoardWithNotCircleCordon(cordon,OrthogonalDirection.Up)  }
 
@@ -654,4 +680,16 @@ object blabla extends App {
   val l1: ListBuffer[Int] = ListBuffer(2, 3,1 ,5, 4)
   val l2: ListBuffer[Int] = (l ++ l1).distinct
   println(EvaluationFunction.isSubList(l, l1))*/
+
+
+  var game = prolog.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
+  var snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+  EvaluationFunction.usefulValues(snapshot)
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(1,2)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,1)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,7), Coordinate(1,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,7), Coordinate(2,11)))
+
+  println(EvaluationFunction.wrongBarricadeScore())
+
 }

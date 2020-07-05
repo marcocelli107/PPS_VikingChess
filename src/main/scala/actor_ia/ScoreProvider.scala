@@ -22,8 +22,6 @@ object ScoreProvider {
 
    def TowerCoefficient: Double = 1.25
 
-   def ErroneousBarricade: Int = 20
-
    def RightBarricade: Int = 20
 
    def WhitePawnOuterCordon: Int = 10
@@ -45,6 +43,8 @@ object ScoreProvider {
    def RightCordon: Int = 30
 
    def WrongCordon: Int = 30
+
+   def WrongBarricade: Int = 20
 
    def BlackDiagonalToKing: Int = 25
 

@@ -1,11 +1,13 @@
 import actor_ia.{MoveGenerator, ScoreProvider}
 import ia.EvaluationFunction
 import model._
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
-//@RunWith(classOf[JUnitRunner])
+@RunWith(classOf[JUnitRunner])
 class EvaluationFunctionTest extends FunSuite {
 
   val THEORY: String = TheoryGame.GameRules.toString
@@ -107,24 +109,32 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot) < 0)
   }
 
-  //TODO DA RIVEDERE
-  /*test("Test Score Black Ahead - Brandubh") {
+  test("Test Score Black Ahead - Brandubh") {
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,4), Coordinate(2,7)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,1)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(3,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(3,3)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,3)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(5,3)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(5,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(5,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(3,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(5,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,3), Coordinate(4,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,6), Coordinate(5,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(5,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7), Coordinate(4,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(2,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(3,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(4,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,1), Coordinate(3,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(4,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(3,5)))
 
-    assert(EvaluationFunction.score(snapshot) < 0)
-  }*/
+    assert(EvaluationFunction.score(snapshot) < -100)
+  }
 
-  test("Test Score White Ahead To Rows And Columns Checked - Hnefatafl") {
+  test("Test Score White Ahead With Rows And Columns Owned - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -182,8 +192,7 @@ class EvaluationFunctionTest extends FunSuite {
       EvaluationFunction.scoreCapturedWhite(snapshot) == 200)
   }
 
-  //TODO DA RIVEDERE
-  /*test("Test Score Cordon Black in 3 Sides - Tawlbwrdd") {
+  test("Test Score Right Barricade On 3 Sides and Wrong Circle Cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
@@ -196,18 +205,13 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(4,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,5), Coordinate(10,4)))
 
-    val blackPawnsInCordon = 14
+    val blackPawnsInCordon = 14 + 4
     EvaluationFunction.usefulValues(snapshot)
-<<<<<<< HEAD
-    assert(EvaluationFunction.scoreBlackCordon() == 70)
+
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - ScoreProvider.WrongCordon)
   }
-=======
->>>>>>> ce246409ff78cf8260460b62592bd2fa472ecde1
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightCordon)
-  }*/
-
-  test("Test Score Inner Cordon Black On All Sides - Tawlbwrdd") {
+  test("Test Score Circle Cordon On All Sides - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
@@ -245,7 +249,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   //TODO DEV ESSERE PIU ALTO DEI PRECEDENTI (AGGIUNGERE SCORE OGNI 3 BIANCHI INTERNI)
-  test("Test Score Inner Cordon Black - Tawlbwrdd") {
+  test("Test Score Right Circle Cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -302,7 +306,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   }
 
-  test("Test Score Wrong Inner Cordon Black - Hnefatafl") {
+  test("Test Score Wrong Circle Cordon - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -332,7 +336,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn - ScoreProvider.WrongCordon)
   }
 
-  test("Test Diagonal Barricade Black - Hnefatafl") {
+  test("Test Score Right Diagonal Barricade - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -348,7 +352,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade)
   }
 
-  test("Test Vertical Barricade - Tablut") {
+  test("Test Score Right Vertical Barricade - Tablut") {
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -380,7 +384,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade)
   }
 
-  test("Test Horizontal Barricade - Tawlbwrdd") {
+  test("Test Score Right Horizontal Barricade and Wrong Circle Cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -402,10 +406,51 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(5,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(4,8)))
 
-    val blackPawnsInCordon: Int = 13
+    val blackPawnsInCordon: Int = 13 + 4
     EvaluationFunction.usefulValues(snapshot)
-    println(snapshot.getBoard.diagonalCells(Coordinate(4,8)))
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - 10)
+    println(snapshot.getBoard.consoleRepresentation)
+
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - ScoreProvider.WrongCordon)
+  }
+
+  test("Tests Score Wrong Barricade - Tawlbwrdd."){
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(1,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,11)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(2,11)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(10,1)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,8), Coordinate(1,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,2), Coordinate(11,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(1,10)))
+
+    EvaluationFunction.usefulValues(snapshot)
+    val wrongBarricade = EvaluationFunction.wrongBarricadeScore()
+
+    assert(wrongBarricade._2 == -40 && wrongBarricade._1 == -20)
+  }
+
+  test("Tests Score Black on King's diagonal - Tablut."){
+    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(2,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(2,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(4,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(1,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(2,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(3,4)))
+
+    EvaluationFunction.usefulValues(snapshot)
+    val blackOnDiagonalScore = EvaluationFunction.scoreBlackOnKingDiagonal()
+    assert(blackOnDiagonalScore == 50)
+
   }
 
 }
