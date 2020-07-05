@@ -578,8 +578,6 @@ object EvaluationFunction {
         sequences = splitBoardWithHorizontalCordon(cordon)
       else
         sequences = splitBoardWithVerticalCordon(cordon)
-      println(controlEmptyPortion(sequences._1) )
-      println(controlEmptyPortion(sequences._2))
       if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)){
         cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade
       }
