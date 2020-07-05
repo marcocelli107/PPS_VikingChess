@@ -394,9 +394,9 @@ object EvaluationFunction {
     kingAdjacentCells.values.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * ScoreProvider.BlackNearKing
   }
 
+  //TODO expand method for all diagonal cells
   def scoreBlackOnKingDiagonal(): Int = {
     var score = 0
-    kingCoord = MoveGenerator.findKing(board)
     findNearBlacks(kingCoord).filter(c => (c.x != kingCoord.x) && (c.y != kingCoord.y)).foreach(c => board.getCell(c).getPiece match {
       case Piece.BlackPawn => score += 25
       case _ =>
