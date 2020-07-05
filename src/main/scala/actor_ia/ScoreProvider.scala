@@ -40,6 +40,8 @@ object ScoreProvider {
 
    def CordonPawn: Int = 5
 
+   def WhiteInCordon: Int = 10
+
    def RightCordon: Int = 30
 
    def WrongCordon: Int = 30
