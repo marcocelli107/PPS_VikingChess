@@ -404,8 +404,7 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackPawnsInCordon: Int = 13
     EvaluationFunction.usefulValues(snapshot)
-    println(snapshot.getBoard.consoleRepresentation)
-
+    println(snapshot.getBoard.diagonalCells(Coordinate(4,8)))
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - 10)
   }
 

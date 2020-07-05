@@ -100,6 +100,7 @@ object MoveGenerator {
       adjacentCells.values.filter(_.nonEmpty).map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
         cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4
 
+
     def kingCapturedTwoSides(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean =
       (adjacentCells(OrthogonalDirection.Right).nonEmpty &&
         adjacentCells(OrthogonalDirection.Left).nonEmpty &&
