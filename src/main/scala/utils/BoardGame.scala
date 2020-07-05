@@ -1,6 +1,7 @@
 package utils
 
 import model.Piece
+import utils.BoardGame.DiagonalDirection.DiagonalDirection
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 
 import scala.collection.immutable.HashMap
@@ -83,6 +84,11 @@ object BoardGame {
     val Up, Right, Down, Left = Value
   }
 
+  object DiagonalDirection extends Enumeration {
+    type DiagonalDirection = Value
+    val UpRight, DownRight, DownLeft, UpLeft = Value
+  }
+
   trait Board {
     /**
      * Defines board's cells list.
@@ -104,6 +110,8 @@ object BoardGame {
     def toString: String
 
     def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]]
+
+    def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]]
 
     def specialCoordinates: List[Coordinate]
 
@@ -142,6 +150,12 @@ object BoardGame {
           OrthogonalDirection.Down -> downCells(coordinate),
           OrthogonalDirection.Left -> leftCells(coordinate))
 
+      override def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]] =
+        HashMap(DiagonalDirection.UpRight -> upRightDiagonal(coordinate),
+          DiagonalDirection.UpLeft -> upLeftDiagonal(coordinate),
+          DiagonalDirection.DownRight -> downRightDiagonal(coordinate),
+          DiagonalDirection.DownLeft -> downLeftDiagonal(coordinate))
+
       private def upCells(coordinate: Coordinate): List[BoardCell] =
         (coordinate.x - 1 to 1 by -1).toList.map(Coordinate(_, coordinate.y)).map(getCell)
 
@@ -153,6 +167,21 @@ object BoardGame {
 
       private def leftCells(coordinate: Coordinate): List[BoardCell] =
         (coordinate.y - 1 to 1 by - 1).toList.map(Coordinate(coordinate.x, _)).map(getCell)
+
+      private def upRightDiagonal(coordinate: Coordinate): List[BoardCell]=
+        (coordinate.x - 1 to 1 by -1).toList.map(x => Coordinate(x, coordinate.x + coordinate.y - x )).filter(isInBoard).map(getCell)
+
+      private def upLeftDiagonal(coordinate: Coordinate):List[BoardCell]=
+        (coordinate.x - 1 to 1 by -1).toList.map(x => Coordinate(x, coordinate.y - coordinate.x + x)).filter(isInBoard).map(getCell)
+
+      private def downRightDiagonal(coordinate: Coordinate):List[BoardCell]=
+        (coordinate.x + 1 to size ).toList.map(x => Coordinate(x, coordinate.y + x - coordinate.x)).filter(isInBoard).map(getCell)
+
+      private def downLeftDiagonal(coordinate: Coordinate):List[BoardCell]=
+        (coordinate.x + 1 to size ).toList.map(x => Coordinate(x, coordinate.x - x +  coordinate.y   )).filter(isInBoard).map(getCell)
+
+      private def isInBoard(coordinate: Coordinate):Boolean =
+        coordinate.x >= 1 && coordinate.x <= size & coordinate.y >= 1 && coordinate.y <= size
 
       override def specialCoordinates: List[Coordinate] =
         cornerCoordinates :+ centerCoordinates

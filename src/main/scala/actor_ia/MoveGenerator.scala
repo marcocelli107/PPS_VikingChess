@@ -103,6 +103,7 @@ object MoveGenerator {
       adjacentCells.values.filter(_.nonEmpty).map(_.head).map(_.getCoordinate).exists(_.equals(move.to))
     }
 
+
     def kingCapturedTwoSides(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean =
       (adjacentCells(OrthogonalDirection.Right).nonEmpty &&
         adjacentCells(OrthogonalDirection.Left).nonEmpty &&
