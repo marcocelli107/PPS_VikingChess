@@ -124,15 +124,13 @@ object EvaluationFunction {
     case OrthogonalDirection.Left => OrthogonalDirection.Right
   }
 
-  def scoreKingOnThrone(/*gameSnapshot: GameSnapshot*/): Int = {
+  def scoreKingOnThrone(): Int = {
     if (kingCoord.equals(board.centerCoordinates)) ScoreProvider.KingOnThroneScore
     else if (quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord)) == 0) ScoreProvider.KingDistanceToCornerDividend
     else ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord))
   }
 
-  def scoreTower(/*gameSnapshot: GameSnapshot*/): Int = {
-    //val board = gameSnapshot.getBoard
-
+  def scoreTower(): Int = {
     def isSquare(list: List[BoardCell]): Boolean = {
       list.count(cell => cell.getPiece.equals(Piece.WhitePawn) || cell.getPiece.equals(Piece.WhiteKing)) == 3
     }
@@ -156,16 +154,16 @@ object EvaluationFunction {
   def computeWhiteBetterPositions(gameSnapshot: GameSnapshot): Int = {
 
     println("***********")
-    println("White King In Throne: " + scoreKingOnThrone(/*gameSnapshot*/))
-    println("White Tower: " + scoreTower(/*gameSnapshot*/))
+    println("White King In Throne: " + scoreKingOnThrone())
+    println("White Tower: " + scoreTower())
     println("King in Free Row or Column: " + scoreKingIsInFreeRowOrColumn())
     println("White Captured Black: " + scoreCapturedBlack(gameSnapshot))
     println("***********")
 
-    scoreKingOnThrone(/*gameSnapshot*/) +
-      scoreTower(/*gameSnapshot*/) +
-      scoreKingIsInFreeRowOrColumn() +
-      scoreCapturedBlack(gameSnapshot)
+    scoreKingOnThrone() +
+    scoreTower() +
+    scoreKingIsInFreeRowOrColumn() +
+    scoreCapturedBlack(gameSnapshot)
   }
 
   def computeBlackBetterPositions(gameSnapshot: GameSnapshot): Int = {
@@ -177,10 +175,8 @@ object EvaluationFunction {
     println("***********")
 
     scoreBlackSurroundTheKing() +
-      scoreCapturedWhite(gameSnapshot) +
-      //TODO review Cordon-Barricade Functionality and Score
-      +scoreBlackCordon()
-
+    scoreCapturedWhite(gameSnapshot) +
+    scoreBlackCordon()
   }
 
   /**
