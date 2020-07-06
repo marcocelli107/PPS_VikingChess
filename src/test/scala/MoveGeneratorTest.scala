@@ -1,24 +1,24 @@
 import actor_ia.MoveGenerator
 import model.GameSnapshot.GameSnapshotImpl
-import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, Player, TheoryGame}
+import model.Player.Player
+import model.{GameVariant, ParserProlog, ParserPrologImpl, Piece, Player}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
 import utils.{BoardGame, Coordinate, Move}
 
 class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
-  val THEORY: String = TheoryGame.GameRules.toString
-  val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
+  val parserProlog: ParserProlog = ParserPrologImpl()
 
   var variantBrandubh: GameVariant.Val = GameVariant.Brandubh
   var variantHnefatafl: GameVariant.Val = GameVariant.Hnefatafl
   var variantTablut:GameVariant.Val = GameVariant.Tablut
   var variantTawlbwrdd:GameVariant.Val = GameVariant.Tawlbwrdd
 
-  var gameBrandubh: (Player.Val, Player.Val, BoardGame.Board, Int) = _
-  var gameHnefatafl: (Player.Val, Player.Val, BoardGame.Board, Int) = _
-  var gameTablut: (Player.Val, Player.Val, BoardGame.Board, Int) = _
-  var gameTawlbwrdd: (Player.Val, Player.Val, BoardGame.Board, Int) = _
+  var gameBrandubh: (Player, Player, BoardGame.Board, Int) = _
+  var gameHnefatafl: (Player, Player, BoardGame.Board, Int) = _
+  var gameTablut: (Player, Player, BoardGame.Board, Int) = _
+  var gameTawlbwrdd: (Player, Player, BoardGame.Board, Int) = _
 
   var snapBrandubh: GameSnapshotImpl = _
   var snapHnefatafl: GameSnapshotImpl = _

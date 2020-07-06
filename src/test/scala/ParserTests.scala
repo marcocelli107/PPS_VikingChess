@@ -1,5 +1,5 @@
 
-import model.{GameVariant, ParserProlog, ParserPrologImpl, Player, TheoryGame}
+import model.{GameVariant, ParserProlog, ParserPrologImpl, Player}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
 import utils.{Coordinate, Move}
@@ -13,7 +13,7 @@ import scala.collection.mutable.ListBuffer
 
 class ParserTests extends FunSuite with MockFactory with Matchers {
 
-  val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
+  val parser: ParserProlog = ParserPrologImpl()
 
   test("Tests of a correct horizontal capture of white pawn.") {
     inSequence {

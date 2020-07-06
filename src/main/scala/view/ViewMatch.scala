@@ -3,6 +3,8 @@ package view
 import java.awt.{Dimension, GridBagConstraints}
 
 import javax.swing._
+import model.Piece.Piece
+import model.Player.Player
 import model._
 import utils.BoardGame.{Board, BoardCell}
 import utils.{Coordinate, Move}
@@ -195,7 +197,7 @@ object ViewMatch {
       * @param winner
       *                 winner of the game.
       */
-    private def setStatusGame(winner: Player.Val, playerToMove: Player.Val): Unit = winner match {
+    private def setStatusGame(winner: Player, playerToMove: Player): Unit = winner match {
       case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
         playerOrWinnerLabel.setText("White has Won!")
@@ -227,8 +229,8 @@ object ViewMatch {
     /**
       * Switches the player label showed.
       */
-    private def switchPlayerLabel(playerToMove: Player.Val): Unit = {
-      playerOrWinnerLabel.setText(playerToMove + " moves")
+    private def switchPlayerLabel(playerToMove: Player): Unit = {
+      playerOrWinnerLabel.setText(playerToMove.extendedString + " moves")
       if(playerToMove.equals(Player.White)) {
         playerBlackLabel.setVisible(false)
         playerWhiteLabel.setVisible(true)
@@ -420,7 +422,7 @@ object ViewMatch {
       * @param length
       *                 number of captured pieces.
       */
-    private def drawLostPawns(player: Player.Val, length: Int): Unit = {
+    private def drawLostPawns(player: Player, length: Int): Unit = {
       val panel: JPanel = if (Player.Black eq player) leftPanel else rightPanel
       panel.removeAll()
       for (_ <- 0 until length) {
@@ -434,7 +436,7 @@ object ViewMatch {
       *
       * @return label
       */
-    private def createLostPawn(player: Player.Val): JLabel = player match {
+    private def createLostPawn(player: Player): JLabel = player match {
       case Player.Black => GameFactory.createLostBlackPawn
       case _ => GameFactory.createLostWhitePawn
     }
@@ -495,7 +497,7 @@ object ViewMatch {
       *             cell to be set.
       */
     private def pawnChoice(cell: BoardCell): Unit = {
-      val piece: Piece.Val = cell.getPiece
+      val piece: Piece = cell.getPiece
       val button: JButton = cells(cell.getCoordinate)
       piece match {
         case Piece.WhitePawn => button.add(GameFactory.createWhitePawn)

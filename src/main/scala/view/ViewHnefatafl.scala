@@ -204,6 +204,7 @@ object ViewHnefatafl {
 
     override def getMenuUtils: Menu = viewMainMenu
 
+    // TODO smells
     override def initOrRestoreGUI(playerChosen: Player.Value): Unit = {
       if (gamePanel.getComponents.length > 0) {
         viewMatch.restoreGame()
@@ -214,7 +215,7 @@ object ViewHnefatafl {
       initGamePanel(newGame._1)
       overlayPanel.add(gamePanel)
       showGame()
-      viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
+      viewMatch.getLabelPlayer.setText(newGame._2.extendedString + " moves.")
 
       controller.startGame()
     }

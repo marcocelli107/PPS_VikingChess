@@ -1,13 +1,6 @@
 package model
 
 /**
-  * Defines game's rules path.
-  */
-object TheoryGame extends Enumeration {
-  val GameRules: TheoryGame.Value = Value("src/main/scala/model/gameRules.pl")
-}
-
-/**
   * Defines Enumeration for the game mode.
   */
 object GameMode extends Enumeration {
@@ -19,11 +12,22 @@ object GameMode extends Enumeration {
   * Defines Enumeration for the player type.
   */
 object Player extends Enumeration {
-  case class Val(playerString: String) extends super.Val
-  val White: Val = Val("w")
-  val Black: Val = Val("b")
-  val None: Val = Val("n")
-  val Draw: Val = Val("d")
+  type Player = Value
+  val White: Value = Value("w")
+  val Black: Value = Value("b")
+  val None: Value = Value("n")
+  val Draw: Value = Value("d")
+
+  class ExtendedStringPlayer(player: Player) {
+    def extendedString: String = player match {
+      case Player.White => "White"
+      case Player.Black => "Black"
+      case Player.None => "None"
+      case _ => "Draw"
+    }
+  }
+
+  implicit def getExtendedString(player: Player): ExtendedStringPlayer = new ExtendedStringPlayer(player)
 }
 
 /**
@@ -52,11 +56,11 @@ object GameVariant extends Enumeration {
   * Defines Enumeration for the piece in each cell.
   */
 object Piece extends Enumeration {
-  case class Val(pieceString: String) extends super.Val
-  val WhitePawn: Val = Val("w")
-  val BlackPawn: Val = Val("b")
-  val WhiteKing : Val= Val("k")
-  val Empty: Val = Val("e")
+  type Piece = Value
+  val WhitePawn: Value = Value("w")
+  val BlackPawn: Value = Value("b")
+  val WhiteKing: Value = Value("k")
+  val Empty: Value = Value("e")
 }
 
 /**
@@ -74,3 +78,4 @@ object MaxMin extends Enumeration {
   type MaxMin = Value
   val Max, min = Value
 }
+

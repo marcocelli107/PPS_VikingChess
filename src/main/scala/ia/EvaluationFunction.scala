@@ -1,6 +1,7 @@
 package ia
 
 import actor_ia.{MoveGenerator, ScoreProvider}
+import model.Piece.Piece
 import model._
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
@@ -339,7 +340,7 @@ object EvaluationFunction {
       Piece.Empty
   }
 
-  private def samePlayerPawns(l: Seq[BoardCell], p: Piece.Val): Boolean =
+  private def samePlayerPawns(l: Seq[BoardCell], p: Piece): Boolean =
     l.nonEmpty && l.size.equals(l.count(_.getPiece.equals(p)))
 /*
   def findQuadrant(coord: Coordinate, oppositQuadrant: Boolean = false): Seq[Seq[BoardCell]] = {
@@ -435,8 +436,7 @@ object EvaluationFunction {
 }
 
 object blabla extends App{
-  val THEORY: String = TheoryGame.GameRules.toString
-  val game: ParserProlog = ParserPrologImpl(THEORY)
+  val game: ParserProlog = ParserPrologImpl()
   val initGame = game.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 

@@ -1,5 +1,6 @@
 import actor_ia.MoveGenerator
 import ia.EvaluationFunction
+import model.Player.Player
 import model._
 import org.scalatest.FunSuite
 import utils.BoardGame.Board
@@ -7,10 +8,9 @@ import utils.{Coordinate, Move}
 
 class EvaluationFunctionTest extends FunSuite {
 
-  val THEORY: String = TheoryGame.GameRules.toString
-  val prolog: ParserProlog = ParserPrologImpl(THEORY)
+  val prolog: ParserProlog = ParserPrologImpl()
   var snapshot: GameSnapshot = _
-  var game: (Player.Val, Player.Val, Board, Int) = _
+  var game: (Player, Player, Board, Int) = _
 
   test("Tests Score King Near Corner - Brandubh."){
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)

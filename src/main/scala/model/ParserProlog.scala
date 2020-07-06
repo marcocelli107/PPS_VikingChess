@@ -3,58 +3,59 @@ package model
 import java.io.FileInputStream
 
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
+import model.Player.Player
 import utils.BoardGame.Board.BoardImpl
 import utils.BoardGame.{Board, BoardCell}
 import utils.{Coordinate, Move}
 
-import scala.collection.mutable.ListBuffer
-
 trait ParserProlog {
 
   /**
-    * Creates a new Game.
-    *
-    * @return game as (PlayerToMove, Winner, Board, PiecesCapturedInTurn).
-    */
-  def createGame(newVariant: String): (Player.Val, Player.Val, Board, Int)
+   * Creates a new Game.
+   *
+   * @return game as (PlayerToMove, Winner, Board, PiecesCapturedInTurn).
+   */
+  def createGame(newVariant: String): (Player, Player, Board, Int)
 
   /**
-    * Gives possible moves from the selected cell.
-    * @param cell
-    *                 coordinate of the Cell.
-    * @return list buffer of coordinates.
-    */
-  def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
+   * Gives possible moves from the selected cell.
+   *
+   * @param cell
+   * coordinate of the Cell.
+   * @return seq of coordinates.
+   */
+  def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
   /**
-    * Sets player move if it's legit.
-    * @param move
-   *                   move to make
-    * @return new board.
-    */
-  def makeLegitMove(move: Move): (Player.Val, Player.Val, Board, Int)
-
+   * Sets player move if it's legit.
+   *
+   * @param move
+   * move to make
+   * @return new board.
+   */
+  def makeLegitMove(move: Move): (Player, Player, Board, Int)
+/* TODO NON LA USIAMO PIU?
   /**
    * Undoes the last move.
+   *
    * @param move
-   *                  move to undo
+   * move to undo
    * @return new board.
    */
   def makeNonLegitMove(move: Move): (Player.Val, Player.Val, Board, Int)
-
+*/
   /**
-    * Finds king on game board.
-    *
-    * @return king's coordinate.
-    */
+   * Finds king on game board.
+   *
+   * @return king's coordinate.
+   */
   def findKing(): Coordinate
 
   /**
    * Checks if the cell at the specified coordinate is the central cell.
    *
    * @param coordinate
-   *                   coordinate of the cell to inspect
-   *
+   * coordinate of the cell to inspect
    * @return boolean.
    */
   def isCentralCell(coordinate: Coordinate): Boolean
@@ -63,20 +64,18 @@ trait ParserProlog {
    * Checks if the cell at the specified coordinate is a corner cell.
    *
    * @param coordinate
-   *                   coordinate of the cell to inspect
-   *
+   * coordinate of the cell to inspect
    * @return boolean.
    */
   def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
-    * Checks if the cell at the specified coordinate is a init pawn cell.
-    *
-    * @param coordinate
-    *                   coordinate of the cell to inspect
-    *
-    * @return boolean.
-    */
+   * Checks if the cell at the specified coordinate is a init pawn cell.
+   *
+   * @param coordinate
+   * coordinate of the cell to inspect
+   * @return boolean.
+   */
   def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
@@ -84,70 +83,62 @@ trait ParserProlog {
    *
    * @return parser representing the game state.
    */
-
   def copy(): ParserProlog
 
   /**
    * Get the Board
    *
-   * @return the actual board state.
+   * @return the current board state.
    */
-  def getActualBoard: Board
-
-
-  /**
-    * Player turn to move
-    *
-    * @return Player.Value.
-    */
-  def getPlayer: Player.Val
-
+  def getCurrentBoard: Board
 
   /**
-    * Checks if game state has a winner.
-    *
-    * @return Option[Player.Val].
-    */
-
-  def hasWinner: Option[Player.Val]
+   * Player turn to move
+   *
+   * @return Player.Value.
+   */
+  def getPlayer: Player
 
   /**
-    * Undo some player move.
-    *
-    * @param oldBoard
-    *                 Board before changes
-    *
-    * @return Unit.
-    */
+   * Undo some player move.
+   *
+   * @param oldBoard
+   * Board before changes
+   * @return Unit.
+   */
   def undoMove(oldBoard: Board): Unit
-
+/* TODO NON LO USIAMO PIU?
   /**
-    * Takes all the possible moves of a player from a game state
-    *
-    * @return List of coordinates tuples
-    */
+   * Takes all the possible moves of a player from a game state
+   *
+   * @return List of coordinates tuples
+   */
   def gamePossibleMoves(): List[(Coordinate, Coordinate)]
-
+*/
 }
 
 object ParserPrologImpl {
 
-  def apply(theory: String): ParserProlog = new ParserPrologImpl(theory)
+  val THEORY: String = "src/main/scala/model/gameRules.pl"
 
-  def apply(theory: String,_playerToWin: Term ,_playerToMove: Term , _board: Term, _variant: Term): ParserPrologImpl = {
-    val ppi=new ParserPrologImpl(theory)
-    ppi.winner= _playerToWin
-    ppi.playerToMove= _playerToMove
-    ppi.board= _board
-    ppi.variant= _variant
+  def apply(): ParserProlog = new ParserPrologImpl()
+
+  // TODO eliminare se non serve più copy
+  def apply(_playerToWin: Term, _playerToMove: Term, _board: Term, _variant: Term): ParserPrologImpl = {
+    val ppi = new ParserPrologImpl()
+    ppi.winner = _playerToWin
+    ppi.playerToMove = _playerToMove
+    ppi.board = _board
+    ppi.variant = _variant
     ppi
   }
 
 }
 
-case class ParserPrologImpl(theory: String) extends ParserProlog {
+case class ParserPrologImpl() extends ParserProlog {
 
-  private var goalString: String = ""
+  import ImplicitParser._
+  import Predicate.Predicate
 
   private val engine = new Prolog()
   private var goal: SolveInfo = _
@@ -157,100 +148,98 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
   private var board: Term = new Struct()
   private var variant: Term = new Struct()
 
-  def getPlayerToWin:Term = winner
-
-  def getPlayerToMove:Term =  playerToMove
-
-  def getBoard: Term = board
-
-  def getVariant: Term = variant
-
-  engine.setTheory(new Theory(new FileInputStream(theory)))
-
-  override def getActualBoard: Board = {
-    goalString = replaceBoardString(board)
-    parseBoard(goalString)
+  object Predicate extends Enumeration {
+    type Predicate = Value
+    val NewGame: Value = Value("newGame")
+    val GetCoordPossibleMoves: Value = Value("getCoordPossibleMoves")
+    val MakeLegitMove: Value = Value("makeLegitMove")
+    val MakeMove: Value = Value("makeMove")
+    val FindKing: Value = Value("findKing")
+    val BoardSize: Value = Value("boardSize")
+    val CornerCellCoord: Value = Value("cornerCellCoord")
+    val CentralCellCoord: Value = Value("centralCellCoord")
+    val IsInitialPawnCoord: Value = Value("isInitialPawnCoord")
+    val GamePossibleMoves: Value = Value("gamePossibleMoves")
+    val UndoMove: Value = Value("undoMove")
   }
 
-  override def getPlayer: Player.Val = {
-    setPlayer(playerToMove.toString)
-  }
+  engine.setTheory(new Theory(new FileInputStream(ParserPrologImpl.THEORY)))
 
-  override def hasWinner: Option[Player.Val] = setPlayer( winner.toString) match {
-    case Player.Black => Option( Player.Black)
-    case Player.White => Option( Player.White)
-    case _ => Option.empty
-  }
+  override def getCurrentBoard: Board = board.parseBoard(getBoardSize)
 
-  override def createGame(newVariant: String): (Player.Val, Player.Val, Board, Int) = {
-    goal = engine.solve(s"newGame($newVariant,(V,P,W,B)).")
+  override def getPlayer: Player = Player.withName(playerToMove.toString)
 
+  override def createGame(newVariant: String): (Player, Player, Board, Int) = {
+    goal = engine.solve(s"${Predicate.NewGame}($newVariant,(V,P,W,B)).")
     setGameTerms(goal)
-
-    goalString = replaceBoardString(board)
-
-    (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString), parseBoard(goalString), 0)
+    (Player.withName(goal.getTerm("P").toString), Player.withName(goal.getTerm("W").toString),
+      board.parseBoard(getBoardSize), 0)
   }
 
-  override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
-
-    goal = engine.solve(s"getCoordPossibleMoves(($variant,$playerToMove,$winner,$board), p(${cell.x}, ${cell.y}), L).")
-
+  override def showPossibleCells(cell: Coordinate): Seq[Coordinate] = {
+    goal = engine.solve(s"${Predicate.GetCoordPossibleMoves}(($variant,$playerToMove,$winner,$board), ${cell.toString}, L).")
     list = goal.getTerm("L")
-
-    goalString = replaceListCellsString(list)
-
-    setListCellsView(goalString)
+    list.parseMoveList
   }
 
-  override def makeLegitMove(move: Move): (Player.Val, Player.Val, Board, Int) =
-    this.synchronized {
-      setMove(move, "makeLegitMove")
-    }
+  override def makeLegitMove(move: Move): (Player, Player, Board, Int) = setMove(move, Predicate.MakeLegitMove)
 
-  override def makeNonLegitMove(move: Move): (Player.Val, Player.Val, Board, Int) =
+  // TODO NON LA USIAMO PIU'?
+  /* override def makeNonLegitMove(move: Move): (Player, Player, Board, Int) =
     setMove(move, "makeMove")
+    */
 
-  private def setMove(move: Move, predicate: String): (Player.Val, Player.Val, Board, Int) = {
+  // TODO INGLOBARE IN MakeLegitMove SE NON USIAMO PIU MakeNonLegit
+  private def setMove(move: Move, predicate: Predicate): (Player, Player, Board, Int) = {
     goal = engine.solve(s"$predicate(($variant, $playerToMove, $winner, $board)," +
       s"${move.from.toString}," +
       s"${move.to.toString}, L, (V,P,W,B)).")
 
     setGameTerms(goal)
 
-    goalString = replaceBoardString(board)
-
-    (setPlayer(goal.getTerm("P").toString), setPlayer(goal.getTerm("W").toString),
-      parseBoard(goalString),
+    (Player.withName(goal.getTerm("P").toString), Player.withName(goal.getTerm("W").toString),
+      board.parseBoard(getBoardSize),
       goal.getTerm("L").toString.toInt)
   }
 
-  override def findKing(): Coordinate = {
-    goal = engine.solve(s"findKing($board, Coord).")
-    list = goal.getTerm("Coord")
+  override def findKing(): Coordinate =
+    engine.solve(s"${Predicate.FindKing}($board, Coord).").getTerm("Coord").parseMoveList.head
+
+  override def isCentralCell(coordinate: Coordinate): Boolean =
+    engine.solve(s"${Predicate.BoardSize}($variant,S), ${Predicate.CentralCellCoord}(S, ${coordinate.toString}).").isSuccess
+
+  override def isCornerCell(coordinate: Coordinate): Boolean =
+    engine.solve(s"${Predicate.BoardSize}($variant,S), ${Predicate.CornerCellCoord}(S, ${coordinate.toString}).").isSuccess
+
+  override def isPawnCell(coordinate: Coordinate): Boolean =
+    engine.solve(s"${Predicate.IsInitialPawnCoord}($variant, ${coordinate.toString}).").isSuccess
+
+  // TODO SERVE ANCORA?
+  override def copy(): ParserProlog = ParserPrologImpl(winner, playerToMove, board, variant)
+
+  override def equals(that: Any): Boolean = that match {
+    case that: ParserPrologImpl =>
+      that.isInstanceOf[ParserPrologImpl] &&
+        that.variant.isEqualObject(this.variant) &&
+        that.playerToMove.isEqualObject(this.playerToMove) &&
+        that.winner.isEqualObject(this.winner) &&
+        that.board.isEqualObject(this.board)
+    case _ => false
+  }
+
+  override def undoMove(oldBoard: Board): Unit =
+    setGameTerms(engine.solve(s"${Predicate.UndoMove}(($variant,$playerToMove,$winner,$board), $oldBoard, (V, P, W, B))."))
+
+  /* TODO NON LO USIAMO PIU?
+  def gamePossibleMoves(): List[(Coordinate, Coordinate)] = {
+    goal = engine.solve(s"gamePossibleMoves(($variant,$playerToMove,$winner,$board), L).")
+
+    list = goal.getTerm("L")
 
     goalString = replaceListCellsString(list)
 
-    setListCellsView(goalString).head
-  }
-
-  override def isCentralCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), centralCellCoord(S, ${coordinate.toString}).")
-
-    goal.isSuccess
-  }
-
-  override def isCornerCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"boardSize($variant,S), cornerCellCoord(S, ${coordinate.toString}).")
-
-    goal.isSuccess
-  }
-
-  override def isPawnCell(coordinate: Coordinate): Boolean = {
-    goal = engine.solve(s"isInitialPawnCoord($variant, ${coordinate.toString}).")
-
-    goal.isSuccess
-  }
+    setListCellsView(goalString).grouped(2).toList.map(listBuffer => (listBuffer.head, listBuffer(1)))
+  }*/
 
   /**
    * Sets game's terms returned from prolog.
@@ -262,128 +251,45 @@ case class ParserPrologImpl(theory: String) extends ParserProlog {
     board = goal.getTerm("B")
   }
 
-  /**
-   * Cleans the board returned in output.
-   *
-   * @param board
-   *              board identification term.
-   *
-   * @return board to string.
-   */
-  private def replaceBoardString(board: Term): String = board.toString.replace("[", "").replace("]", "")
-    .replace("(", "").replace(")", "").replace(Coordinate.COORD_STRING, "")
+  private def getBoardSize: Int = engine.solve(s"${Predicate.BoardSize}($variant,S).").getTerm("S").toString.toInt
 
-  /**
-   * Cleans the pieces captured list returned in output.
-   *
-   * @param list
-   *              list identification term.
-   *
-   * @return list to string.
-   */
-  private def replaceListCellsString(list: Term): String = list.toString.replace("','", "").replace("[", "").replace("]", "")
-    .replace("),", "").replace("(", "").replace(")", "")
+  object ImplicitParser {
 
-  /**
-   * Parses the board: from prolog to scala style.
-   *
-   * @param stringBoard
-   *              board identification string.
-   */
-  private def parseBoard(stringBoard: String): Board = {
+    private val prologListUselessChars: List[String] = List("','", "[", "]", "),", "(", ")")
+    private val prologBoardUselessChars: List[String] = List("[", "]", "(", ")")
 
-    var listCells: ListBuffer[BoardCell] = ListBuffer.empty[BoardCell]
+    implicit class StringUtils(base: String) {
+      implicit def clearChars(chars: List[String]): String = base.filter(e => !chars.contains(e.toString))
+      implicit def dropRightComma: String = if (base.last.equals(',')) base.dropRight(1) else base
+    }
 
-    stringBoard.split(BoardCell.CELL_STRING).tail.foreach(elem => {
-      var coordinateCell: Array[String] = null
-      if (elem.contains(Piece.Empty.pieceString)) {
-        coordinateCell = elem.substring(0, elem.length - Piece.Empty.pieceString.length - 1).split(",")
-        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.Empty)
-      } else if (elem.contains(Piece.BlackPawn.pieceString)) {
-        coordinateCell = elem.substring(0, elem.length - Piece.BlackPawn.pieceString.length - 1).split(",")
-        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.BlackPawn)
-      } else if (elem.contains(Piece.WhitePawn.pieceString)) {
-        coordinateCell = elem.substring(0, elem.length - Piece.WhitePawn.pieceString.length - 1).split(",")
-        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhitePawn)
-      } else {
-        coordinateCell = elem.substring(0, elem.length - Piece.WhiteKing.pieceString.length - 1).split(",")
-        listCells += BoardCell(Coordinate(coordinateCell(0).toInt, coordinateCell(1).toInt), Piece.WhiteKing)
+    implicit class BoardParser(base: Term) {
+      implicit def parseBoard(size: Int): Board =
+        BoardImpl(base.toString.clearChars(prologBoardUselessChars)
+          .split(BoardCell.CELL_STRING).tail.map(_.parseCell).grouped(size).toSeq.map(_.toSeq))
+    }
+
+    implicit class CellParser(base: String) {
+      implicit def parseCell: BoardCell = {
+        val cell = base.dropRightComma
+        BoardCell(cell.parseCoordinate, Piece.withName(cell.last.toString))
       }
-    })
+    }
 
-    BoardImpl(listCells.grouped(getBoardSize).toSeq.map(_.toSeq))
-  }
+    private def arrayToCoordinate(a: Array[String]): Coordinate = Coordinate(a(0).toInt, a(1).toInt)
 
-  private def getBoardSize: Int = {
-    val goal: SolveInfo = engine.solve(s"boardSize($variant,S).")
-    goal.getTerm("S").toString.toInt
-  }
+    implicit class CoordinateParser(base: String) {
+      implicit def parseCoordinate: Coordinate = {
+        val coordinate = base.replace(Coordinate.COORD_STRING, "").substring(0, base.length - 1).split(",")
+        arrayToCoordinate(coordinate)
+      }
+    }
 
-  /**
-   * Parses the pieces captured list: from prolog to scala style.
-   *
-   * @param stringList
-   *              list identification string.
-   *
-   * @return parsed list.
-   */
-  private def setListCellsView(stringList: String): ListBuffer[Coordinate] = {
-    var listPossibleCoordinates: ListBuffer[Coordinate] = ListBuffer.empty[Coordinate]
-
-    goalString.split(Coordinate.COORD_STRING).tail.foreach(elem => {
-      var coordinateCells: Array[String] = null
-      coordinateCells = elem.split(",")
-      listPossibleCoordinates += Coordinate(coordinateCells(0).toInt, coordinateCells(1).toInt)
-    })
-    listPossibleCoordinates
-  }
-
-
-  /**
-   * Parses the string player in a enum.
-   *
-   * @param stringPlayer
-   *              player identification string.
-   *
-   * @return parsed player.
-   */
-  private def setPlayer(stringPlayer: String): Player.Val = stringPlayer match {
-    case Player.White.playerString => Player.White
-    case Player.Black.playerString => Player.Black
-    case Player.Draw.playerString => Player.Draw
-    case _ => Player.None
-  }
-
-
-  override def copy(): ParserProlog = ParserPrologImpl(theory, winner, playerToMove, board, variant)
-
-
-  override def equals(that: Any): Boolean = that match {
-    case that: ParserPrologImpl =>
-      that.isInstanceOf[ParserPrologImpl] &&
-        that.variant.isEqualObject(this.variant) &&
-        that.playerToMove.isEqualObject(this.playerToMove) &&
-        that.winner.isEqualObject(this.winner) &&
-        that.board.isEqualObject(this.board)
-    case _ => false
-
-  }
-
-
-  override def undoMove(oldBoard: Board): Unit = {
-    goal = engine.solve(s"undoMove(($variant,$playerToMove,$winner,$board), $oldBoard, (V, P, W, B)).")
-    setGameTerms(goal)
-  }
-
-
-  override def gamePossibleMoves(): List[(Coordinate, Coordinate)] = {
-    goal = engine.solve(s"gamePossibleMoves(($variant,$playerToMove,$winner,$board), L).")
-
-    list = goal.getTerm("L")
-
-    goalString = replaceListCellsString(list)
-
-    setListCellsView(goalString).grouped(2).toList.map(listBuffer => (listBuffer.head, listBuffer(1)))
+    implicit class MovesParser(base: Term) {
+      implicit def parseMoveList: Seq[Coordinate] =
+        base.toString.clearChars(prologListUselessChars).split(Coordinate.COORD_STRING).tail
+          .map(e => arrayToCoordinate(e.split(",")))
+    }
   }
 
 }

@@ -2,6 +2,7 @@ package actor_ia
 
 import akka.actor.{Actor, ActorRef, Props}
 import ia.EvaluationFunction
+import model.Player.Player
 import model._
 import utils.Move
 
@@ -74,7 +75,7 @@ abstract class MiniMaxActor() extends Actor {
       self ! GenerateChildrenMsg()
     }
 
-  def isTerminalNode(gameStatus: Player.Val, depth: Int): Boolean = !gameStatus.equals(Player.None) || depth == 0
+  def isTerminalNode(gameStatus: Player, depth: Int): Boolean = !gameStatus.equals(Player.None) || depth == 0
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
     fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame))

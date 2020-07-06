@@ -20,7 +20,8 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 
   override def findBestMove(gameSnapshot: GameSnapshot):Move = {
 
-    def _findBestMove( bestCoord: Move , bestScore: Int ,gamePossibleMove: List[Move] ):Move = gamePossibleMove match {
+    @scala.annotation.tailrec
+    def _findBestMove(bestCoord: Move, bestScore: Int, gamePossibleMove: List[Move] ):Move = gamePossibleMove match {
       case Nil  => bestCoord
       case h::t =>
                 val sonGameSnapshot = MoveGenerator.makeMove(gameSnapshot.getCopy,h)
@@ -45,6 +46,7 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
     val gameMoves: List[Move] = MoveGenerator.gamePossibleMoves(sonGameSnapshot)
 
 
+    @scala.annotation.tailrec
     def _maximizationPhase(gameMoves: List[Move], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
       case Nil => tempVal
       case _  if beta <= alfa => tempVal
@@ -65,7 +67,8 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
     val gameMoves: List[Move] = MoveGenerator.gamePossibleMoves(sonGameSnapshot)
 
 
-    def _minimizationPhase( gameMoves: List[Move], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
+    @scala.annotation.tailrec
+    def _minimizationPhase(gameMoves: List[Move], tempVal: Int, depth: Int, alfa: Int, beta: Int): Int = gameMoves match {
       case Nil => tempVal
       case _  if beta <= alfa => tempVal
       case h::t =>
@@ -84,8 +87,7 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 
 }
 object TryMinMax extends App{
-  val THEORY: String = TheoryGame.GameRules.toString
-  val game: ParserProlog = ParserPrologImpl(THEORY)
+  val game: ParserProlog = ParserPrologImpl()
   val initGame = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
   val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 

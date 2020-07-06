@@ -1,5 +1,6 @@
 package model
 
+import model.Player.Player
 import utils.BoardGame.Board
 import utils.Move
 
@@ -7,9 +8,9 @@ trait GameSnapshot {
 
   def getVariant: GameVariant.Val
 
-  def getPlayerToMove: Player.Val
+  def getPlayerToMove: Player
 
-  def getWinner: Player.Val
+  def getWinner: Player
 
   def getBoard: Board
 
@@ -30,16 +31,16 @@ trait GameSnapshot {
 
 object GameSnapshot {
 
-  def apply(variant: GameVariant.Val, playerToMove: Player.Val, winner: Player.Val, board: Board, lastMove: Option[Move], numberCapturedBlacks: Int, numberCapturedWhites: Int): GameSnapshot =
+  def apply(variant: GameVariant.Val, playerToMove: Player, winner: Player, board: Board, lastMove: Option[Move], numberCapturedBlacks: Int, numberCapturedWhites: Int): GameSnapshot =
     GameSnapshotImpl(variant, playerToMove, winner, board, lastMove, numberCapturedBlacks, numberCapturedWhites)
 
-  case class GameSnapshotImpl(variant: GameVariant.Val, playerToMove: Player.Val, winner: Player.Val, board: Board, lastMove: Option[Move], numberCapturedBlacks: Int, numberCapturedWhites: Int) extends GameSnapshot {
+  case class GameSnapshotImpl(variant: GameVariant.Val, playerToMove: Player, winner: Player, board: Board, lastMove: Option[Move], numberCapturedBlacks: Int, numberCapturedWhites: Int) extends GameSnapshot {
 
     override def getVariant: GameVariant.Val = variant
 
-    override def getPlayerToMove: Player.Val = playerToMove
+    override def getPlayerToMove: Player = playerToMove
 
-    override def getWinner: Player.Val = winner
+    override def getWinner: Player = winner
 
     override def getBoard: Board = board
 

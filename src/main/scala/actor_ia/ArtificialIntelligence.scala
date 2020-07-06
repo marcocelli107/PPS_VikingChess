@@ -2,6 +2,7 @@ package actor_ia
 
 import actor_ia.RootActor.{MaxRootActor, MinRootActor}
 import akka.actor.{Actor, Props}
+import model.Player.Player
 import model._
 import utils.Move
 
@@ -32,6 +33,6 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int) extends
 
   }
 
-  private def iaIsBlack(iaPlayer: Player.Val): Boolean = iaPlayer.equals(Player.Black)
+  private def iaIsBlack(iaPlayer: Player): Boolean = iaPlayer.equals(Player.Black)
 
 }

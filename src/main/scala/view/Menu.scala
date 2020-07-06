@@ -4,6 +4,7 @@ import java.awt.{Dimension, GridBagConstraints}
 import java.awt.event.{ActionEvent, ActionListener}
 
 import javax.swing._
+import model.Player.Player
 import model.{GameMode, GameVariant, Level, Player}
 
 trait Menu {
@@ -13,7 +14,7 @@ trait Menu {
     *
     * @return player
     */
-  def getPlayer: Player.Val
+  def getPlayer: Player
 
   /**
     * Initializes the main menù.
@@ -94,11 +95,11 @@ object Menu {
     private var gameMode: GameMode.Value = _
     private var boardVariant: GameVariant.Val = _
     private var levelIA: Level.Val = _
-    private var player: Player.Val = _
+    private var player: Player = _
 
     private var limits: GridBagConstraints = _
 
-    override def getPlayer: Player.Val = player
+    override def getPlayer: Player = player
 
     override def initMenu: JPanel = {
       menuPanel = MenuFactory.createMenuPanel("Choose Mode: ")
