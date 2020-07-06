@@ -88,7 +88,7 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 }
 object TryMinMax extends App{
   val game: ParserProlog = ParserPrologImpl()
-  val initGame = game.createGame(GameVariant.Hnefatafl.nameVariant.toLowerCase)
+  val initGame = game.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
   val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 
 

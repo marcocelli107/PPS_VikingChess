@@ -4,6 +4,8 @@ import java.awt.{Dimension, GridBagConstraints}
 import java.awt.event.{ActionEvent, ActionListener}
 
 import javax.swing._
+import model.GameMode.GameMode
+import model.GameVariant.GameVariant
 import model.Player.Player
 import model.{GameMode, GameVariant, Level, Player}
 
@@ -49,14 +51,14 @@ trait Menu {
     *
     * @return variant
     */
-  def getBoardVariant: GameVariant.Val
+  def getBoardVariant: GameVariant
 
   /**
     * Gets the game mode chosen.
     *
     * @return game mode
     */
-  def getGameMode: GameMode.Value
+  def getGameMode: GameMode
 
   /**
     * Gets the level of difficult chosen.
@@ -85,15 +87,11 @@ object Menu {
                 panelVariantHnefatafl, panelVariantTawlbwrdd, panelVariantTablut, panelVariantBrandubh,
                 panelLevelNewcomer, panelLevelAmateur, panelLevelStandard, panelLevelAdvanced,
                 panelChoseWhite, panelChoseBlack: JPanel = _
-    private var pvpButton, pveButton, exitButtonMenu, hnefatafl, tawlbwrdd, tablut, brandubh,
-      newcomer, amateur, standard, advanced, whiteButton, blackButton, quitGame, returnToMenu,
+    private var pvpButton, pveButton, exitButtonMenu, quitGame, returnToMenu,
       returnToGame, restartGame: JButton = _
 
-    private var labelHnefatafl, labelTawlbwrdd, labelTablut, labelBrandubh, labelNewcomer, labelAmateur,
-                labelStandard, labelAdvanced, labelWhiteChose, labelBlackChose: JLabel = _
-
-    private var gameMode: GameMode.Value = _
-    private var boardVariant: GameVariant.Val = _
+    private var gameMode: GameMode = _
+    private var boardVariant: GameVariant = _
     private var levelIA: Level.Val = _
     private var player: Player = _
 
@@ -222,9 +220,9 @@ object Menu {
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(previousPanel, nextPanel))
     }
 
-    override def getBoardVariant: GameVariant.Val = boardVariant
+    override def getBoardVariant: GameVariant = boardVariant
 
-    override def getGameMode: GameMode.Value = gameMode
+    override def getGameMode: GameMode = gameMode
 
     override def getDifficulty: Level.Val = levelIA
 

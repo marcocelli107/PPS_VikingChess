@@ -1,5 +1,7 @@
 package controller
 
+import model.GameMode.GameMode
+import model.GameVariant.GameVariant
 import model._
 import view.ViewHnefatafl
 import utils.BoardGame.Board
@@ -12,7 +14,7 @@ trait ControllerHnefatafl {
     *
     * @return board and player to move.
     */
-  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value)
+  def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value)
 
   /**
     * Calls model to initialize IA in PVE mode.
@@ -137,7 +139,7 @@ object ControllerHnefatafl {
     private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value) = {
+    override def newGame(variant: GameVariant, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value) = {
       modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)
       modelGame.createGame()
     }

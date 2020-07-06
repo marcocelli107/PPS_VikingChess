@@ -432,12 +432,11 @@ object EvaluationFunction {
   def isSequenceFreeCells(seq: Seq[BoardCell]): Boolean =
     seq.count(boardCell => !boardCell.getPiece.equals(Piece.Empty)) == 0
 
-
 }
 
 object blabla extends App{
   val game: ParserProlog = ParserPrologImpl()
-  val initGame = game.createGame(GameVariant.Tawlbwrdd.nameVariant.toLowerCase)
+  val initGame = game.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
   val gameSnapshot = GameSnapshot(GameVariant.Tawlbwrdd, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 
 

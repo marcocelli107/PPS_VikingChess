@@ -4,7 +4,9 @@ import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg, MoveGenerator}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
 import ia.{EvaluationFunction, MiniMax, MiniMaxImpl}
+import model.GameMode.GameMode
 import model.GameSnapshot.GameSnapshotImpl
+import model.GameVariant.GameVariant
 import model.Player.Player
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
@@ -108,9 +110,9 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
-  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
+  def apply(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, levelIA: Level.Val, playerChosen: Player): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
 
-  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Val, playerChosen: Player) extends ModelHnefatafl {
+  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level.Val, playerChosen: Player) extends ModelHnefatafl {
 
     /**
      * Inits the parser prolog and set the file of the prolog rules.
@@ -132,23 +134,23 @@ object ModelHnefatafl {
     /**
       * Defines the game variant.
       */
-    private val currentVariant: GameVariant.Val = newVariant
+    private val currentVariant: GameVariant = newVariant
 
     /**
       * Defines the chosen mode.
       */
-    private val mode: GameMode.Value = gameMode
+    private val mode: GameMode = gameMode
 
     /**
       * Defines the chosen level of IA.
       */
     private val levelIA: Level.Val = level
 
-    override def getDimension: Int = newVariant.size
+    override def getDimension: Int = newVariant.boardSize
 
     override def createGame(): (Board, Player) = {
 
-      game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
+      game = parserProlog.createGame(currentVariant.toString.toLowerCase)
 
       storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
 

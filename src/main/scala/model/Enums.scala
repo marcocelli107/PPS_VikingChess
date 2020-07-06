@@ -4,6 +4,7 @@ package model
   * Defines Enumeration for the game mode.
   */
 object GameMode extends Enumeration {
+  type GameMode = Value
   val PVP: GameMode.Value = Value("PVP")
   val PVE: GameMode.Value = Value("PVE")
 }
@@ -45,11 +46,21 @@ object Level extends Enumeration {
   * Defines Enumeration for the game variant.
   */
 object GameVariant extends Enumeration {
-  case class Val(nameVariant: String, size: Int) extends super.Val
-  val Hnefatafl: Val = Val("Hnefatafl", 11)
-  val Tawlbwrdd: Val = Val("Tawlbwrdd", 11)
-  val Tablut: Val = Val("Tablut", 9)
-  val Brandubh: Val = Val("Brandubh", 7)
+  type GameVariant = Value
+  val Hnefatafl: Value = Value("Hnefatafl")
+  val Tawlbwrdd: Value = Value("Tawlbwrdd")
+  val Tablut: Value = Value("Tablut")
+  val Brandubh: Value = Value("Brandubh")
+
+  class GameVariantBoardSize(gameVariant: GameVariant) {
+    def boardSize: Int = gameVariant match {
+      case GameVariant.Tablut => 9
+      case GameVariant.Brandubh => 7
+      case _ => 11
+    }
+  }
+
+  implicit def getBoardSize(gameVariant: GameVariant): GameVariantBoardSize = new GameVariantBoardSize(gameVariant)
 }
 
 /**

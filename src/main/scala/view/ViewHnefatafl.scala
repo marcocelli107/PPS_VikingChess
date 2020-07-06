@@ -2,6 +2,7 @@ package view
 
 import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
+import model.GameMode.GameMode
 import model.{GameMode, GameSnapshot, Player, Snapshot}
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
@@ -160,7 +161,7 @@ trait ViewHnefatafl {
   /**
     * Gets game mode chosen from user.
     */
-  def getGameMode: GameMode.Value
+  def getGameMode: GameMode
 }
 
 object ViewHnefatafl {
@@ -258,7 +259,7 @@ object ViewHnefatafl {
 
     override def getPlayerChosen: Player.Value = viewMainMenu.getPlayer
 
-    override def getGameMode: GameMode.Value = viewMainMenu.getGameMode
+    override def getGameMode: GameMode = viewMainMenu.getGameMode
 
     /**
       * Initializes the main menù.
