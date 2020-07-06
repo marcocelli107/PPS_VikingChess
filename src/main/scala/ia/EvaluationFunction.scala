@@ -55,6 +55,7 @@ object EvaluationFunction {
       case Level.Standard => score = computeStandardScore(gameSnapshot)
       case _ => score = computeAdvancedScore(gameSnapshot)
     }
+
     score
     /*
     if (kingAdjacentToCorner()) {
@@ -92,6 +93,10 @@ object EvaluationFunction {
       //println("PossibleKingToCornerInOne")
     }
     if(newcomerScore == 0) {
+      //println(scoreBlackSurroundTheKing() + scoreBlackOnKingDiagonal() + scoreCapturedWhite(snapshot))
+      //(scoreCapturedBlack(snapshot) + scoreKingOnThrone() +
+        //scoreKingIsInFreeRowOrColumn())
+
       newcomerScore -= scoreBlackSurroundTheKing() +
                         scoreBlackOnKingDiagonal() +
                         scoreCapturedWhite(snapshot)
@@ -102,23 +107,29 @@ object EvaluationFunction {
     newcomerScore
   }
 
+  //TODO togliere print inutili dopo aver verificato punteggi corretti
   def computeStandardScore(snapshot: GameSnapshot): Int = {
     var standardScore: Int = computeNewcomerScore(snapshot)
+    //println("INNER NEWCOMER: " + standardScore)
     if (kingCapturedInOne(snapshot)) {
       standardScore = -ScoreProvider.KingCatchableInOne
     }
     if(standardScore == 0 || standardScore.abs != ScoreProvider.PossibleWinInOne) {
-      standardScore -= scoreBlackCordon()
-      standardScore += scoreTower()
+      val scoreErroneousBarricade: (Int, Int) = scoreWrongBarricade()
+      standardScore -= scoreBlackCordon() - scoreErroneousBarricade._2
+      standardScore += scoreTower() - scoreErroneousBarricade._1
     }
     standardScore
   }
 
   def computeAdvancedScore(snapshot: GameSnapshot): Int = {
     var advancedScore: Int = computeStandardScore(snapshot)
+    //println("INNER STANDARD: " + advancedScore)
+
     if(advancedScore == 0 || advancedScore.abs != ScoreProvider.PossibleWinInOne) {
-      advancedScore -= scoreLastPawnMovedCatchableInOne(snapshot)
-      advancedScore += scoreLastPawnMovedCatchableInOne(snapshot)
+      val scoreRowOrColumnFree: (Int, Int) = scoreOwnerFirstLastThreeRowsOrColumns()
+      advancedScore -= scoreLastPawnMovedCatchableInOne(snapshot) + scoreRowOrColumnFree._2
+      advancedScore += scoreLastPawnMovedCatchableInOne(snapshot) + scoreRowOrColumnFree._1
     }
     advancedScore
   }
@@ -625,6 +636,71 @@ object EvaluationFunction {
     orthogonal.map { case (k, v) => (k, v.take(1)) }
       .map { case (k, v) => if (v.nonEmpty) (k, Option(v.head)) else (k, Option.empty) }
   }
+
+
+}
+
+
+object blabla extends App {
+  val THEORY: String = TheoryGame.GameRules.toString
+  val prolog: ParserProlog = ParserPrologImpl(THEORY)
+  var snapshot: GameSnapshot = _
+  var game: (Player.Val, Player.Val, Board, Int) = _
+  game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+  snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+  /*
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,5)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(4,8)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(5,8)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(4,6)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,8), Coordinate(4,11)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,8), Coordinate(5,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(2,11)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,6), Coordinate(5,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(5,9)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,10), Coordinate(1,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,9), Coordinate(9,9)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,1), Coordinate(8,2)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(8,6)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,6), Coordinate(10,4)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,4), Coordinate(11,3)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,7), Coordinate(8,9)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,3), Coordinate(9,3)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,9), Coordinate(9,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,8), Coordinate(10,8)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(9,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,8), Coordinate(10,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))*/
+
+
+
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(3,2)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,3)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,9), Coordinate(6,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,5), Coordinate(7,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,5), Coordinate(8,3)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(2,5)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(7,6)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(6,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,2)))
+
+
+
+  EvaluationFunction.usefulValues(snapshot)
+
+
+  //println(snapshot.getBoard.consoleRepresentation)
+
+  //println("Newcomer: " + EvaluationFunction.computeNewcomerScore(snapshot))
+  //println("Standard: " + EvaluationFunction.computeStandardScore(snapshot))
+  println("Advanced: " + EvaluationFunction.computeAdvancedScore(snapshot))
 
 
 }
