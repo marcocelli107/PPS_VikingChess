@@ -33,8 +33,8 @@ object Level extends Enumeration {
   case class Val(difficulty: String, depth: Int) extends super.Val
   val Newcomer: Val = Val("Newcomer", 1)
   val Amateur: Val = Val("Amateur", 2)
-  val Standard: Val = Val("Standard", 3)
-  val Advanced: Val = Val("Advanced", 4)
+  val Standard: Val = Val("Standard", 2)
+  val Advanced: Val = Val("Advanced", 2)
 }
 
 /**

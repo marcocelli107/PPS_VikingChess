@@ -4,57 +4,57 @@ package actor_ia
 
 object ScoreProvider {
 
-   def WhiteWinScore: Int = 1000
+   def WhiteWin: Int = 1000
 
-   def BlackWinScore: Int = 1000
+   def BlackWin: Int = 1000
+
+   def PossibleWinInOne: Int = 900
 
    def KingCatchableInOne: Int = 900
 
-   def KingNearCornerScore: Int = 900
+   def KingNearCorner: Int = 900
 
-   def KingToCornerScore: Int = 900
+   def KingToCorner: Int = 900
 
-   def DrawScore: Int = 0
+   def KingDistanceToCornerDividend: Int = 900
 
-   def KingOnThroneScore: Int = 0
+   def Draw: Int = 0
 
-   def KingDistanceToCornerDividend: Int = 150
+   def KingOnThrone: Int = 0
 
-   def TowerCoefficient: Double = 1.25
+   def TowerCoefficient: Double = 3
 
-   def RightBarricade: Int = 20
+   def WhitePawnOuterCordon: Int = 30
 
-   def WhitePawnOuterCordon: Int = 10
+   def FirstLastRowOrColumnOwnedByBlack: Int = 10
 
-   def BlackFirstLastRowOrColumnOwnerScore: Int = 5
+   def FirstLastRowOrColumnOwnedByWhite: Int = 20
 
-   def WhiteFirstLastRowOrColumnOwnerScore: Int = 10
+   def FirstLastRowOrColumnOwnedByKing: Int = 200
 
-   def KingFirstLastRowOrColumnOwnerScore: Int = 90
+   def RowOrColumnOwnedKing: Int = 50
 
-   def KingRowOrColumnOwnerScore: Int = 25
+   def RowAndColumnOwnedKing: Int = 100
 
-   def KingRowAndColumnOwnerScore: Int = 50
+   def BlackNearKing: Int = 50
 
-   def BlackNearKing: Int = 30
+   def PawnInCordon: Int = 5
 
-   def CordonPawn: Int = 5
+   def WhiteInsideCordon: Int = 10
 
-   def WhiteInCordon: Int = 10
+   def RightCordon: Int = 100
 
-   def RightCordon: Int = 30
+   def WrongCordon: Int = 50
 
-   def WrongCordon: Int = 30
+   def WrongBarricade: Int = 50
 
-   def WrongBarricade: Int = 20
+   def BlackOnDiagonalKing: Int = 25
 
-   def BlackDiagonalToKing: Int = 25
+   def BlackCaptured: Int = 20
 
-   def BlackCapturedScore: Int = 20
+   def WhiteCaptured: Int = 50
 
-   def WhiteCapturedScore: Int = 50
+   def LastBlackMovedCatchableInOne: Int = 100
 
-   def LastBlackMoveCatchableInOne: Int = 10
-
-   def LastWhiteMoveCatchableInOne: Int = 15
+   def LastWhiteMovedCatchableInOne: Int = 150
 }

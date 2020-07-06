@@ -90,7 +90,6 @@ object MoveGenerator {
 
     def checkKingCapturedSmallBoard(kingCoord: Coordinate, adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean = {
       if(kingOnThrone(gameSnapshot, kingCoord) || kingNextToThrone(gameSnapshot, kingCoord)){
-        println(fourOrThreeSideCondition(adjacentCells))
         fourOrThreeSideCondition(adjacentCells)
       }
       else

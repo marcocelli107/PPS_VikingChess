@@ -22,7 +22,7 @@ case class ValueSonMsg(score: Int)
 
 case class ActorState(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, alfa: Int)
 
-abstract class MiniMaxActor() extends Actor {
+abstract class MiniMaxActor(levelIA: Level.Val) extends Actor {
 
   override def receive: Receive = {
     case event: InitMsg =>
@@ -77,7 +77,7 @@ abstract class MiniMaxActor() extends Actor {
   def isTerminalNode(gameStatus: Player.Val, depth: Int): Boolean = !gameStatus.equals(Player.None) || depth == 0
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
-    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame))
+    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, levelIA))
 
   def generateChildren(actorState: ActorState): Unit = {
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(actorState.gameSnapshot.getCopy)

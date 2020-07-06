@@ -10,11 +10,11 @@ trait MiniMax {
 }
 
 object MiniMaxImpl {
-  def apply(depth: Int): MiniMaxImpl = new MiniMaxImpl(depth)
+  def apply(depth: Int, levelIA: Level.Val): MiniMaxImpl = new MiniMaxImpl(depth, levelIA)
 }
 
 
-class MiniMaxImpl(depth: Int) extends  MiniMax {
+class MiniMaxImpl(depth: Int, levelIA: Level.Val) extends  MiniMax {
 
   //var evaluationFunction: EvaluationFunction =  EvaluationFunctionImpl()
 
@@ -34,8 +34,8 @@ class MiniMaxImpl(depth: Int) extends  MiniMax {
 
 
   def pruningAlfaBeta (sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin.Value, move: Move ): Int =  (depth, phase)  match {
-    case (_,_)  if isTerminalNode(sonGameSnapshot) => EvaluationFunction.score(sonGameSnapshot)
-    case (0,_)  => EvaluationFunction.score(sonGameSnapshot)
+    case (_,_)  if isTerminalNode(sonGameSnapshot) => EvaluationFunction.score(sonGameSnapshot, levelIA)
+    case (0,_)  => EvaluationFunction.score(sonGameSnapshot, levelIA)
     case (_, MaxMin.Max) => maximizationPhase(sonGameSnapshot, depth, alfa, beta)
     case  _ => minimizationPhase(sonGameSnapshot, depth, alfa, beta)
   }
@@ -90,7 +90,7 @@ object TryMinMax extends App{
   val gameSnapshot = GameSnapshot(GameVariant.Hnefatafl, initGame._1, initGame._2, initGame._3, Option.empty, 0, 0)
 
 
-  val miniMax: MiniMax = new MiniMaxImpl(3)
+  val miniMax: MiniMax = new MiniMaxImpl(3, null)
 
   println( miniMax.findBestMove(gameSnapshot))
 
