@@ -1,6 +1,6 @@
 package utils
 
-import model.Piece
+import model.Piece.Piece
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 
 import scala.collection.immutable.HashMap
@@ -31,7 +31,7 @@ object BoardGame {
      * @return
      *         the piece type
      */
-    def getPiece: Piece.Val
+    def getPiece: Piece
 
     /**
      * Gets coordinate of the cell
@@ -55,15 +55,15 @@ object BoardGame {
 
     val CELL_STRING: String = "c"
 
-    def apply(coordinateCell: Coordinate, piece: Piece.Val): BoardCell = BoardCellImpl(coordinateCell, piece)
+    def apply(coordinateCell: Coordinate, piece: Piece): BoardCell = BoardCellImpl(coordinateCell, piece)
 
-    case class BoardCellImpl(private val coordinateCell: Coordinate, private val pieceCell: Piece.Val) extends BoardCell {
+    case class BoardCellImpl(private val coordinateCell: Coordinate, private val pieceCell: Piece) extends BoardCell {
 
-      override def getPiece: Piece.Val = pieceCell
+      override def getPiece: Piece = pieceCell
 
       override def getCoordinate: Coordinate = coordinateCell
 
-      override def toString: String = BoardCell.CELL_STRING + "(" + coordinateCell.toString + "," + pieceCell.pieceString + ")"
+      override def toString: String = BoardCell.CELL_STRING + "(" + coordinateCell.toString + "," + pieceCell.toString + ")"
     }
 
   }

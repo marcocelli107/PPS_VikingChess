@@ -2,8 +2,10 @@ package view
 
 import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
-import model.{GameMode, GameSnapshot, Player, Snapshot}
-import utils.BoardGame.Board
+import model.GameMode.GameMode
+import model.Player.Player
+import model.Snapshot.Snapshot
+import model.GameSnapshot
 import utils.{Coordinate, Move}
 
 trait ViewHnefatafl {
@@ -49,7 +51,7 @@ trait ViewHnefatafl {
   /**
     * Initializes or restores the game.
     */
-  def initOrRestoreGUI(playerChosen: Player.Value)
+  def resetGUI()
 
   /**
     * Makes move.
@@ -127,7 +129,7 @@ trait ViewHnefatafl {
     * @param snapshotToShow
     *                   indicates snapshot to show.
     */
-  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot): Unit
 
   /**
    * Undoes last move.
@@ -155,12 +157,12 @@ trait ViewHnefatafl {
   /**
     * Gets player chosen from user.
     */
-  def getPlayerChosen: Player.Value
+  def getPlayerChosen: Player
 
   /**
     * Gets game mode chosen from user.
     */
-  def getGameMode: GameMode.Value
+  def getGameMode: GameMode
 }
 
 object ViewHnefatafl {
@@ -169,7 +171,7 @@ object ViewHnefatafl {
 
   case class ViewHnefataflImpl(controller: ControllerHnefatafl) extends ViewHnefatafl {
 
-    private var menuPanel, variantsPanel, diffPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
+    private var menuPanel, variantsPanel, difficultyPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
     private var dimension: Int = _
     private val viewMainMenu: Menu = Menu(this)
     private val viewMatch: ViewMatch = ViewMatch(this)
@@ -177,15 +179,15 @@ object ViewHnefatafl {
     private val overlayPanel: JPanel = GameFactory.createOverlayLayoutPanel
     private var gamePanel: JPanel = GameFactory.createGamePanel
 
-    initMainMenu()
+    menuPanel = viewMainMenu.initMenu
     overlayPanel.add(menuPanel)
-    initVariantsMenu()
+    variantsPanel = viewMainMenu.initVariantsMenu
     overlayPanel.add(variantsPanel)
-    initDiffMenu()
-    overlayPanel.add(diffPanel)
-    initPlayerChoiceMenu()
+    difficultyPanel = viewMainMenu.initDiffMenu
+    overlayPanel.add(difficultyPanel)
+    playerChoicePanel = viewMainMenu.initPlayerChoiceMenu
     overlayPanel.add(playerChoicePanel)
-    initInGameMenu()
+    inGameMenuPanel = viewMainMenu.initInGameMenu
     overlayPanel.add(inGameMenuPanel)
 
     frame.add(overlayPanel)
@@ -204,28 +206,23 @@ object ViewHnefatafl {
 
     override def getMenuUtils: Menu = viewMainMenu
 
-    override def initOrRestoreGUI(playerChosen: Player.Value): Unit = {
+    override def resetGUI(): Unit = {
       if (gamePanel.getComponents.length > 0) {
         viewMatch.restoreGame()
         overlayPanel.remove(gamePanel)
       }
-      val newGame: (Board, Player.Value) = controller.newGame(viewMainMenu.getBoardVariant,viewMainMenu.getGameMode, viewMainMenu.getDifficulty, viewMainMenu.getPlayer)
-      dimension = newGame._1.size
-      initGamePanel(newGame._1)
+      val newGame: GameSnapshot = controller.newGame(viewMainMenu.getBoardVariant, viewMainMenu.getGameMode, viewMainMenu.getDifficulty, viewMainMenu.getPlayer)
+      dimension = newGame.getBoard.size
+      gamePanel = viewMatch.initGamePanel()
       overlayPanel.add(gamePanel)
+      viewMatch.update(newGame)
       showGame()
-      viewMatch.getLabelPlayer.setText(newGame._2 + " moves.")
-
       controller.startGame()
     }
 
-    override def makeMove(move: Move): Unit = {
-      controller.makeMove(move)
-    }
+    override def makeMove(move: Move): Unit = controller.makeMove(move)
 
-    override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = {
-      controller.getPossibleMoves(coordinate)
-    }
+    override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = controller.getPossibleMoves(coordinate)
 
     override def update(gameSnapshot: GameSnapshot): Unit = viewMatch.update(gameSnapshot)
 
@@ -239,7 +236,7 @@ object ViewHnefatafl {
 
     override def findKing(): Coordinate = controller.findKing()
 
-    override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = controller.changeSnapshot(snapshotToShow)
+    override def changeSnapshot(snapshotToShow: Snapshot): Unit = controller.changeSnapshot(snapshotToShow)
 
     override def undoMove(): Unit = controller.undoMove()
 
@@ -255,54 +252,9 @@ object ViewHnefatafl {
 
     override def activeFirstPrevious(): Unit = viewMatch.activeFirstPrevious()
 
-    override def getPlayerChosen: Player.Value = viewMainMenu.getPlayer
+    override def getPlayerChosen: Player = viewMainMenu.getPlayer
 
-    override def getGameMode: GameMode.Value = viewMainMenu.getGameMode
-
-    /**
-      * Initializes the main menù.
-      */
-    private def initMainMenu(): Unit = {
-      menuPanel = viewMainMenu.initMenu
-    }
-
-    /**
-      * Initializes the variant menù.
-      */
-    private def initVariantsMenu(): Unit = {
-      variantsPanel = viewMainMenu.initVariantsMenu
-    }
-
-    /**
-      * Initializes the difficult selection menù.
-      */
-    private def initDiffMenu(): Unit = {
-      diffPanel = viewMainMenu.initDiffMenu
-    }
-
-    /**
-      * Initializes the player selection menù.
-      */
-    private def initPlayerChoiceMenu(): Unit = {
-      playerChoicePanel = viewMainMenu.initPlayerChoiceMenu
-    }
-
-    /**
-      * Initializes the game menù.
-      */
-    private def initInGameMenu(): Unit = {
-      inGameMenuPanel = viewMainMenu.initInGameMenu
-    }
-
-    /**
-      * Initializes the game panel.
-      *
-      * @param board
-      *               board returned from parser.
-      */
-    private def initGamePanel(board: Board): Unit = {
-      gamePanel = viewMatch.initGamePanel(board)
-    }
+    override def getGameMode: GameMode = viewMainMenu.getGameMode
 
     /**
       * Show the game panel.

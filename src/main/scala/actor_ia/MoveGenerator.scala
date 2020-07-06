@@ -1,5 +1,7 @@
 package actor_ia
 
+import model.Piece.Piece
+import model.Player.Player
 import model.{GameSnapshot, GameVariant, Piece, Player}
 import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
@@ -52,13 +54,13 @@ object MoveGenerator {
       case _ => null
     }
 
-    def switchPlayer(): Player.Val = gameSnapshot.getPlayerToMove match {
+    def switchPlayer(): Player = gameSnapshot.getPlayerToMove match {
       case Player.Black => Player.White
       case Player.White => Player.Black
       case _ => Player.None
     }
 
-    def checkWinner(): Player.Val = (checkVictory(), checkDraw()) match {
+    def checkWinner(): Player = (checkVictory(), checkDraw()) match {
       case (true, false) => gameSnapshot.getPlayerToMove
       case (false, true) => Player.Draw
       case _ => Player.None
@@ -133,7 +135,7 @@ object MoveGenerator {
     gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).values.map(_.head.getCoordinate)
       .toList.contains(kingCoord)
 
-  private def isOwner(pawn: Piece.Value, player: Player.Value): Boolean = (pawn, player) match {
+  private def isOwner(pawn: Piece, player: Player): Boolean = (pawn, player) match {
     case (Piece.WhitePawn, Player.White) => true
     case (Piece.WhiteKing, Player.White) => true
     case (Piece.BlackPawn, Player.Black) => true

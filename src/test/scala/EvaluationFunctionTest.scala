@@ -1,5 +1,6 @@
 import actor_ia.MoveGenerator
 import ia.EvaluationFunction
+import model.Player.Player
 import model._
 import org.scalatest.FunSuite
 import utils.BoardGame.Board
@@ -7,13 +8,12 @@ import utils.{Coordinate, Move}
 
 class EvaluationFunctionTest extends FunSuite {
 
-  val THEORY: String = TheoryGame.GameRules.toString
-  val prolog: ParserProlog = ParserPrologImpl(THEORY)
+  val prolog: ParserProlog = ParserPrologImpl()
   var snapshot: GameSnapshot = _
-  var game: (Player.Val, Player.Val, Board, Int) = _
+  var game: (Player, Player, Board, Int) = _
 
   test("Tests Score King Near Corner - Brandubh."){
-    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Brandubh.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(3,6)))
@@ -27,7 +27,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Tests Score King To Corner In One - Brandubh."){
-    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Brandubh.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(3,6)))
@@ -39,7 +39,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Tests Score Capture King In One On Throne - Tablut."){
-    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tablut.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(1,2)))
@@ -58,7 +58,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Tests Score Capture King Near Throne - Tablut."){
-    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tablut.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(2,2)))
@@ -72,7 +72,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Capture King Far From Throne - Brandubh") {
-    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Brandubh.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(6,2)))
@@ -84,7 +84,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Capture King Far From Throne - Tawlbwurdd") {
-    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(9,2)))
@@ -100,7 +100,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Black Ahead - Brandubh") {
-    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Brandubh.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,4), Coordinate(2,7)))
@@ -116,7 +116,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score White Ahead To Rows And Columns Checked - Hnefatafl") {
-    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(7,4)))
@@ -137,7 +137,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Black Surround King On Three Side - Tawlbwrdd") {
-    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
@@ -153,7 +153,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Captured Pieces (4 whites / 2 blacks) - Hnefatafl") {
-    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(2,4)))
@@ -174,7 +174,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Cordon Black in 3 Sides - Tawlbwrdd") {
-    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,8)))
@@ -190,7 +190,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Score Cordon Black in 4 Sides - Tawlbwrdd") {
-    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,5)))
@@ -225,7 +225,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   //TODO DEV ESSERE PIU ALTO DEI PRECEDENTI
   test("Test Score Inner Cordon Black - Tawlbwrdd") {
-    game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,4)))
@@ -277,7 +277,7 @@ class EvaluationFunctionTest extends FunSuite {
   }
 
   test("Test Initial Score Is Better For Blacks") {
-    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    game = prolog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
     println(EvaluationFunction.score(snapshot))
     assert(EvaluationFunction.score(snapshot) < 0)

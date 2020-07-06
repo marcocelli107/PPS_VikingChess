@@ -1,8 +1,12 @@
 package controller
 
+import model.GameMode.GameMode
+import model.GameVariant.GameVariant
+import model.Level.Level
+import model.Player.Player
+import model.Snapshot.Snapshot
 import model._
 import view.ViewHnefatafl
-import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
 trait ControllerHnefatafl {
@@ -10,9 +14,9 @@ trait ControllerHnefatafl {
   /**
     * Calls model to a new game.
     *
-    * @return board and player to move.
+    * @return game snapshot
     */
-  def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value)
+  def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot
 
   /**
     * Calls model to initialize IA in PVE mode.
@@ -102,7 +106,7 @@ trait ControllerHnefatafl {
     * @param snapshotToShow
     *                       indicates snapshot to show.
     */
-  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot): Unit
 
   /**
    * Undoes last move.
@@ -137,7 +141,7 @@ object ControllerHnefatafl {
     private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): (Board, Player.Value) = {
+    override def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot = {
       modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)
       modelGame.createGame()
     }
@@ -162,7 +166,7 @@ object ControllerHnefatafl {
 
     override def findKing(): Coordinate = modelGame.findKing()
 
-    override def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = modelGame.changeSnapshot(snapshotToShow)
+    override def changeSnapshot(snapshotToShow: Snapshot): Unit = modelGame.changeSnapshot(snapshotToShow)
 
     override def undoMove(): Unit = modelGame.undoMove()
 

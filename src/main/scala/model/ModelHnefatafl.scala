@@ -1,10 +1,15 @@
 package model
 
-import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg, MoveGenerator}
+import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.{EvaluationFunction, MiniMax, MiniMaxImpl}
+import ia.MiniMax
+import model.GameMode.GameMode
 import model.GameSnapshot.GameSnapshotImpl
+import model.GameVariant.GameVariant
+import model.Level.Level
+import model.Player.Player
+import model.Snapshot.Snapshot
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
@@ -23,9 +28,9 @@ trait ModelHnefatafl {
   /**
    * Calls parser for a new Game.
    *
-   * @return created board and player to move.
+   * @return game snapshot
    */
-  def createGame(): (Board, Player.Val)
+  def createGame(): GameSnapshot
 
   /**
     * Initializes IA in PVE mode. IA makes first move if is your turn.
@@ -40,7 +45,7 @@ trait ModelHnefatafl {
    *
    * @return list buffer of the possible computed moves.
    */
-  def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate]
+  def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
   /**
    * Calls parser for making a move from coordinate to coordinate.
@@ -97,7 +102,7 @@ trait ModelHnefatafl {
    *
    * @return required board
    */
-  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot): Unit
 
   /**
    * Undoes last move.
@@ -107,52 +112,50 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
-  def apply(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, levelIA: Level.Val, playerChosen: Player.Value): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
+  def apply(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
 
-  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant.Val, gameMode: GameMode.Value, level: Level.Val, playerChosen: Player.Value) extends ModelHnefatafl {
+  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level, playerChosen: Player) extends ModelHnefatafl {
 
-    /**
-     * Inits the parser prolog and set the file of the prolog rules.
-     */
-    private val THEORY: String = TheoryGame.GameRules.toString
-    private val parserProlog: ParserProlog = ParserPrologImpl(THEORY)
+    private val parserProlog: ParserProlog = ParserPrologImpl()
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
 
     private var refIA: ActorRef = _
+
+    // TODO remove
     private var sequIA: MiniMax = _
 
     /**
      * Defines status of the current game.
      */
-    private var game: (Player.Val, Player.Val, Board, Int) = _
+    private var game: (Player, Player, Board, Int) = _
 
     private final val SIZE_DRAW: Int = 9
 
     /**
       * Defines the game variant.
       */
-    private val currentVariant: GameVariant.Val = newVariant
+    private val currentVariant: GameVariant = newVariant
 
     /**
       * Defines the chosen mode.
       */
-    private val mode: GameMode.Value = gameMode
+    private val mode: GameMode = gameMode
 
     /**
       * Defines the chosen level of IA.
       */
-    private val levelIA: Level.Val = level
+    private val levelIA: Level = level
 
-    override def getDimension: Int = newVariant.size
+    override def getDimension: Int = newVariant.boardSize
 
-    override def createGame(): (Board, Player.Val) = {
+    override def createGame(): GameSnapshot = {
 
-      game = parserProlog.createGame(currentVariant.nameVariant.toLowerCase)
+      game = parserProlog.createGame(currentVariant.toString.toLowerCase)
 
       storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
 
-      (game._3, game._1)
+      storySnapshot.last
     }
 
     override def startGame(): Unit = {
@@ -163,7 +166,7 @@ object ModelHnefatafl {
       }
     }
 
-    override def showPossibleCells(cell: Coordinate): ListBuffer[Coordinate] = {
+    override def showPossibleCells(cell: Coordinate): Seq[Coordinate] = {
       if (showingCurrentSnapshot)
         parserProlog.showPossibleCells(cell)
       else ListBuffer.empty
@@ -177,7 +180,7 @@ object ModelHnefatafl {
       game = parserProlog.makeLegitMove(move)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
-      var winner: Player.Val = game._2
+      var winner: Player = game._2
 
       if (checkThreefoldRepetition())
         winner = Player.Draw
@@ -208,7 +211,7 @@ object ModelHnefatafl {
 
     override def findKing(): Coordinate = parserProlog.findKing()
 
-    override def changeSnapshot(previousOrNext: Snapshot.Value): Unit = {
+    override def changeSnapshot(previousOrNext: Snapshot): Unit = {
       previousOrNext match {
         case Snapshot.Previous => decrementCurrentSnapshot()
         case Snapshot.Next => incrementCurrentSnapshot()
@@ -262,7 +265,7 @@ object ModelHnefatafl {
     /**
      * Increments the number of pieces captured of the player.
      */
-    private def incrementCapturedPieces(player: Player.Val, piecesCaptured: Int): (Int, Int) = player match {
+    private def incrementCapturedPieces(player: Player, piecesCaptured: Int): (Int, Int) = player match {
       case Player.Black => (storySnapshot.last.getNumberCapturedBlacks + piecesCaptured, storySnapshot.last.getNumberCapturedWhites)
       case Player.White => (storySnapshot.last.getNumberCapturedBlacks, storySnapshot.last.getNumberCapturedWhites + piecesCaptured)
       case _ => null
