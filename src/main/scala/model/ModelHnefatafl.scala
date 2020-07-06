@@ -1,13 +1,14 @@
 package model
 
-import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg, MoveGenerator}
+import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.{EvaluationFunction, MiniMax, MiniMaxImpl}
+import ia.MiniMax
 import model.GameMode.GameMode
 import model.GameSnapshot.GameSnapshotImpl
 import model.GameVariant.GameVariant
 import model.Player.Player
+import model.Snapshot.Snapshot
 import utils.BoardGame.Board
 import utils.{Coordinate, Move}
 
@@ -26,9 +27,9 @@ trait ModelHnefatafl {
   /**
    * Calls parser for a new Game.
    *
-   * @return created board and player to move.
+   * @return game snapshot
    */
-  def createGame(): (Board, Player)
+  def createGame(): GameSnapshot
 
   /**
     * Initializes IA in PVE mode. IA makes first move if is your turn.
@@ -100,7 +101,7 @@ trait ModelHnefatafl {
    *
    * @return required board
    */
-  def changeSnapshot(snapshotToShow: Snapshot.Value): Unit
+  def changeSnapshot(snapshotToShow: Snapshot): Unit
 
   /**
    * Undoes last move.
@@ -114,14 +115,13 @@ object ModelHnefatafl {
 
   case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level.Val, playerChosen: Player) extends ModelHnefatafl {
 
-    /**
-     * Inits the parser prolog and set the file of the prolog rules.
-     */
     private val parserProlog: ParserProlog = ParserPrologImpl()
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
 
     private var refIA: ActorRef = _
+
+    // TODO remove
     private var sequIA: MiniMax = _
 
     /**
@@ -148,13 +148,13 @@ object ModelHnefatafl {
 
     override def getDimension: Int = newVariant.boardSize
 
-    override def createGame(): (Board, Player) = {
+    override def createGame(): GameSnapshot = {
 
       game = parserProlog.createGame(currentVariant.toString.toLowerCase)
 
       storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
 
-      (game._3, game._1)
+      storySnapshot.last
     }
 
     override def startGame(): Unit = {
@@ -210,7 +210,7 @@ object ModelHnefatafl {
 
     override def findKing(): Coordinate = parserProlog.findKing()
 
-    override def changeSnapshot(previousOrNext: Snapshot.Value): Unit = {
+    override def changeSnapshot(previousOrNext: Snapshot): Unit = {
       previousOrNext match {
         case Snapshot.Previous => decrementCurrentSnapshot()
         case Snapshot.Next => incrementCurrentSnapshot()

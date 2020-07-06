@@ -78,7 +78,7 @@ object Piece extends Enumeration {
   * Defines Enumeration for previous, next, first or last snapshot.
   */
 object Snapshot extends Enumeration {
-  type SnapshotType = Value
+  type Snapshot = Value
   val Previous, Next, First, Last = Value
 }
 

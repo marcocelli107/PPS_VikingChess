@@ -95,7 +95,7 @@ trait ParserProlog {
   /**
    * Player turn to move
    *
-   * @return Player.Value.
+   * @return Player.
    */
   def getPlayer: Player
 

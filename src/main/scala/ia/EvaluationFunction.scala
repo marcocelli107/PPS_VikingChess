@@ -328,7 +328,7 @@ object EvaluationFunction {
   /* UTILS METHODS */
 
 
-  def isRowOrColumnOwner(cellsSeq: Seq[BoardCell]): Piece.Value = {
+  def isRowOrColumnOwner(cellsSeq: Seq[BoardCell]): Piece = {
     val nonEmptyCells = cellsSeq.filter(!_.getPiece.equals(Piece.Empty))
     if((nonEmptyCells.size == 1) && nonEmptyCells.head.getPiece.equals(Piece.WhiteKing))
       Piece.WhiteKing

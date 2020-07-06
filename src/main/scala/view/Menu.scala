@@ -101,9 +101,9 @@ object Menu {
 
     override def initMenu: JPanel = {
       menuPanel = MenuFactory.createMenuPanel("Choose Mode: ")
-      pveButton = MenuFactory.createMainButton(" Player Vs Computer")
+      pveButton = MenuFactory.createMainButton("Player vs Computer")
       pveButton.addActionListener(chooseGameModeListener("PVE"))
-      pvpButton = MenuFactory.createMainButton("Player Vs Player")
+      pvpButton = MenuFactory.createMainButton("Player vs Player")
       pvpButton.addActionListener(chooseGameModeListener("PVP"))
       exitButtonMenu = MenuFactory.createMainButton("Exit")
       exitButtonMenu.addActionListener(_ => System.exit(0))
@@ -332,8 +332,6 @@ object Menu {
     /**
       * Initializes or restores the game by calling game view.
       */
-    private def initOrRestore(): Unit = {
-      view.initOrRestoreGUI(player)
-    }
+    private def initOrRestore(): Unit = view.initOrRestoreGUI(player)
   }
 }

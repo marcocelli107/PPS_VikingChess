@@ -5,6 +5,7 @@ import java.awt.{Dimension, GridBagConstraints}
 import javax.swing._
 import model.Piece.Piece
 import model.Player.Player
+import model.Snapshot.Snapshot
 import model._
 import utils.BoardGame.{Board, BoardCell}
 import utils.{Coordinate, Move}
@@ -16,12 +17,9 @@ trait ViewMatch {
   /**
     * Initializes the game panel.
     *
-    * @param board
-*                 board returned from parser.
-    *
     * @return panel
     */
-  def initGamePanel(board: Board): JPanel
+  def initGamePanel(): JPanel
 
   /**
     * Restores the game.
@@ -100,7 +98,7 @@ object ViewMatch {
 
     private var limits: GridBagConstraints = _
 
-    override def initGamePanel(initialBoard: Board): JPanel = {
+    override def initGamePanel(): JPanel = {
       limits = GameFactory.createBagConstraints
       limits.fill = GridBagConstraints.NONE
       limits.anchor = GridBagConstraints.LINE_START
@@ -111,7 +109,6 @@ object ViewMatch {
       initSouthPanel()
       initLeftRightPanel()
       initBoard()
-      drawPawns(initialBoard)
 
       gamePanel = GameFactory.createGamePanel
       gamePanel.add(northPanel)
@@ -348,7 +345,6 @@ object ViewMatch {
       * Initializes the panels of captures.
       */
     private def initLeftRightPanel(): Unit = {
-
       leftPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
       rightPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
     }
@@ -397,10 +393,7 @@ object ViewMatch {
       * @param cell
       *               arrival cell.
       */
-    private def actionMovePawn(cell: JButton): Unit = {
-      view.makeMove(Move(selectedCell.get, getCoordinate(cell)))
-    }
-
+    private def actionMovePawn(cell: JButton): Unit = view.makeMove(Move(selectedCell.get, getCoordinate(cell)))
     /**
       * Updates the number of captured pieces white or black.
       *
@@ -449,9 +442,7 @@ object ViewMatch {
       *
       * @return pair of coordinate
       */
-    private def getCoordinate(cell: JButton): Coordinate = {
-      cells.filter(v => v._2.equals(cell)).head._1
-    }
+    private def getCoordinate(cell: JButton): Coordinate = cells.filter(v => v._2.equals(cell)).head._1
 
     /**
       * Requires for a move.
@@ -527,7 +518,7 @@ object ViewMatch {
       * @param snapshotToShow
       *             snapshot to show.
       */
-    private def changeSnapshot(snapshotToShow: Snapshot.Value): Unit = view.changeSnapshot(snapshotToShow)
+    private def changeSnapshot(snapshotToShow: Snapshot): Unit = view.changeSnapshot(snapshotToShow)
 
     /**
       * Delete last move and reset winnerStatus.

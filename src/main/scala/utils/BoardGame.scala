@@ -1,6 +1,5 @@
 package utils
 
-import model.Piece
 import model.Piece.Piece
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 
