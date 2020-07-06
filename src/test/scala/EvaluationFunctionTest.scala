@@ -520,4 +520,66 @@ class EvaluationFunctionTest extends FunSuite {
 
     assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastWhiteMovedCatchableInOne)
   }
+
+  test("Test Score for all difficulties - Hnefatafl") {
+    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(4,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(5,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(4,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,10)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,8), Coordinate(4,11)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,8), Coordinate(5,10)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,11), Coordinate(2,11)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,6), Coordinate(5,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,10)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(5,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,10), Coordinate(1,10)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,9), Coordinate(9,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,1), Coordinate(8,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(8,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,6), Coordinate(10,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,4), Coordinate(11,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,7), Coordinate(8,9)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,3), Coordinate(9,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,9), Coordinate(9,10)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(11,8), Coordinate(10,8)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(9,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,8), Coordinate(10,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))
+
+    EvaluationFunction.usefulValues(snapshot)
+
+    assert(EvaluationFunction.computeNewcomerScore(snapshot) == -100 &&
+      EvaluationFunction.computeStandardScore(snapshot) == -156 &&
+      EvaluationFunction.computeAdvancedScore(snapshot) == -216)
+  }
+
+  test("Test Score for all difficulties - Tablut") {
+    game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(3,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(4,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,9), Coordinate(6,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,5), Coordinate(7,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,5), Coordinate(8,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(2,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(7,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(6,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,2)))
+
+    EvaluationFunction.usefulValues(snapshot)
+
+    assert(EvaluationFunction.computeNewcomerScore(snapshot) == -28 &&
+      EvaluationFunction.computeStandardScore(snapshot) == -900 &&
+      EvaluationFunction.computeAdvancedScore(snapshot) == -900)
+  }
+
 }
