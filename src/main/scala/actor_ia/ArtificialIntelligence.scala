@@ -11,10 +11,10 @@ case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
 object ArtificialIntelligenceImpl {
 
-  def apply(model: ModelHnefatafl, depth: Int): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth)
+  def apply(model: ModelHnefatafl, depth: Int, levelIA: Level.Val): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, depth, levelIA)
 }
 
-case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int) extends Actor {
+case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int, levelIA: Level.Val) extends Actor {
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
@@ -24,9 +24,9 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, depth: Int) extends
   def findBestMove(gameSnapshot: GameSnapshot): Unit = {
     var sonActor: Props = Props.empty
     if (iaIsBlack(gameSnapshot.getPlayerToMove))
-      sonActor = Props(MinRootActor())
+      sonActor = Props(MinRootActor(levelIA))
     else
-      sonActor = Props(MaxRootActor())
+      sonActor = Props(MaxRootActor(levelIA))
     val refSonActor = context.actorOf(sonActor)
     refSonActor ! InitMsg(gameSnapshot.getCopy, depth, Option.empty)
 

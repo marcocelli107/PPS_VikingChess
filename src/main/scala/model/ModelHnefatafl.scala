@@ -172,7 +172,7 @@ object ModelHnefatafl {
 
     override def makeMove(move: Move): Unit = {
 
-      println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
+      //println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
 
       game = parserProlog.makeLegitMove(move)
 
@@ -311,8 +311,9 @@ object ModelHnefatafl {
       */
     private def initIA(): Unit = {
       val system: ActorSystem = ActorSystem()
-      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
-      //sequIA = MiniMaxImpl(levelIA.depth)
+      //TODO PASSARE SOLO LEVELIA
+      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth, levelIA)))
+      //sequIA = MiniMaxImpl(levelIA.depth, levelIA)
     }
 
     /**

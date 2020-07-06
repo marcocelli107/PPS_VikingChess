@@ -21,11 +21,11 @@ object EvaluationFunction {
   private var gamePossibleMoves: Seq[Move] = _
   private var board: Board = _
 
-  def score(snapshot: GameSnapshot): Int = snapshot.getWinner match {
-    case Player.Black => -ScoreProvider.BlackWinScore
-    case Player.White => ScoreProvider.WhiteWinScore
-    case Player.Draw => ScoreProvider.DrawScore
-    case _ => computeScore(snapshot)
+  def score(snapshot: GameSnapshot, levelIA: Level.Val): Int = snapshot.getWinner match {
+    case Player.Black => -ScoreProvider.BlackWin
+    case Player.White => ScoreProvider.WhiteWin
+    case Player.Draw => ScoreProvider.Draw
+    case _ => computeScore(snapshot, levelIA)
   }
 
   def usefulValues(gameSnapshot: GameSnapshot): Unit = {
@@ -46,66 +46,118 @@ object EvaluationFunction {
     gamePossibleMoves = MoveGenerator.gamePossibleMoves(gameSnapshot)
   }
 
-  def computeScore(gameSnapshot: GameSnapshot): Int = {
+  def computeScore(gameSnapshot: GameSnapshot, levelIA: Level.Val): Int = {
     usefulValues(gameSnapshot)
     var score: Int = 0
+
+    levelIA match {
+      case Level.Newcomer => score = computeNewcomerScore(gameSnapshot)
+      case Level.Standard => score = computeStandardScore(gameSnapshot)
+      case _ => score = computeAdvancedScore(gameSnapshot)
+    }
+    score
+    /*
     if (kingAdjacentToCorner()) {
-      score += ScoreProvider.KingNearCornerScore
-      println("PossibleKingAdjacentToCorner")
+      score += ScoreProvider.KingNearCorner
+      //println("PossibleKingAdjacentToCorner")
     }
     else if (kingToCornerInOne()) {
-      score += ScoreProvider.KingToCornerScore
-      println("PossibleKingToCornerInOne")
+      score += ScoreProvider.KingToCorner
+      //println("PossibleKingToCornerInOne")
     }
     if (kingCapturedInOne(gameSnapshot)) {
       score -= ScoreProvider.KingCatchableInOne
-      println("PossibleKingCaptureInOne")
+      //println("PossibleKingCaptureInOne")
     }
     if (score == 0) {
       val scoreRowOrColumnFree: (Int, Int) = scoreOwnerFirstLastThreeRowsOrColumns()
       val scoreErrouneousBarricade: (Int, Int) = scoreWrongBarricade()
-      println("RowsColumnsOwned(Whites,Blacks): " + scoreRowOrColumnFree)
-      println("WrongBarricade(Whites, Blacks)" + scoreWrongBarricade)
+      //println("RowsColumnsOwned(Whites,Blacks): " + scoreRowOrColumnFree)
+      //println("WrongBarricade(Whites, Blacks)" + scoreWrongBarricade)
       score -= computeBlackBetterPositions(gameSnapshot) + scoreRowOrColumnFree._2 - scoreErrouneousBarricade._2
       score += computeWhiteBetterPositions(gameSnapshot) + scoreRowOrColumnFree._1 - scoreErrouneousBarricade._1
     }
-    score
+    score*/
   }
 
+  def computeNewcomerScore(snapshot: GameSnapshot): Int = {
+    var newcomerScore: Int = 0
+
+    if (kingAdjacentToCorner()) {
+      newcomerScore += ScoreProvider.KingNearCorner
+      //println("PossibleKingAdjacentToCorner")
+    }
+    else if (kingToCornerInOne()) {
+      newcomerScore += ScoreProvider.KingToCorner
+      //println("PossibleKingToCornerInOne")
+    }
+    if(newcomerScore == 0) {
+      newcomerScore -= scoreBlackSurroundTheKing() +
+                        scoreBlackOnKingDiagonal() +
+                        scoreCapturedWhite(snapshot)
+      newcomerScore += scoreKingOnThrone() +
+                        scoreKingIsInFreeRowOrColumn() +
+                        scoreCapturedBlack(snapshot)
+    }
+    newcomerScore
+  }
+
+  def computeStandardScore(snapshot: GameSnapshot): Int = {
+    var standardScore: Int = computeNewcomerScore(snapshot)
+    if (kingCapturedInOne(snapshot)) {
+      standardScore = -ScoreProvider.KingCatchableInOne
+    }
+    if(standardScore == 0 || standardScore.abs != ScoreProvider.PossibleWinInOne) {
+      standardScore -= scoreBlackCordon()
+      standardScore += scoreTower()
+    }
+    standardScore
+  }
+
+  def computeAdvancedScore(snapshot: GameSnapshot): Int = {
+    var advancedScore: Int = computeStandardScore(snapshot)
+    if(advancedScore == 0 || advancedScore.abs != ScoreProvider.PossibleWinInOne) {
+      advancedScore -= scoreLastPawnMovedCatchableInOne(snapshot)
+      advancedScore += scoreLastPawnMovedCatchableInOne(snapshot)
+    }
+    advancedScore
+  }
+
+  /*
   def computeWhiteBetterPositions(gameSnapshot: GameSnapshot): Int = {
 
-    println("***********")
-    println("White King In Throne: " + scoreKingOnThrone())
-    println("White Tower: " + scoreTower())
-    println("King in Free Row or Column: " + scoreKingIsInFreeRowOrColumn())
-    println("White Captured Black: " + scoreCapturedBlack(gameSnapshot))
-    println("Last Black Moved capture In One: " + scoreBlackOnKingDiagonal())
-    println("***********")
+    //println("***********")
+    //println("White King In Throne: " + scoreKingOnThrone())
+    //println("White Tower: " + scoreTower())
+    //println("King in Free Row or Column: " + scoreKingIsInFreeRowOrColumn())
+    //println("White Captured Black: " + scoreCapturedBlack(gameSnapshot))
+    //println("Last Black Moved capture In One: " + scoreBlackOnKingDiagonal())
+    //println("***********")
 
     scoreKingOnThrone() +
-      scoreTower() +
-      scoreKingIsInFreeRowOrColumn() +
-      scoreCapturedBlack(gameSnapshot) +
-      scoreLastPawnMovedCatchableInOne(gameSnapshot)
+    scoreKingIsInFreeRowOrColumn() +
+    scoreCapturedBlack(gameSnapshot) +
+    scoreTower() +
+    scoreLastPawnMovedCatchableInOne(gameSnapshot)
   }
 
   def computeBlackBetterPositions(gameSnapshot: GameSnapshot): Int = {
 
-    println("***********")
-    println("Black Surround The King: " + scoreBlackSurroundTheKing())
-    println("Black Captured White: " + scoreCapturedWhite(gameSnapshot))
-    println("Black Cordon: " + scoreBlackCordon())
-    println("Black On King Diagonal: " + scoreBlackOnKingDiagonal())
-    println("Last White Moved capture In One: " + scoreBlackOnKingDiagonal())
-    println("***********")
+    //println("***********")
+    //println("Black Surround The King: " + scoreBlackSurroundTheKing())
+    //println("Black Captured White: " + scoreCapturedWhite(gameSnapshot))
+    //println("Black Cordon: " + scoreBlackCordon())
+    //println("Black On King Diagonal: " + scoreBlackOnKingDiagonal())
+    //println("Last White Moved capture In One: " + scoreBlackOnKingDiagonal())
+    //println("***********")
 
     scoreBlackSurroundTheKing() +
+      scoreBlackOnKingDiagonal() +
       scoreCapturedWhite(gameSnapshot) +
       scoreBlackCordon() +
-      scoreBlackOnKingDiagonal() +
       scoreLastPawnMovedCatchableInOne(gameSnapshot)
   }
-
+  */
   /**
    * White and Black score
    * */
@@ -118,9 +170,9 @@ object EvaluationFunction {
 
     listRowsAndColumns.foreach(
       isRowOrColumnOwner(_) match {
-        case Piece.WhiteKing => whiteScore += ScoreProvider.KingFirstLastRowOrColumnOwnerScore
-        case Piece.WhitePawn => whiteScore += ScoreProvider.WhiteFirstLastRowOrColumnOwnerScore
-        case Piece.BlackPawn => blackScore += ScoreProvider.BlackFirstLastRowOrColumnOwnerScore
+        case Piece.WhiteKing => whiteScore += ScoreProvider.FirstLastRowOrColumnOwnedByKing
+        case Piece.WhitePawn => whiteScore += ScoreProvider.FirstLastRowOrColumnOwnedByWhite
+        case Piece.BlackPawn => blackScore += ScoreProvider.FirstLastRowOrColumnOwnedByBlack
         case _ =>
       }
     )
@@ -131,8 +183,8 @@ object EvaluationFunction {
     var whiteScore = 0
     var blackScore = 0
     board.cornerCoordinates.flatMap(c => getOrthogonalCoords(c)).filter(p => p._2 != Option.empty).grouped(2).foreach {
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.BlackPawn) => blackScore += ScoreProvider.WrongBarricade
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.WhitePawn) => whiteScore += ScoreProvider.WrongBarricade
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.BlackPawn) => blackScore += ScoreProvider.WrongCordon
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get)).equals(Piece.WhitePawn) => whiteScore += ScoreProvider.WrongCordon
       case _ =>
     }
     (whiteScore, blackScore)
@@ -144,7 +196,7 @@ object EvaluationFunction {
    */
 
   def scoreKingOnThrone(): Int = {
-    if (kingCoord.equals(board.centerCoordinates)) ScoreProvider.KingOnThroneScore
+    if (kingCoord.equals(board.centerCoordinates)) ScoreProvider.KingOnThrone
     else if (quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord)) == 0) ScoreProvider.KingDistanceToCornerDividend
     else ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceBetweenCells(kingCoord, findCloserCorner(kingCoord))
   }
@@ -169,16 +221,16 @@ object EvaluationFunction {
     score.toInt
   }
 
-  def scoreCapturedBlack(gameSnapshot: GameSnapshot): Int = gameSnapshot.getNumberCapturedBlacks * ScoreProvider.BlackCapturedScore
+  def scoreCapturedBlack(gameSnapshot: GameSnapshot): Int = gameSnapshot.getNumberCapturedBlacks * ScoreProvider.BlackCaptured
 
   def scoreKingIsInFreeRowOrColumn(): Int = {
     val rowWhithoutKing = kingOrthogonalCells(OrthogonalDirection.Right) ++ kingOrthogonalCells(OrthogonalDirection.Left)
     val columnWhithoutKing = kingOrthogonalCells(OrthogonalDirection.Up) ++ kingOrthogonalCells(OrthogonalDirection.Down)
 
     def _scoreKingIsInFreeRowOrColumn(): Int = (rowWhithoutKing, columnWhithoutKing) match {
-      case (row, column) if isSequenceFreeCells(row) && isSequenceFreeCells(column) => ScoreProvider.KingRowAndColumnOwnerScore
-      case (row, _) if isSequenceFreeCells(row) => ScoreProvider.KingRowOrColumnOwnerScore
-      case (_, column) if isSequenceFreeCells(column) => ScoreProvider.KingRowOrColumnOwnerScore
+      case (row, column) if isSequenceFreeCells(row) && isSequenceFreeCells(column) => ScoreProvider.RowAndColumnOwnedKing
+      case (row, _) if isSequenceFreeCells(row) => ScoreProvider.RowOrColumnOwnedKing
+      case (_, column) if isSequenceFreeCells(column) => ScoreProvider.RowOrColumnOwnedKing
       case _ => 0
     }
 
@@ -193,9 +245,9 @@ object EvaluationFunction {
       val adjOrthogonalCells = mappingOrthogonalToAdjacent(board.orthogonalCells(gameSnapshot.getLastMove.get.to))
 
       if (gameSnapshot.getPlayerToMove.equals(Player.Black) && checkOrthogonalEmptyCells(Piece.BlackPawn, adjOrthogonalCells))
-        ScoreProvider.LastWhiteMoveCatchableInOne
+        ScoreProvider.LastWhiteMovedCatchableInOne
       else if (gameSnapshot.getPlayerToMove.equals(Player.White) && checkOrthogonalEmptyCells(Piece.WhitePawn, adjOrthogonalCells))
-        ScoreProvider.LastBlackMoveCatchableInOne
+        ScoreProvider.LastBlackMovedCatchableInOne
       else 0
     }
     else 0
@@ -206,7 +258,7 @@ object EvaluationFunction {
   def kingToCornerInOne(): Boolean = {
     var returnValue = false
     for (i <- kingOrthogonalCells.keys)
-      if (kingOrthogonalCells(i).nonEmpty &&
+      if (kingOrthogonalCells.isDefinedAt(i) && kingOrthogonalCells(i).nonEmpty &&
         cornerCoordinates.contains(kingOrthogonalCells(i).last.getCoordinate) &&
         (kingOrthogonalCells(i).count(_.getPiece.equals(Piece.Empty)) == kingOrthogonalCells(i).size))
         returnValue = true
@@ -222,17 +274,22 @@ object EvaluationFunction {
   /**
    * Black score
    */
-  def scoreCapturedWhite(gameSnapshot: GameSnapshot): Int = gameSnapshot.getNumberCapturedWhites * ScoreProvider.WhiteCapturedScore
+  def scoreCapturedWhite(gameSnapshot: GameSnapshot): Int = gameSnapshot.getNumberCapturedWhites * ScoreProvider.WhiteCaptured
 
   def scoreBlackSurroundTheKing(): Int = {
-    kingAdjacentCells.values.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * ScoreProvider.BlackNearKing
+    var score = 0
+    for (cell <- kingAdjacentCells.values.filter(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn))) {
+      if(!checkOrthogonalEmptyCells(cell.get.getPiece, mappingOrthogonalToAdjacent(board.orthogonalCells(cell.get.getCoordinate))))
+        score += ScoreProvider.BlackNearKing
+    }
+    score
+    //kingAdjacentCells.values.count(c => c.nonEmpty && c.get.getPiece.equals(Piece.BlackPawn)) * ScoreProvider.BlackNearKing
   }
 
-  //TODO expand method for all diagonal cells
   def scoreBlackOnKingDiagonal(): Int = {
     var score = 0
     findNearBlacks(kingCoord).filter(c => (c.x != kingCoord.x) && (c.y != kingCoord.y)).foreach(c => board.getCell(c).getPiece match {
-      case Piece.BlackPawn => score += 25
+      case Piece.BlackPawn => score += ScoreProvider.BlackOnDiagonalKing
       case _ =>
     })
     score
@@ -342,10 +399,10 @@ object EvaluationFunction {
   def checkCircleCordon(cordon: Seq[Coordinate]): Int = {
     val (_,inn) = splitBoardWithCircleCordon(cordon)
     if(isCorrectCircleCordon(inn))
-      cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightCordon +
-        + inn.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon
+      cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+        + inn.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInsideCordon
     else
-      cordon.size * ScoreProvider.CordonPawn - ScoreProvider.WrongCordon
+      cordon.size * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon
   }
 
   def checkNotCircleCordon(cordon: Seq[Coordinate]): Int = {
@@ -356,16 +413,17 @@ object EvaluationFunction {
         sequences = splitBoardWithHorizontalCordon(cordon)
       else
         sequences = splitBoardWithVerticalCordon(cordon)
+
       if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)) {
-        cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade
+        cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon
       }
       else
         if(sequences._1.map(_.getCoordinate).contains(board.centerCoordinates))
-          (cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade) -
-            - (sequences._2.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon)
+          (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) -
+            - (sequences._1.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
         else
-          (cordon.size * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade) -
-            - (sequences._1.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInCordon)
+          (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) -
+            - (sequences._2.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
     } else
       0
   }
@@ -505,7 +563,7 @@ object EvaluationFunction {
     var returnValue = false
 
     for (i <- adjOrthogonalCells.keys) {
-      if(adjOrthogonalCells(i).nonEmpty &&
+      if(adjOrthogonalCells.isDefinedAt(i) && adjOrthogonalCells(i).nonEmpty &&
         adjOrthogonalCells(i).get.getPiece.equals(piece) &&
         adjOrthogonalCells(oppositeOrthogonalDirection(i)).nonEmpty &&
         gamePossibleMoves.map(_.to).contains(adjOrthogonalCells(oppositeOrthogonalDirection(i)).get.getCoordinate))

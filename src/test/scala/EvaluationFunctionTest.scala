@@ -26,7 +26,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6),Coordinate(1,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(7,6)))
 
-    assert(EvaluationFunction.score(snapshot).equals(900))
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer).equals(ScoreProvider.KingNearCorner))
   }
 
   test("Tests Score King To Corner In One - Brandubh."){
@@ -38,7 +38,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7),Coordinate(2,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4),Coordinate(4,7)))
 
-    assert(EvaluationFunction.score(snapshot).equals(900))
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer).equals(ScoreProvider.KingToCorner))
   }
 
   test("Tests Score Capture King In One On Throne - Tablut."){
@@ -57,7 +57,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,5), Coordinate(6,8)))
 
 
-    assert(EvaluationFunction.score(snapshot) == -900)
+    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Tests Score Capture King Near Throne - Tablut."){
@@ -71,7 +71,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,4), Coordinate(6,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(5,4)))
 
-    assert(EvaluationFunction.score(snapshot) == -900)
+    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Test Score Capture King Far From Throne - Brandubh") {
@@ -83,7 +83,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(6,4)))
 
-    assert(EvaluationFunction.score(snapshot) == -900)
+    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Test Score Capture King Far From Throne - Tawlbwurdd") {
@@ -99,14 +99,14 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,2), Coordinate(9,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(10,6)))
 
-    assert(EvaluationFunction.score(snapshot) == -900)
+    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
-  test("Test Initial Score Is Better For Blacks") {
-    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+  test("Test Initial Score Is Draw - Brandubh") {
+    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
-    assert(EvaluationFunction.score(snapshot) < 0)
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.Draw)
   }
 
   test("Test Score Black Ahead - Brandubh") {
@@ -131,7 +131,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(3,5)))
 
-    assert(EvaluationFunction.score(snapshot) < -100)
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer) < -100)
   }
 
   test("Test Score White Ahead With Rows And Columns Owned - Hnefatafl") {
@@ -152,7 +152,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,1), Coordinate(8,2)))
 
-    assert(EvaluationFunction.score(snapshot) > 50)
+    assert(EvaluationFunction.score(snapshot, Level.Standard) > 50)
   }
 
   test("Test Score Black Surround King On Three Side - Tawlbwrdd") {
@@ -168,7 +168,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(9,1)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,2)))
 
-    assert(EvaluationFunction.score(snapshot) < -100)
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer) < -90)
   }
 
   test("Test Score Captured Pieces (4 whites / 2 blacks) - Hnefatafl") {
@@ -208,7 +208,7 @@ class EvaluationFunctionTest extends FunSuite {
 
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreKingOnThrone() == ScoreProvider.KingOnThroneScore)
+    assert(EvaluationFunction.scoreKingOnThrone() == ScoreProvider.KingOnThrone)
   }
 
   test("Test Score White King Far From Throne - Tablut") {
@@ -234,9 +234,6 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreKingOnThrone() == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
   }
 
-
-
-
   test("Test Score Right Barricade On 3 Sides and Wrong Circle Cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
@@ -253,7 +250,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon = 14 + 4
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - ScoreProvider.WrongCordon)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
   test("Test Score Circle Cordon On All Sides - Tawlbwrdd") {
@@ -291,8 +288,8 @@ class EvaluationFunctionTest extends FunSuite {
     val whitePawnsInCordon: Int = 13
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightCordon +
-      + whitePawnsInCordon * ScoreProvider.WhiteInCordon)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+      + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
   test("Test Score Right Circle Cordon - Tawlbwrdd") {
@@ -349,8 +346,8 @@ class EvaluationFunctionTest extends FunSuite {
     val whitePawnsInCordon: Int = 12
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightCordon +
-    + whitePawnsInCordon * ScoreProvider.WhiteInCordon)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+    + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
   test("Test Score Wrong Circle Cordon - Hnefatafl") {
@@ -380,7 +377,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 10
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn - ScoreProvider.WrongCordon)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon)
   }
 
   test("Test Score Right Diagonal Barricade - Hnefatafl") {
@@ -396,7 +393,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 3
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
   test("Test Score Right Vertical Barricade - Tablut") {
@@ -428,7 +425,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 9
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
   test("Test Score Right Horizontal Barricade and Wrong Circle Cordon - Tawlbwrdd") {
@@ -456,7 +453,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 13 + 4
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.CordonPawn + ScoreProvider.RightBarricade - ScoreProvider.WrongCordon)
+    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
   test("Tests Score Wrong Barricade (2 black, 1 white) - Tawlbwrdd."){
@@ -496,7 +493,31 @@ class EvaluationFunctionTest extends FunSuite {
     EvaluationFunction.usefulValues(snapshot)
     val blackOnDiagonalScore = EvaluationFunction.scoreBlackOnKingDiagonal()
 
-    assert(blackOnDiagonalScore == ScoreProvider.BlackDiagonalToKing * 2)
+    assert(blackOnDiagonalScore == ScoreProvider.BlackOnDiagonalKing * 2)
   }
 
+  test("Test Score Last Black Moved Catchable In One - Hnefatafl") {
+    game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(2,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(3,5)))
+
+    EvaluationFunction.usefulValues(snapshot)
+
+    assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastBlackMovedCatchableInOne)
+  }
+
+  test("Test Score Last White Moved Catchable In One - Brandubh") {
+    game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(2,3)))
+
+    EvaluationFunction.usefulValues(snapshot)
+
+    assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastWhiteMovedCatchableInOne)
+  }
 }
