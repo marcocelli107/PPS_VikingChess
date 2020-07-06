@@ -5,8 +5,8 @@ package model
   */
 object GameMode extends Enumeration {
   type GameMode = Value
-  val PVP: GameMode.Value = Value("PVP")
-  val PVE: GameMode.Value = Value("PVE")
+  val PVP: GameMode.Value = Value("Player vs Player")
+  val PVE: GameMode.Value = Value("Player vs Computer")
 }
 
 /**
@@ -14,32 +14,43 @@ object GameMode extends Enumeration {
   */
 object Player extends Enumeration {
   type Player = Value
-  val White: Value = Value("w")
-  val Black: Value = Value("b")
-  val None: Value = Value("n")
-  val Draw: Value = Value("d")
+  val White: Value = Value("White")
+  val Black: Value = Value("Black")
+  val None: Value = Value("None")
+  val Draw: Value = Value("Draw")
 
-  class ExtendedStringPlayer(player: Player) {
-    def extendedString: String = player match {
-      case Player.White => "White"
-      case Player.Black => "Black"
-      case Player.None => "None"
-      case _ => "Draw"
+  case class ParserStringPlayer(player: Player) {
+    def parserString: String = player match {
+      case Player.White => "w"
+      case Player.Black => "b"
+      case Player.None => "n"
+      case _ => "d"
     }
   }
 
-  implicit def getExtendedString(player: Player): ExtendedStringPlayer = new ExtendedStringPlayer(player)
+  implicit def getParserString(player: Player): ParserStringPlayer = ParserStringPlayer(player)
 }
 
 /**
   * Defines Enumeration for the IA difficulty.
   */
 object Level extends Enumeration {
-  case class Val(difficulty: String, depth: Int) extends super.Val
-  val Newcomer: Val = Val("Newcomer", 1)
-  val Amateur: Val = Val("Amateur", 2)
-  val Standard: Val = Val("Standard", 3)
-  val Advanced: Val = Val("Advanced", 4)
+  type Level = Value
+  val Newcomer: Value = Value("Newcomer")
+  val Amateur: Value = Value("Amateur")
+  val Standard: Value = Value("Standard")
+  val Advanced: Value = Value("Advanced")
+
+  case class LevelDepth(level: Level) {
+    def depth: Int = level match {
+      case Level.Newcomer => 1
+      case Level.Amateur => 2
+      case Level.Standard => 3
+      case Level.Advanced => 4
+    }
+  }
+
+  implicit def depth(level: Level): LevelDepth = LevelDepth(level)
 }
 
 /**
@@ -52,7 +63,7 @@ object GameVariant extends Enumeration {
   val Tablut: Value = Value("Tablut")
   val Brandubh: Value = Value("Brandubh")
 
-  class GameVariantBoardSize(gameVariant: GameVariant) {
+  case class GameVariantBoardSize(gameVariant: GameVariant) {
     def boardSize: Int = gameVariant match {
       case GameVariant.Tablut => 9
       case GameVariant.Brandubh => 7
@@ -60,7 +71,7 @@ object GameVariant extends Enumeration {
     }
   }
 
-  implicit def getBoardSize(gameVariant: GameVariant): GameVariantBoardSize = new GameVariantBoardSize(gameVariant)
+  implicit def getBoardSize(gameVariant: GameVariant): GameVariantBoardSize = GameVariantBoardSize(gameVariant)
 }
 
 /**

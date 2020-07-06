@@ -2,6 +2,7 @@ package controller
 
 import model.GameMode.GameMode
 import model.GameVariant.GameVariant
+import model.Level.Level
 import model.Player.Player
 import model.Snapshot.Snapshot
 import model._
@@ -15,7 +16,7 @@ trait ControllerHnefatafl {
     *
     * @return game snapshot
     */
-  def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level.Val, playerChosen: Player): GameSnapshot
+  def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot
 
   /**
     * Calls model to initialize IA in PVE mode.
@@ -140,7 +141,7 @@ object ControllerHnefatafl {
     private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
     private var modelGame: ModelHnefatafl = _
 
-    override def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level.Val, playerChosen: Player): GameSnapshot = {
+    override def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot = {
       modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)
       modelGame.createGame()
     }

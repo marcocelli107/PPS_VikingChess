@@ -227,7 +227,7 @@ object ViewMatch {
       * Switches the player label showed.
       */
     private def switchPlayerLabel(playerToMove: Player): Unit = {
-      playerOrWinnerLabel.setText(playerToMove.extendedString + " moves")
+      playerOrWinnerLabel.setText(playerToMove + " moves")
       if(playerToMove.equals(Player.White)) {
         playerBlackLabel.setVisible(false)
         playerWhiteLabel.setVisible(true)

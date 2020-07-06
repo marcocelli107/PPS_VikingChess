@@ -51,7 +51,7 @@ trait ViewHnefatafl {
   /**
     * Initializes or restores the game.
     */
-  def initOrRestoreGUI(playerChosen: Player)
+  def resetGUI()
 
   /**
     * Makes move.
@@ -206,7 +206,7 @@ object ViewHnefatafl {
 
     override def getMenuUtils: Menu = viewMainMenu
 
-    override def initOrRestoreGUI(playerChosen: Player): Unit = {
+    override def resetGUI(): Unit = {
       if (gamePanel.getComponents.length > 0) {
         viewMatch.restoreGame()
         overlayPanel.remove(gamePanel)

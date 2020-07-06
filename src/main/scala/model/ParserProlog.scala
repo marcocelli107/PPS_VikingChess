@@ -167,12 +167,12 @@ case class ParserPrologImpl() extends ParserProlog {
 
   override def getCurrentBoard: Board = board.parseBoard(getBoardSize)
 
-  override def getPlayer: Player = Player.withName(playerToMove.toString)
+  override def getPlayer: Player = playerToMove.parsePlayer
 
   override def createGame(newVariant: String): (Player, Player, Board, Int) = {
     goal = engine.solve(s"${Predicate.NewGame}($newVariant,(V,P,W,B)).")
     setGameTerms(goal)
-    (Player.withName(goal.getTerm("P").toString), Player.withName(goal.getTerm("W").toString),
+    (goal.getTerm("P").parsePlayer, goal.getTerm("W").parsePlayer,
       board.parseBoard(getBoardSize), 0)
   }
 
@@ -197,9 +197,8 @@ case class ParserPrologImpl() extends ParserProlog {
 
     setGameTerms(goal)
 
-    (Player.withName(goal.getTerm("P").toString), Player.withName(goal.getTerm("W").toString),
-      board.parseBoard(getBoardSize),
-      goal.getTerm("L").toString.toInt)
+    (goal.getTerm("P").parsePlayer, goal.getTerm("W").parsePlayer,
+      board.parseBoard(getBoardSize), goal.getTerm("L").toString.toInt)
   }
 
   override def findKing(): Coordinate =
@@ -289,6 +288,10 @@ case class ParserPrologImpl() extends ParserProlog {
       implicit def parseMoveList: Seq[Coordinate] =
         base.toString.clearChars(prologListUselessChars).split(Coordinate.COORD_STRING).tail
           .map(e => arrayToCoordinate(e.split(",")))
+    }
+
+    implicit class PlayerParser(base: Term) {
+      implicit def parsePlayer: Player = Player.values.filter(_.parserString.equals(base.toString)).head
     }
   }
 

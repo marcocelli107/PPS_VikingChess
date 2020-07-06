@@ -6,6 +6,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing._
 import model.GameMode.GameMode
 import model.GameVariant.GameVariant
+import model.Level.Level
 import model.Player.Player
 import model.{GameMode, GameVariant, Level, Player}
 
@@ -65,7 +66,7 @@ trait Menu {
     *
     * @return level
     */
-  def getDifficulty: Level.Val
+  def getDifficulty: Level
 
   /**
     * Initializes the game menù.
@@ -92,7 +93,7 @@ object Menu {
 
     private var gameMode: GameMode = _
     private var boardVariant: GameVariant = _
-    private var levelIA: Level.Val = _
+    private var levelIA: Level = _
     private var player: Player = _
 
     private var limits: GridBagConstraints = _
@@ -101,10 +102,10 @@ object Menu {
 
     override def initMenu: JPanel = {
       menuPanel = MenuFactory.createMenuPanel("Choose Mode: ")
-      pveButton = MenuFactory.createMainButton("Player vs Computer")
-      pveButton.addActionListener(chooseGameModeListener("PVE"))
-      pvpButton = MenuFactory.createMainButton("Player vs Player")
-      pvpButton.addActionListener(chooseGameModeListener("PVP"))
+      pveButton = MenuFactory.createMainButton(GameMode.PVE.toString)
+      pveButton.addActionListener(chooseGameModeListener(GameMode.PVE.toString))
+      pvpButton = MenuFactory.createMainButton(GameMode.PVP.toString)
+      pvpButton.addActionListener(chooseGameModeListener(GameMode.PVP.toString))
       exitButtonMenu = MenuFactory.createMainButton("Exit")
       exitButtonMenu.addActionListener(_ => System.exit(0))
       menuPanel.add(Box.createRigidArea(DIMENSION_PANEL))
@@ -119,17 +120,21 @@ object Menu {
     }
 
     override def initVariantsMenu: JPanel = {
-      variantsPanel = MenuFactory.createMenuPanel("Choose Board Variant: ")
+      variantsPanel = MenuFactory.createMenuPanel("Choose Game Variant: ")
 
       panelVariantHnefatafl = MenuFactory.createSubMenuVariantPanel
       panelVariantTawlbwrdd = MenuFactory.createSubMenuVariantPanel
       panelVariantTablut = MenuFactory.createSubMenuVariantPanel
       panelVariantBrandubh = MenuFactory.createSubMenuVariantPanel
 
-      initVariantButton(panelVariantHnefatafl, MenuFactory.createVariantButton("Hnefatafl (11 x 11)"), MenuFactory.createLabelBoardHnefatafl, "Hnefatafl")
-      initVariantButton(panelVariantTawlbwrdd, MenuFactory.createVariantButton("Tawlbwrdd (11 x 11)"), MenuFactory.createLabelBoardTawlbwrdd, "Tawlbwrdd")
-      initVariantButton(panelVariantTablut, MenuFactory.createVariantButton("Tablut (9 x 9)"), MenuFactory.createLabelBoardTablut, "Tablut")
-      initVariantButton(panelVariantBrandubh, MenuFactory.createVariantButton("Brandubh (7 x 7)"), MenuFactory.createLabelBoardBrandubh, "Brandubh")
+      initVariantButton(panelVariantHnefatafl, MenuFactory.createVariantButton(GameVariant.Hnefatafl.toString),
+        MenuFactory.createLabelBoardHnefatafl, GameVariant.Hnefatafl.toString)
+      initVariantButton(panelVariantTawlbwrdd, MenuFactory.createVariantButton(GameVariant.Tawlbwrdd.toString),
+        MenuFactory.createLabelBoardTawlbwrdd, GameVariant.Tawlbwrdd.toString)
+      initVariantButton(panelVariantTablut, MenuFactory.createVariantButton(GameVariant.Tablut.toString),
+        MenuFactory.createLabelBoardTablut, GameVariant.Tablut.toString)
+      initVariantButton(panelVariantBrandubh, MenuFactory.createVariantButton(GameVariant.Brandubh.toString),
+        MenuFactory.createLabelBoardBrandubh, GameVariant.Brandubh.toString)
 
       initReturnButton(variantsPanel, menuPanel, "Previous Menu")
 
@@ -161,10 +166,10 @@ object Menu {
       panelLevelStandard = MenuFactory.createSubMenuLevelPanel
       panelLevelAdvanced = MenuFactory.createSubMenuLevelPanel
 
-      initDiffButton(panelLevelNewcomer, MenuFactory.createLevelButton("Newcomer"), MenuFactory.createLabelNewcomer, "Newcomer")
-      initDiffButton(panelLevelAmateur, MenuFactory.createLevelButton("Amateur"), MenuFactory.createLabelAmateur,"Amateur")
-      initDiffButton(panelLevelStandard, MenuFactory.createLevelButton("Standard"), MenuFactory.createLabelStandard, "Standard")
-      initDiffButton(panelLevelAdvanced, MenuFactory.createLevelButton("Advanced"), MenuFactory.createLabelAdvanced, "Advanced")
+      initDiffButton(panelLevelNewcomer, MenuFactory.createLevelButton(Level.Newcomer.toString), MenuFactory.createLabelNewcomer, Level.Newcomer.toString)
+      initDiffButton(panelLevelAmateur, MenuFactory.createLevelButton(Level.Amateur.toString), MenuFactory.createLabelAmateur, Level.Amateur.toString)
+      initDiffButton(panelLevelStandard, MenuFactory.createLevelButton(Level.Standard.toString), MenuFactory.createLabelStandard, Level.Standard.toString)
+      initDiffButton(panelLevelAdvanced, MenuFactory.createLevelButton(Level.Advanced.toString), MenuFactory.createLabelAdvanced, Level.Advanced.toString)
 
       initReturnButton(diffPanel, variantsPanel, "Previous Menu")
 
@@ -193,8 +198,10 @@ object Menu {
       panelChoseWhite = MenuFactory.createSubMenuPlayerPanel
       panelChoseBlack = MenuFactory.createSubMenuPlayerPanel
 
-      initPlayerChoiceButton(panelChoseWhite, MenuFactory.createPlayerButton("White Pawns"), MenuFactory.createLabelWhitePlayer, "White")
-      initPlayerChoiceButton(panelChoseBlack, MenuFactory.createPlayerButton("Black Pawns"), MenuFactory.createLabelBlackPlayer, "Black")
+      initPlayerChoiceButton(panelChoseWhite, MenuFactory.createPlayerButton(Player.White.toString),
+        MenuFactory.createLabelWhitePlayer, Player.White.toString)
+      initPlayerChoiceButton(panelChoseBlack, MenuFactory.createPlayerButton(Player.Black.toString),
+        MenuFactory.createLabelBlackPlayer, Player.Black.toString)
 
       initReturnButton(playerChoicePanel, variantsPanel, "Previous Menu")
 
@@ -210,7 +217,7 @@ object Menu {
     private def initPlayerChoiceButton(myPanel: JPanel, diffButton: JButton, label: JLabel, text: String): Unit = {
       GameFactory.resetXConstraints(limits)
       myPanel.add(label, limits)
-      diffButton.addActionListener(setPlayer(text))
+      diffButton.addActionListener(selectPlayer(text))
       GameFactory.incrementXConstraints(limits)
       myPanel.add(diffButton, limits)
     }
@@ -224,7 +231,7 @@ object Menu {
 
     override def getGameMode: GameMode = gameMode
 
-    override def getDifficulty: Level.Val = levelIA
+    override def getDifficulty: Level = levelIA
 
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = MenuFactory.createMenuPanel("Choose Option: ")
@@ -232,7 +239,7 @@ object Menu {
       returnToGame.addActionListener((_: ActionEvent) => view.switchOverlay(inGameMenuPanel, view.getGamePanel))
 
       restartGame = MenuFactory.createMainButton("Restart Match")
-      restartGame.addActionListener((_: ActionEvent) => {view.initOrRestoreGUI(player); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
+      restartGame.addActionListener((_: ActionEvent) => {view.resetGUI(); view.switchOverlay(inGameMenuPanel, view.getGamePanel)})
 
       initReturnButton(inGameMenuPanel, menuPanel, "Leave Match")
 
@@ -249,40 +256,17 @@ object Menu {
     }
 
     /**
-      * Sets the game mode.
-      *
-      * @param gameModeString
-      *               game mode chosen by the user.
-      */
-    private def setGameMode(gameModeString: String): Unit = gameModeString match {
-      case "PVP" => gameMode = GameMode.PVP
-      case "PVE" => gameMode = GameMode.PVE
-    }
-
-    /**
       * Listens for switch from main menù to variant menù.
       *
-      * @param gameMode
+      * @param gameModeString
       *             String of the game mode chosen.
       * @return listner
       */
-    private def chooseGameModeListener(gameMode: String): ActionListener = (_: ActionEvent) => {
-      setGameMode(gameMode)
-      view.switchOverlay(menuPanel, variantsPanel)
-    }
-
-    /**
-      * Sets the variant chosen from user.
-      *
-      * @param variant
-      *              variant chosen from user.
-      */
-    private def setBoardVariant(variant: String): Unit = variant match {
-      case "Hnefatafl" => boardVariant = GameVariant.Hnefatafl
-      case "Tawlbwrdd" => boardVariant = GameVariant.Tawlbwrdd
-      case "Tablut" => boardVariant = GameVariant.Tablut
-      case "Brandubh" => boardVariant = GameVariant.Brandubh
-    }
+    private def chooseGameModeListener(gameModeString: String): ActionListener =
+      (_: ActionEvent) => {
+        gameMode = GameMode.withName(gameModeString)
+        view.switchOverlay(menuPanel, variantsPanel)
+      }
 
     /**
       * Listens for switch from variant menù in according to the chosen mode.
@@ -292,21 +276,11 @@ object Menu {
       * @return listner
       */
     private def chooseVariantListener(variant: String): ActionListener = (_: ActionEvent) => {
-      setBoardVariant(variant)
+      boardVariant = GameVariant.withName(variant)
       gameMode match {
         case GameMode.PVP => view.switchOverlay(variantsPanel, playerChoicePanel)
         case GameMode.PVE => view.switchOverlay(variantsPanel, diffPanel)
       }
-    }
-
-    /**
-      * Sets the difficult chosen from user.
-      */
-    private def setLevelIA(level: String): Unit = level match {
-      case "Newcomer" => levelIA = Level.Newcomer
-      case "Amateur" => levelIA = Level.Amateur
-      case "Standard" => levelIA = Level.Standard
-      case "Advanced" => levelIA = Level.Advanced
     }
 
     /**
@@ -316,22 +290,17 @@ object Menu {
       *             String of the level IA chosen.
       * @return listner
       */
-    private def chooseLevelIAListener(level: String): ActionListener = (_: ActionEvent) => {
-      setLevelIA(level)
-      view.switchOverlay(diffPanel, playerChoicePanel)
-    }
+    private def chooseLevelIAListener(level: String): ActionListener =
+      (_: ActionEvent) => {
+        levelIA = Level.withName(level)
+        view.switchOverlay(diffPanel, playerChoicePanel)
+      }
 
-    /**
-      * Sets the user player.
-      */
-    private def setPlayer(playerString: String): ActionListener = (_: ActionEvent) => playerString match {
-      case "White" => player = Player.White; initOrRestore()
-      case "Black" => player = Player.Black; initOrRestore()
-    }
+    private def selectPlayer(playerString: String): ActionListener =
+      (_: ActionEvent) => {
+        player = Player.withName(playerString)
+        view.resetGUI()
+      }
 
-    /**
-      * Initializes or restores the game by calling game view.
-      */
-    private def initOrRestore(): Unit = view.initOrRestoreGUI(player)
   }
 }

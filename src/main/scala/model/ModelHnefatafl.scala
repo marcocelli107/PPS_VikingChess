@@ -7,6 +7,7 @@ import ia.MiniMax
 import model.GameMode.GameMode
 import model.GameSnapshot.GameSnapshotImpl
 import model.GameVariant.GameVariant
+import model.Level.Level
 import model.Player.Player
 import model.Snapshot.Snapshot
 import utils.BoardGame.Board
@@ -111,9 +112,9 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
-  def apply(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, levelIA: Level.Val, playerChosen: Player): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
+  def apply(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
 
-  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level.Val, playerChosen: Player) extends ModelHnefatafl {
+  case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level, playerChosen: Player) extends ModelHnefatafl {
 
     private val parserProlog: ParserProlog = ParserPrologImpl()
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
@@ -144,7 +145,7 @@ object ModelHnefatafl {
     /**
       * Defines the chosen level of IA.
       */
-    private val levelIA: Level.Val = level
+    private val levelIA: Level = level
 
     override def getDimension: Int = newVariant.boardSize
 
