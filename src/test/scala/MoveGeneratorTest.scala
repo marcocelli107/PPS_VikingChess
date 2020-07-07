@@ -168,7 +168,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     val step1 = MoveGenerator.makeMove(snapHnefatafl, Move(Coordinate(1,4), Coordinate(1,3)))
     val step2 = MoveGenerator.makeMove(step1, Move(Coordinate(6,6), Coordinate(11,11)))
 
-    println(step2.getWinner)
     assert(step2.getWinner.equals(Player.White))
   }
 
@@ -381,7 +380,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     val step2 = MoveGenerator.makeMove(step1, Move(Coordinate(4,4), Coordinate(4,3)))
     val step3 = MoveGenerator.makeMove(step2, Move(Coordinate(2,4), Coordinate(5,3)))
 
-    println(step3.getBoard.consoleRepresentation)
     assert(step3.getWinner.equals(Player.Black))
 
   }
