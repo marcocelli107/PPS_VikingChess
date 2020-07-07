@@ -37,16 +37,13 @@ object Player extends Enumeration {
 object Level extends Enumeration {
   type Level = Value
   val Newcomer: Value = Value("Newcomer")
-  val Amateur: Value = Value("Amateur")
   val Standard: Value = Value("Standard")
   val Advanced: Value = Value("Advanced")
 
   case class LevelDepth(level: Level) {
     def depth: Int = level match {
       case Level.Newcomer => 1
-      case Level.Amateur => 2
-      case Level.Standard => 3
-      case Level.Advanced => 4
+      case _ => 2
     }
   }
 

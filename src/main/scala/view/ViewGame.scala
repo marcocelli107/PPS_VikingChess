@@ -1,5 +1,6 @@
 package view
 
+import java.awt.event.ActionListener
 import java.awt.{Dimension, GridBagConstraints}
 
 import javax.swing._
@@ -9,10 +10,11 @@ import model.Snapshot.Snapshot
 import model._
 import utils.BoardGame.{Board, BoardCell}
 import utils.{Coordinate, Move}
+import JPanelAddAll._
 
 import scala.collection.mutable
 
-trait ViewMatch {
+trait ViewGame {
 
   /**
     * Initializes the game panel.
@@ -69,11 +71,11 @@ trait ViewMatch {
 
 }
 
-object ViewMatch {
+object ViewGame {
 
-  def apply(gameView: ViewHnefatafl): ViewMatch = ViewMatchImpl(gameView)
+  def apply(gameView: ViewHnefatafl): ViewGame = ViewMatchImpl(gameView)
 
-  case class ViewMatchImpl(view: ViewHnefatafl) extends ViewMatch {
+  case class ViewMatchImpl(view: ViewHnefatafl) extends ViewGame {
 
     private val HEIGHT_DIMENSION = GameFactory.getSmallerSide * 8 / 100
     private val SMALL_WIDTH_DIMENSION = GameFactory.getSmallerSide * 10 / 100
@@ -96,13 +98,10 @@ object ViewMatch {
     private var lastMoveCells: Option[(Cell, Cell)] = Option.empty
     private var kingCoordinate: Option[Coordinate] = Option.empty
 
-    private var limits: GridBagConstraints = _
+    private val winString: String = " has won"
+    private val movesString: String = " moves"
 
     override def initGamePanel(): JPanel = {
-      limits = GameFactory.createBagConstraints
-      limits.fill = GridBagConstraints.NONE
-      limits.anchor = GridBagConstraints.LINE_START
-
       GameFactory.setVariantBoardSize(this.view.getDimension)
 
       initNorthPanel()
@@ -114,12 +113,9 @@ object ViewMatch {
       gamePanel.add(northPanel)
 
       boardPlusColumns = GameFactory.createBoardPlusColumnsPanel
-      boardPlusColumns.add(leftPanel)
-      boardPlusColumns.add(boardPanel)
-      boardPlusColumns.add(rightPanel)
+      boardPlusColumns.addAll(leftPanel)(boardPanel)(rightPanel)
 
-      gamePanel.add(boardPlusColumns)
-      gamePanel.add(southPanel)
+      gamePanel.addAll(boardPlusColumns)(southPanel)
       gamePanel
     }
 
@@ -132,8 +128,6 @@ object ViewMatch {
 
     override def update(gameSnapshot: GameSnapshot): Unit = {
       updateSnapshot(gameSnapshot)
-
-      //makeMoveIA(gameSnapshot)
 
       /* TODO NON FUNZIONA */
       //ViewFactory.generateASoundForMove()
@@ -188,16 +182,10 @@ object ViewMatch {
 
     override def disableUndo(): Unit = undoMoveButton.setEnabled(false)
 
-    /**
-      * Sets the end game.
-      *
-      * @param winner
-      *                 winner of the game.
-      */
     private def setStatusGame(winner: Player, playerToMove: Player): Unit = winner match {
       case Player.White =>
         playerOrWinnerLabel.setForeground(ColorProvider.getWhiteColor)
-        playerOrWinnerLabel.setText("White has Won!")
+        playerOrWinnerLabel.setText(winText(Player.White))
         playerWhiteLabel.setVisible(true)
         playerBlackLabel.setVisible(false)
         cells(kingCoordinate.get).setAsKingEscapedCell()
@@ -205,29 +193,25 @@ object ViewMatch {
 
       case Player.Black =>
         playerOrWinnerLabel.setForeground(ColorProvider.getBlackColor)
-        playerOrWinnerLabel.setText("Black has Won!")
+        playerOrWinnerLabel.setText(winText(Player.Black))
         playerWhiteLabel.setVisible(false)
         playerBlackLabel.setVisible(true)
         cells(kingCoordinate.get).setAsKingCapturedCell()
         resetListeners()
 
       case Player.Draw =>
-        playerOrWinnerLabel.setText("Draw!")
+        playerOrWinnerLabel.setText(Player.Draw.toString)
         resetListeners()
 
       case _ => switchPlayerLabel(playerToMove)
     }
 
-    /**
-      * Resets all listeners for each cell button.
-      */
+    private def winText(player: Player): String = player.toString + winString
+
     private def resetListeners(): Unit = cells.values.foreach(c => c.getActionListeners.foreach(c.removeActionListener))
 
-    /**
-      * Switches the player label showed.
-      */
     private def switchPlayerLabel(playerToMove: Player): Unit = {
-      playerOrWinnerLabel.setText(playerToMove + " moves")
+      playerOrWinnerLabel.setText(playerToMove + movesString)
       if(playerToMove.equals(Player.White)) {
         playerBlackLabel.setVisible(false)
         playerWhiteLabel.setVisible(true)
@@ -237,21 +221,12 @@ object ViewMatch {
       }
     }
 
-    /**
-      * Highlights the cells where the last move occured.
-      *
-      * @param lastMove
-      *                 last move fromCoordinate and toCoordinate
-      */
     private def highlightLastMove(lastMove: Move): Unit = {
       lastMoveCells = Option(cells(lastMove.from), cells(lastMove.to))
       lastMoveCells.get._1.setAsLastMoveCell()
       lastMoveCells.get._2.setAsLastMoveCell()
     }
 
-    /**
-      * Resets the cells of the last move.
-      */
     private def resetLastMoveCells(): Unit = {
       if(lastMoveCells.nonEmpty) {
         lastMoveCells.get._1.unsetAsLastMoveCell()
@@ -259,197 +234,123 @@ object ViewMatch {
       }
     }
 
-    /**
-      * Initializes the board panel.
-      */
     private def initBoard(): Unit = {
       boardPanel = GameFactory.createBoardPanel
+      GridConstraints.setAnchor(GridBagConstraints.LINE_START)
       for (i <- 1 to view.getDimension) {
         for (j <- 1 to view.getDimension) {
           val coordinate: Coordinate = Coordinate(i, j)
           val cell: Cell = setTypeCell(coordinate)
           cell.addActionListener(_ => actionCell(cell))
-          GameFactory.setXYConstraints(limits,j,i)
+          GridConstraints.setXYConstraints(j, i)
           cells += coordinate -> cell
-          boardPanel.add(cell, limits)
+          boardPanel.add(cell, GridConstraints.getLimits)
         }
       }
     }
 
-    /**
-      * Initializes the north panel.
-      */
     private def initNorthPanel(): Unit = {
       northPanel = GameFactory.createTopBottomPanel
-      northPanel.add(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
       subNorthPanel = GameFactory.createGameSubMenuPanel
 
-      GameFactory.resetXConstraints(limits)
+      GridConstraints.setAnchor(GridBagConstraints.LINE_START)
+
+      GridConstraints.resetXConstraints()
       playerBlackLabel.setVisible(true)
       playerWhiteLabel.setVisible(false)
-      subNorthPanel.add(playerBlackLabel, limits)
-      subNorthPanel.add(playerWhiteLabel, limits)
+      subNorthPanel.add(playerBlackLabel, GridConstraints.getLimits)
+      subNorthPanel.add(playerWhiteLabel, GridConstraints.getLimits)
 
       playerOrWinnerLabel = GameFactory.createLabelPlayerToMoveWinner
-      GameFactory.incrementXConstraints(limits)
-      subNorthPanel.add(playerOrWinnerLabel, limits)
-      northPanel.add(subNorthPanel)
+      GridConstraints.incrementXConstraints()
+      subNorthPanel.add(playerOrWinnerLabel, GridConstraints.getLimits)
 
-      northPanel.add(Box.createRigidArea(new Dimension(BETWEEN_COMPONENTS_DIMENSION, HEIGHT_DIMENSION)))
       menuButton = GameFactory.createGameButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
-      northPanel.add(menuButton)
 
-      northPanel.add(Box.createRigidArea(new Dimension(MEDIUM_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
+      northPanel.addAll(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))(subNorthPanel)(
+        Box.createRigidArea(new Dimension(BETWEEN_COMPONENTS_DIMENSION, HEIGHT_DIMENSION)))(
+        menuButton)(Box.createRigidArea(new Dimension(MEDIUM_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
     }
 
-    /**
-      * Initializes the south panel.
-      */
     private def initSouthPanel(): Unit = {
       southPanel = GameFactory.createTopBottomPanel
       southPanel.add(Box.createRigidArea(new Dimension(BIG_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
       subSouthPanel = GameFactory.createGameSubMenuPanel
 
-      GameFactory.resetXConstraints(limits)
-      GameFactory.incrementWeightXConstraints(limits)
-      limits.anchor = GridBagConstraints.CENTER
+      GridConstraints.resetXConstraints()
+      GridConstraints.incrementWeightXConstraints()
+      GridConstraints.setAnchor(GridBagConstraints.CENTER)
+
       firstMoveButton = GameFactory.createFirstMoveButton()
-      firstMoveButton.addActionListener(_ => changeSnapshot(Snapshot.First))
-      subSouthPanel.add(firstMoveButton, limits)
-
+      initSouthPanelButton(firstMoveButton, _ => changeSnapshot(Snapshot.First))
       previousMoveButton = GameFactory.createPreviousMoveButton()
-      previousMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Previous))
-      GameFactory.incrementXConstraints(limits)
-      subSouthPanel.add(previousMoveButton, limits)
-
+      initSouthPanelButton(previousMoveButton, _ => changeSnapshot(Snapshot.Previous))
       nextMoveButton = GameFactory.createNextMoveButton()
-      nextMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Next))
-      GameFactory.incrementXConstraints(limits)
-      subSouthPanel.add(nextMoveButton, limits)
-
+      initSouthPanelButton(nextMoveButton, _ => changeSnapshot(Snapshot.Next))
       lastMoveButton = GameFactory.createLastMoveButton()
-      lastMoveButton.addActionListener(_ => changeSnapshot(Snapshot.Last))
-      GameFactory.incrementXConstraints(limits)
-      subSouthPanel.add(lastMoveButton, limits)
-
+      initSouthPanelButton(lastMoveButton, _ => changeSnapshot(Snapshot.Last))
       undoMoveButton = GameFactory.createUndoMoveButton()
-      undoMoveButton.addActionListener(_ => undoMove())
-      GameFactory.incrementXConstraints(limits)
-      subSouthPanel.add(undoMoveButton, limits)
+      initSouthPanelButton(undoMoveButton, _ => undoMove())
+
       southPanel.add(subSouthPanel)
       southPanel.add(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))
     }
 
-    /**
-      * Initializes the panels of captures.
-      */
+    private def initSouthPanelButton(b: JButton, al: ActionListener): Unit = {
+      b.addActionListener(al)
+      subSouthPanel.add(b, GridConstraints.getLimits)
+      GridConstraints.incrementXConstraints()
+    }
+
     private def initLeftRightPanel(): Unit = {
       leftPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
       rightPanel = GameFactory.createLeftRightPanel(1, view.getDimension)
     }
 
-    /**
-      * Defines the action to show the possible moves from a specifies cell.
-      *
-      * @param cell
-      *               cell where possible moves begin.
-      */
     private def actionCell(cell: JButton): Unit = {
       if(cell.getComponents.length > 0 && possibleMoves.isEmpty)
         actionSelectCell(cell)
       else if(possibleMoves.nonEmpty && !possibleMoves.contains(getCoordinate(cell))) {
         actionDeselectCell()
         actionSelectCell(cell)
-      }
-      else if(possibleMoves.contains(getCoordinate(cell)) && selectedCell.isDefined)
+      } else if(possibleMoves.contains(getCoordinate(cell)) && selectedCell.isDefined)
         actionMovePawn(cell)
       else
         actionDeselectCell()
     }
 
-    /**
-      * Defines the selection of a cell.
-      *
-      * @param cell
-      *               starting cell.
-      */
     private def actionSelectCell(cell: JButton): Unit = {
       selectedCell = Option(getCoordinate(cell))
       moveRequest(getCoordinate(cell))
     }
 
-    /**
-      * Defines the deselection of a cell.
-      */
     private def actionDeselectCell(): Unit = {
       possibleMoves.foreach(c => cells(c).unsetAsPossibleMove())
       deselectCell()
     }
 
-    /**
-      * Defines the movement action from a cell to another cell.
-      *
-      * @param cell
-      *               arrival cell.
-      */
     private def actionMovePawn(cell: JButton): Unit = view.makeMove(Move(selectedCell.get, getCoordinate(cell)))
-    /**
-      * Updates the number of captured pieces white or black.
-      *
-      * @param nBlackCaptured
-      *                 number of captured pieces black.
-      * @param nWhiteCaptured
-      *                 number of captured pieces white.
-      */
+
     private def addLostPawns(nBlackCaptured: Int, nWhiteCaptured: Int): Unit = {
       drawLostPawns(Player.Black, nBlackCaptured)
       drawLostPawns(Player.White, nWhiteCaptured)
     }
 
-    /**
-      * Draws the number of captured pieces white or black.
-      *
-      * @param player
-      *                 player to move.
-      * @param length
-      *                 number of captured pieces.
-      */
     private def drawLostPawns(player: Player, length: Int): Unit = {
       val panel: JPanel = if (Player.Black eq player) leftPanel else rightPanel
       panel.removeAll()
-      for (_ <- 0 until length) {
-        panel.add(createLostPawn(player))
-      }
+      for (_ <- 0 until length) panel.add(createLostPawn(player))
       panel.repaint()
     }
 
-    /**
-      * Adds the captured piece white or black.
-      *
-      * @return label
-      */
     private def createLostPawn(player: Player): JLabel = player match {
       case Player.Black => GameFactory.createLostBlackPawn
       case _ => GameFactory.createLostWhitePawn
     }
 
-    /**
-      * Gets the coordinate of a specifies cell.
-      *
-      * @param cell
-      *               specifies cell.
-      *
-      * @return pair of coordinate
-      */
     private def getCoordinate(cell: JButton): Coordinate = cells.filter(v => v._2.equals(cell)).head._1
 
-    /**
-      * Requires for a move.
-      *
-      * @param coordinate
-      *               specifies coordinate.
-      */
     private def moveRequest(coordinate: Coordinate): Unit = {
       possibleMoves = view.getPossibleMoves(coordinate)
       possibleMoves.foreach(c => cells(c).setAsPossibleMove())
@@ -457,9 +358,6 @@ object ViewMatch {
         cells(selectedCell.get).setAsSelectedCell()
     }
 
-    /**
-      * Empties the selected cell and its possible moves.
-      */
     private def deselectCell(): Unit = {
       if(selectedCell.nonEmpty)
         cells(selectedCell.get).unsetAsSelectedCell()
@@ -467,12 +365,6 @@ object ViewMatch {
       possibleMoves = Seq.empty
     }
 
-    /**
-      * Sets pieces in the board.
-      *
-      * @param board
-      *             board.
-      */
     private def drawPawns(board: Board): Unit = {
       board.rows.foreach(_.foreach(c => {
         val button: JButton = cells(c.getCoordinate)
@@ -481,12 +373,6 @@ object ViewMatch {
       }))
     }
 
-    /**
-      * Sets the type of piece.
-      *
-      * @param cell
-      *             cell to be set.
-      */
     private def pawnChoice(cell: BoardCell): Unit = {
       val piece: Piece = cell.getPiece
       val button: JButton = cells(cell.getCoordinate)
@@ -498,31 +384,15 @@ object ViewMatch {
       }
     }
 
-    /**
-     * Sets the type of cell.
-     *
-     * @param cell
-     *             cell to be set.
-     */
     private def setTypeCell(cell: Coordinate): Cell = cell match {
       case coordinate if view.isCornerCell(coordinate) => GameFactory.createCornerCell()
       case coordinate if view.isCentralCell(coordinate) => GameFactory.createCenterCell()
       case coordinate if view.isPawnCell(coordinate) => GameFactory.createPawnCell()
       case _ => GameFactory.createNormalCell()
-
     }
 
-    /**
-      * Show next, previous, first or last move.
-      *
-      * @param snapshotToShow
-      *             snapshot to show.
-      */
     private def changeSnapshot(snapshotToShow: Snapshot): Unit = view.changeSnapshot(snapshotToShow)
 
-    /**
-      * Delete last move and reset winnerStatus.
-      */
     private def undoMove(): Unit = {
       cells.values.foreach(c => if(c.getActionListeners.length == 0) c.addActionListener(_ => actionCell(c)))
       view.undoMove()

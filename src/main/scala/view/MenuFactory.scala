@@ -102,7 +102,6 @@ trait MenuFactory {
     * @return a label.
     */
   def createLabelNewcomer: JLabel
-  def createLabelAmateur: JLabel
   def createLabelStandard: JLabel
   def createLabelAdvanced: JLabel
 
@@ -125,7 +124,7 @@ object MenuFactory extends MenuFactory {
   private val boardHnefataflIconPath: String =  "src/main/resources/images/iconBoardHnefatafl.png"
   private val boardTawlbwrddIconPath: String =  "src/main/resources/images/iconBoardTawlbwrdd.png"
   private val boardTablutIconPath: String =  "src/main/resources/images/iconBoardTablut.png"
-  private val boardBrandubhlIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
+  private val boardBrandubhIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
   private val newcomerIconPath: String =  "src/main/resources/images/iconNewcomer.png"
   private val amateurIconPath: String =  "src/main/resources/images/iconAmateur.png"
   private val standardIconPath: String =  "src/main/resources/images/iconStandard.png"
@@ -158,11 +157,9 @@ object MenuFactory extends MenuFactory {
 
   override def createLabelBoardTablut: JLabel = new IconLabel(boardTablutIconPath)
 
-  override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhlIconPath)
+  override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhIconPath)
 
   override def createLabelNewcomer: JLabel = new IconLabel(newcomerIconPath)
-
-  override def createLabelAmateur: JLabel = new IconLabel(amateurIconPath)
 
   override def createLabelStandard: JLabel = new IconLabel(standardIconPath)
 
