@@ -7,6 +7,7 @@ import model.Player.Player
 import model.Snapshot.Snapshot
 import model.GameSnapshot
 import utils.{Coordinate, Move}
+import JPanelAddAll._
 
 trait ViewHnefatafl {
 
@@ -46,7 +47,7 @@ trait ViewHnefatafl {
     *
     * @return menù panel.
     */
-  def getMenuUtils: Menu
+  def getMenuUtils: ViewMenu
 
   /**
     * Initializes or restores the game.
@@ -173,22 +174,19 @@ object ViewHnefatafl {
 
     private var menuPanel, variantsPanel, difficultyPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
     private var dimension: Int = _
-    private val viewMainMenu: Menu = Menu(this)
-    private val viewMatch: ViewMatch = ViewMatch(this)
+    private val viewMainMenu: ViewMenu = ViewMenu(this)
+    private val viewMatch: ViewGame = ViewGame(this)
     private val frame: JFrame = GameFactory.createFrame
     private val overlayPanel: JPanel = GameFactory.createOverlayLayoutPanel
     private var gamePanel: JPanel = GameFactory.createGamePanel
 
     menuPanel = viewMainMenu.initMenu
-    overlayPanel.add(menuPanel)
     variantsPanel = viewMainMenu.initVariantsMenu
-    overlayPanel.add(variantsPanel)
     difficultyPanel = viewMainMenu.initDiffMenu
-    overlayPanel.add(difficultyPanel)
     playerChoicePanel = viewMainMenu.initPlayerChoiceMenu
-    overlayPanel.add(playerChoicePanel)
     inGameMenuPanel = viewMainMenu.initInGameMenu
-    overlayPanel.add(inGameMenuPanel)
+
+    overlayPanel.addAll(menuPanel)(variantsPanel)(difficultyPanel)(playerChoicePanel)(inGameMenuPanel)
 
     frame.add(overlayPanel)
     frame.setVisible(true)
@@ -204,7 +202,7 @@ object ViewHnefatafl {
 
     override def getGamePanel: JPanel = gamePanel
 
-    override def getMenuUtils: Menu = viewMainMenu
+    override def getMenuUtils: ViewMenu = viewMainMenu
 
     override def resetGUI(): Unit = {
       if (gamePanel.getComponents.length > 0) {
@@ -256,9 +254,6 @@ object ViewHnefatafl {
 
     override def getGameMode: GameMode = viewMainMenu.getGameMode
 
-    /**
-      * Show the game panel.
-      */
     private def showGame(): Unit = {
       playerChoicePanel.setVisible(false)
       gamePanel.setVisible(true)

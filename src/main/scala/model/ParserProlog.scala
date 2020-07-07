@@ -148,7 +148,7 @@ case class ParserPrologImpl() extends ParserProlog {
   private var board: Term = new Struct()
   private var variant: Term = new Struct()
 
-  object Predicate extends Enumeration {
+  private object Predicate extends Enumeration {
     type Predicate = Value
     val NewGame: Value = Value("newGame")
     val GetCoordPossibleMoves: Value = Value("getCoordPossibleMoves")
@@ -159,6 +159,7 @@ case class ParserPrologImpl() extends ParserProlog {
     val CornerCellCoord: Value = Value("cornerCellCoord")
     val CentralCellCoord: Value = Value("centralCellCoord")
     val IsInitialPawnCoord: Value = Value("isInitialPawnCoord")
+    // TODO ELIMINARE SE NON USATO
     val GamePossibleMoves: Value = Value("gamePossibleMoves")
     val UndoMove: Value = Value("undoMove")
   }
