@@ -15,7 +15,7 @@ class EvaluationFunctionTest extends FunSuite {
   var snapshot: GameSnapshot = _
   var game: (Player.Val, Player.Val, Board, Int) = _
 
-  test("Tests Score King Near Corner - Brandubh."){
+  test("Tests Score King Near Corner - Brandubh"){
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -25,11 +25,12 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4),Coordinate(4,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6),Coordinate(1,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(7,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,4),Coordinate(7,5)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer).equals(ScoreProvider.KingNearCorner))
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
   }
 
-  test("Tests Score King To Corner In One - Brandubh."){
+  test("Tests Score King To Corner In One - Brandubh"){
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -37,11 +38,12 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5),Coordinate(1,5)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7),Coordinate(2,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4),Coordinate(4,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6),Coordinate(4,6)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer).equals(ScoreProvider.KingToCorner))
+    assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
   }
 
-  test("Tests Score Capture King In One On Throne - Tablut."){
+  test("Tests Score Capture King In One On Throne - Tablut"){
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -56,11 +58,10 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(5,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,5), Coordinate(6,8)))
 
-
     assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
-  test("Tests Score Capture King Near Throne - Tablut."){
+  test("Tests Score Capture King Near Throne - Tablut"){
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -78,10 +79,10 @@ class EvaluationFunctionTest extends FunSuite {
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(3,2)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(2,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(6,2)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(5,6)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
-    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(6,4)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(4,2)))
 
     assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
@@ -228,7 +229,6 @@ class EvaluationFunctionTest extends FunSuite {
 
     EvaluationFunction.usefulValues(snapshot)
 
-    /** Quadratic Distance from cell(6,3) to center cell(5,5) */
     val quadraticDistanceFromKingToThrone = 10
 
     assert(EvaluationFunction.scoreKingOnThrone() == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
@@ -456,7 +456,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
-  test("Tests Score Wrong Barricade (2 black, 1 white) - Tawlbwrdd."){
+  test("Tests Score Wrong Barricade (2 black, 1 white) - Tawlbwrdd"){
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -475,7 +475,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(wrongBarricade._2 == 2 * ScoreProvider.WrongBarricade && wrongBarricade._1 == ScoreProvider.WrongBarricade)
   }
 
-  test("Tests Score Two Black on King's diagonal - Tablut."){
+  test("Tests Score Two Black on King's diagonal - Tablut"){
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -521,7 +521,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastWhiteMovedCatchableInOne)
   }
 
-  test("Test Score for all difficulties - Hnefatafl") {
+  test("Test Score For All Difficulties - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -559,7 +559,7 @@ class EvaluationFunctionTest extends FunSuite {
       EvaluationFunction.computeAdvancedScore(snapshot) == -216)
   }
 
-  test("Test Score for all difficulties - Tablut") {
+  test("Test Score For All Difficulties - Tablut") {
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -577,9 +577,9 @@ class EvaluationFunctionTest extends FunSuite {
 
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.computeNewcomerScore(snapshot) == -28 &&
-      EvaluationFunction.computeStandardScore(snapshot) == -900 &&
-      EvaluationFunction.computeAdvancedScore(snapshot) == -900)
+    assert(EvaluationFunction.computeNewcomerScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
+      EvaluationFunction.computeStandardScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
+      EvaluationFunction.computeAdvancedScore(snapshot) == ScoreProvider.KingEscapeToCorner)
   }
 
 }
