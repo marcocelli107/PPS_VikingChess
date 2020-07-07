@@ -1,33 +1,29 @@
-package actor_ia
+package model.game
 
-import model.Piece.Piece
-import model.Player.Player
-import model.{GameSnapshot, GameVariant, Piece, Player}
-import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
-import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
-import utils.{Coordinate, Move}
+import model.game.BoardGame.OrthogonalDirection.OrthogonalDirection
+import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
+import model.game.Piece.Piece
+import model.game.Player.Player
 
 object MoveGenerator {
 
-  def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
-    def _moves(cell: BoardCell): List[Move] = {
-      gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
-        .flatMap(_cutAfterPiece(_, cell)).toList
-    }
-
+  /** Not checking correct turn */
+  def coordPossibleMoves(cell: BoardCell, gameSnapshot: GameSnapshot): List[Move] = {
     def _cutAfterPiece(sequence: List[BoardCell], cell: BoardCell): List[Move] =
       sequence.takeWhile(_.getPiece.equals(Piece.Empty))
         .filter(_filterIfPawn(_, cell))
         .map(c => Move(cell.getCoordinate, c.getCoordinate))
-
     def _filterIfPawn(cellToInspect: BoardCell, movingCell: BoardCell): Boolean = {
       (!movingCell.getPiece.equals(Piece.WhiteKing) && !gameSnapshot.getBoard.specialCoordinates.contains(cellToInspect.getCoordinate)) ||
         movingCell.getPiece.equals(Piece.WhiteKing)
     }
-
+    gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
+      .flatMap(_cutAfterPiece(_, cell)).toList
+  }
+  def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     gameSnapshot.getBoard.rows.flatMap(_.flatMap(c =>
       if (isOwner(c.getPiece, gameSnapshot.getPlayerToMove))
-        _moves(c)
+        coordPossibleMoves(c, gameSnapshot)
       else List.empty
     ))
   }.toList
@@ -87,20 +83,23 @@ object MoveGenerator {
     def checkBlackSmallBoardVictory(): Boolean = {
       val kingCoord = findKing(gameSnapshot.getBoard)
       val adjacentCells = gameSnapshot.getBoard.orthogonalCells(kingCoord)
-
       checkKingCapturedSmallBoard(kingCoord, adjacentCells)
     }
 
     def checkKingCapturedSmallBoard(kingCoord: Coordinate, adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean = {
-      if(kingOnThrone(gameSnapshot, kingCoord) || kingNextToThrone(gameSnapshot, kingCoord))
+      if(kingOnThrone(gameSnapshot, kingCoord) || kingNextToThrone(gameSnapshot, kingCoord)){
         fourOrThreeSideCondition(adjacentCells)
+      }
       else
         kingCapturedTwoSides(adjacentCells)
     }
 
-    def fourOrThreeSideCondition(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean =
+    def fourOrThreeSideCondition(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean = {
       adjacentCells.values.filter(_.nonEmpty).map(_.head).count(cell => cell.getPiece.equals(Piece.BlackPawn) ||
-        cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4
+      cell.getCoordinate.equals(gameSnapshot.getBoard.centerCoordinates)) == 4 &&
+      adjacentCells.values.filter(_.nonEmpty).map(_.head).map(_.getCoordinate).exists(_.equals(move.to))
+    }
+
 
     def kingCapturedTwoSides(adjacentCells: Map[OrthogonalDirection, List[BoardCell]]): Boolean =
       (adjacentCells(OrthogonalDirection.Right).nonEmpty &&
@@ -141,5 +140,4 @@ object MoveGenerator {
     case (Piece.BlackPawn, Player.Black) => true
     case _ => false
   }
-
 }

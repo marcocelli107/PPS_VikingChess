@@ -2,12 +2,14 @@ package view
 
 import controller.ControllerHnefatafl
 import javax.swing.{JFrame, JPanel}
-import model.GameMode.GameMode
-import model.Player.Player
-import model.Snapshot.Snapshot
-import model.GameSnapshot
-import utils.{Coordinate, Move}
-import JPanelAddAll._
+import model.game.GameMode.GameMode
+import model.game.Player.Player
+import model.game.Snapshot.Snapshot
+import view.utils.JPanelAddAll._
+import model.game.{Coordinate, GameSnapshot, Move}
+import view.factories.GameFactory
+import view.game.ViewGame
+import view.menu.ViewMenu
 
 trait ViewHnefatafl {
 

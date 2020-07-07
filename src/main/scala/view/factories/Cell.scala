@@ -1,4 +1,4 @@
-package view
+package view.factories
 
 import javax.swing.JButton
 

@@ -1,9 +1,8 @@
-package model
+package model.game
 
-import model.GameVariant.GameVariant
-import model.Player.Player
-import utils.BoardGame.Board
-import utils.Move
+import model.game.BoardGame.Board
+import model.game.GameVariant.GameVariant
+import model.game.Player.Player
 
 trait GameSnapshot {
 

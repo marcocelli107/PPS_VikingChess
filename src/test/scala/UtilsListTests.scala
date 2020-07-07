@@ -1,20 +1,15 @@
 import java.io.FileInputStream
 
 import alice.tuprolog.{Prolog, SolveInfo, Theory}
-import model.ParserPrologImpl
+import model.prolog.ParserProlog
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-/**
-  *   @author Luca Nannini
-  *   @author Giovanni Maria Speciale
-  */
-
 @RunWith(classOf[JUnitRunner])
 class UtilsListTests extends FunSuite {
   val prolog: Prolog = new Prolog()
-  val theory: Theory = new Theory(new FileInputStream(ParserPrologImpl.THEORY))
+  val theory: Theory = new Theory(new FileInputStream(ParserProlog.THEORY))
   var goal: SolveInfo = _
   prolog.setTheory(theory)
 

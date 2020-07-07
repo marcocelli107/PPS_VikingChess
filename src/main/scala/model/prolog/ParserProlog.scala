@@ -1,14 +1,14 @@
-package model
+package model.prolog
 
 import java.io.FileInputStream
 
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
-import model.Player.Player
-import utils.BoardGame.Board.BoardImpl
-import utils.BoardGame.{Board, BoardCell}
-import utils.{Coordinate, Move}
+import model.game.Player.Player
+import model.game.BoardGame.Board.BoardImpl
+import model.game.BoardGame.{Board, BoardCell}
+import model.game.{Coordinate, Move, Piece, Player}
 
-trait ParserProlog {
+sealed trait ParserPrologTrait {
 
   /**
    * Creates a new Game.
@@ -34,16 +34,7 @@ trait ParserProlog {
    * @return new board.
    */
   def makeLegitMove(move: Move): (Player, Player, Board, Int)
-/* TODO NON LA USIAMO PIU?
-  /**
-   * Undoes the last move.
-   *
-   * @param move
-   * move to undo
-   * @return new board.
-   */
-  def makeNonLegitMove(move: Move): (Player.Val, Player.Val, Board, Int)
-*/
+
   /**
    * Finds king on game board.
    *
@@ -79,13 +70,6 @@ trait ParserProlog {
   def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
-   * Copy himself.
-   *
-   * @return parser representing the game state.
-   */
-  def copy(): ParserProlog
-
-  /**
    * Get the Board
    *
    * @return the current board state.
@@ -107,40 +91,14 @@ trait ParserProlog {
    * @return Unit.
    */
   def undoMove(oldBoard: Board): Unit
-/* TODO NON LO USIAMO PIU?
-  /**
-   * Takes all the possible moves of a player from a game state
-   *
-   * @return List of coordinates tuples
-   */
-  def gamePossibleMoves(): List[(Coordinate, Coordinate)]
-*/
 }
 
-object ParserPrologImpl {
-
-  val THEORY: String = "src/main/scala/model/gameRules.pl"
-
-  def apply(): ParserProlog = new ParserPrologImpl()
-
-  // TODO eliminare se non serve più copy
-  def apply(_playerToWin: Term, _playerToMove: Term, _board: Term, _variant: Term): ParserPrologImpl = {
-    val ppi = new ParserPrologImpl()
-    ppi.winner = _playerToWin
-    ppi.playerToMove = _playerToMove
-    ppi.board = _board
-    ppi.variant = _variant
-    ppi
-  }
-
-}
-
-case class ParserPrologImpl() extends ParserProlog {
+object ParserProlog extends ParserPrologTrait {
 
   import ImplicitParser._
-  import Predicate.Predicate
 
-  private val engine = new Prolog()
+  val THEORY: String = "src/main/scala/model/prolog/gameRules.pl"
+  private val engine: Prolog = new Prolog()
   private var goal: SolveInfo = _
   private var list: Term = new Struct()
   private var winner: Term = new Struct()
@@ -153,18 +111,14 @@ case class ParserPrologImpl() extends ParserProlog {
     val NewGame: Value = Value("newGame")
     val GetCoordPossibleMoves: Value = Value("getCoordPossibleMoves")
     val MakeLegitMove: Value = Value("makeLegitMove")
-    val MakeMove: Value = Value("makeMove")
     val FindKing: Value = Value("findKing")
     val BoardSize: Value = Value("boardSize")
     val CornerCellCoord: Value = Value("cornerCellCoord")
     val CentralCellCoord: Value = Value("centralCellCoord")
     val IsInitialPawnCoord: Value = Value("isInitialPawnCoord")
-    // TODO ELIMINARE SE NON USATO
-    val GamePossibleMoves: Value = Value("gamePossibleMoves")
     val UndoMove: Value = Value("undoMove")
   }
-
-  engine.setTheory(new Theory(new FileInputStream(ParserPrologImpl.THEORY)))
+  engine.setTheory(new Theory(new FileInputStream(ParserProlog.THEORY)))
 
   override def getCurrentBoard: Board = board.parseBoard(getBoardSize)
 
@@ -183,16 +137,8 @@ case class ParserPrologImpl() extends ParserProlog {
     list.parseMoveList
   }
 
-  override def makeLegitMove(move: Move): (Player, Player, Board, Int) = setMove(move, Predicate.MakeLegitMove)
-
-  // TODO NON LA USIAMO PIU'?
-  /* override def makeNonLegitMove(move: Move): (Player, Player, Board, Int) =
-    setMove(move, "makeMove")
-    */
-
-  // TODO INGLOBARE IN MakeLegitMove SE NON USIAMO PIU MakeNonLegit
-  private def setMove(move: Move, predicate: Predicate): (Player, Player, Board, Int) = {
-    goal = engine.solve(s"$predicate(($variant, $playerToMove, $winner, $board)," +
+  override def makeLegitMove(move: Move): (Player, Player, Board, Int) = {
+    goal = engine.solve(s"${Predicate.MakeLegitMove}(($variant, $playerToMove, $winner, $board)," +
       s"${move.from.toString}," +
       s"${move.to.toString}, L, (V,P,W,B)).")
 
@@ -214,36 +160,9 @@ case class ParserPrologImpl() extends ParserProlog {
   override def isPawnCell(coordinate: Coordinate): Boolean =
     engine.solve(s"${Predicate.IsInitialPawnCoord}($variant, ${coordinate.toString}).").isSuccess
 
-  // TODO SERVE ANCORA?
-  override def copy(): ParserProlog = ParserPrologImpl(winner, playerToMove, board, variant)
-
-  override def equals(that: Any): Boolean = that match {
-    case that: ParserPrologImpl =>
-      that.isInstanceOf[ParserPrologImpl] &&
-        that.variant.isEqualObject(this.variant) &&
-        that.playerToMove.isEqualObject(this.playerToMove) &&
-        that.winner.isEqualObject(this.winner) &&
-        that.board.isEqualObject(this.board)
-    case _ => false
-  }
-
   override def undoMove(oldBoard: Board): Unit =
     setGameTerms(engine.solve(s"${Predicate.UndoMove}(($variant,$playerToMove,$winner,$board), $oldBoard, (V, P, W, B))."))
 
-  /* TODO NON LO USIAMO PIU?
-  def gamePossibleMoves(): List[(Coordinate, Coordinate)] = {
-    goal = engine.solve(s"gamePossibleMoves(($variant,$playerToMove,$winner,$board), L).")
-
-    list = goal.getTerm("L")
-
-    goalString = replaceListCellsString(list)
-
-    setListCellsView(goalString).grouped(2).toList.map(listBuffer => (listBuffer.head, listBuffer(1)))
-  }*/
-
-  /**
-   * Sets game's terms returned from prolog.
-   */
   private def setGameTerms(goal: SolveInfo): Unit = {
     variant = goal.getTerm("V")
     playerToMove = goal.getTerm("P")
@@ -295,5 +214,4 @@ case class ParserPrologImpl() extends ParserProlog {
       implicit def parsePlayer: Player = Player.values.filter(_.parserString.equals(base.toString)).head
     }
   }
-
 }

@@ -1,6 +1,8 @@
-package view
+package view.utils
 
 import java.awt.GridBagConstraints
+
+import view.factories.GameFactory
 
 object GridConstraints {
 

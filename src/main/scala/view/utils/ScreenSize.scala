@@ -1,4 +1,4 @@
-package view
+package view.utils
 
 import java.awt.{Dimension, Toolkit}
 
@@ -25,5 +25,3 @@ object ScreenSize {
       */
     def getSmallerSide: Int = smallerSide
 }
-
-
