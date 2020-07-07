@@ -15,7 +15,7 @@ class EvaluationFunctionTest extends FunSuite {
   var snapshot: GameSnapshot = _
   var game: (Player.Val, Player.Val, Board, Int) = _
 
-  test("Tests Score King Near Corner - Brandubh"){
+  test("Tests score king near corner - Brandubh"){
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -30,7 +30,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
   }
 
-  test("Tests Score King To Corner In One - Brandubh"){
+  test("Tests score king to corner in one - Brandubh"){
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -43,7 +43,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
   }
 
-  test("Tests Score Capture King In One On Throne - Tablut"){
+  test("Tests score capture king in one on throne - Tablut"){
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -61,7 +61,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
-  test("Tests Score Capture King Near Throne - Tablut"){
+  test("Tests score capture king near throne - Tablut"){
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -75,7 +75,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
-  test("Test Score Capture King Far From Throne - Brandubh") {
+  test("Test score capture king far from throne - Brandubh") {
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -87,7 +87,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
-  test("Test Score Capture King Far From Throne - Tawlbwurdd") {
+  test("Test score capture king far from throne - Tawlbwurdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -103,14 +103,14 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
-  test("Test Initial Score Is Draw - Brandubh") {
+  test("Test initial score is draw - Brandubh") {
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
     assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.Draw)
   }
 
-  test("Test Score Black Ahead - Brandubh") {
+  test("Test score black ahead - Brandubh") {
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -135,7 +135,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Newcomer) < -100)
   }
 
-  test("Test Score White Ahead With Rows And Columns Owned - Hnefatafl") {
+  test("Test score white ahead with rows and columns owned - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -156,7 +156,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Standard) > 50)
   }
 
-  test("Test Score Black Surround King On Three Side - Tawlbwrdd") {
+  test("Test score black surround king on three side - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -172,7 +172,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.score(snapshot, Level.Newcomer) < -90)
   }
 
-  test("Test Score Captured Pieces (4 whites / 2 blacks) - Hnefatafl") {
+  test("Test score captured pieces (4 whites / 2 blacks) - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
@@ -193,7 +193,7 @@ class EvaluationFunctionTest extends FunSuite {
       EvaluationFunction.scoreCapturedWhite(snapshot) == 200)
   }
 
-  test("Test Score White Towers Near Throne - Hnefatafl") {
+  test("Test score white towers near throne - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -203,7 +203,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreTower == ScoreProvider.TowerCoefficient * numberOfTowers)
   }
 
-  test("Test Score White King On Throne - Tablut") {
+  test("Test score white king on throne - Tablut") {
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -212,7 +212,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreKingOnThrone == ScoreProvider.KingOnThrone)
   }
 
-  test("Test Score White King Far From Throne - Tablut") {
+  test("Test score white king far from throne - Tablut") {
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -234,7 +234,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreKingOnThrone == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
   }
 
-  test("Test Score Right Barricade On 3 Sides and Wrong Circle Cordon - Tawlbwrdd") {
+  test("Test score right barricade on 3 sides and wrong circle cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
@@ -253,7 +253,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
-  test("Test Score Circle Cordon On All Sides - Tawlbwrdd") {
+  test("Test score circle cordon on all sides - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
@@ -292,7 +292,7 @@ class EvaluationFunctionTest extends FunSuite {
       + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
-  test("Test Score Right Circle Cordon - Tawlbwrdd") {
+  test("Test score right circle cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -350,7 +350,7 @@ class EvaluationFunctionTest extends FunSuite {
     + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
-  test("Test Score Wrong Circle Cordon - Hnefatafl") {
+  test("Test score wrong circle cordon - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -380,7 +380,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon)
   }
 
-  test("Test Score Right Diagonal Barricade - Hnefatafl") {
+  test("Test score right diagonal barricade - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -396,7 +396,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
-  test("Test Score Right Vertical Barricade - Tablut") {
+  test("Test score right vertical barricade - Tablut") {
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -428,7 +428,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
-  test("Test Score Right Horizontal Barricade and Wrong Circle Cordon - Tawlbwrdd") {
+  test("Test score right horizontal barricade and wrong circle cordon - Tawlbwrdd") {
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -456,7 +456,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
-  test("Tests Score Wrong Barricade (2 black, 1 white) - Tawlbwrdd"){
+  test("Tests score wrong barricade (2 black, 1 white) - Tawlbwrdd"){
     game = prolog.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -475,7 +475,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(wrongBarricade._2 == 2 * ScoreProvider.WrongBarricade && wrongBarricade._1 == ScoreProvider.WrongBarricade)
   }
 
-  test("Tests Score Two Black on King's diagonal - Tablut"){
+  test("Tests score two black on king's diagonal - Tablut"){
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -496,7 +496,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(blackOnDiagonalScore == ScoreProvider.BlackOnDiagonalKing * 2)
   }
 
-  test("Test Score Last Black Moved Catchable In One - Hnefatafl") {
+  test("Test score last black moved catchable in one - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -509,7 +509,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastBlackMovedCatchableInOne)
   }
 
-  test("Test Score Last White Moved Catchable In One - Brandubh") {
+  test("Test score last white moved catchable in one - Brandubh") {
     game = prolog.createGame(GameVariant.Brandubh.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -521,7 +521,7 @@ class EvaluationFunctionTest extends FunSuite {
     assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastWhiteMovedCatchableInOne)
   }
 
-  test("Test Score For All Difficulties - Hnefatafl") {
+  test("Test score for all difficulties - Hnefatafl") {
     game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -559,7 +559,7 @@ class EvaluationFunctionTest extends FunSuite {
       EvaluationFunction.computeAdvancedScore(snapshot) == -216)
   }
 
-  test("Test Score For All Difficulties - Tablut") {
+  test("Test score for all difficulties - Tablut") {
     game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
@@ -581,5 +581,4 @@ class EvaluationFunctionTest extends FunSuite {
       EvaluationFunction.computeStandardScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
       EvaluationFunction.computeAdvancedScore(snapshot) == ScoreProvider.KingEscapeToCorner)
   }
-
 }
