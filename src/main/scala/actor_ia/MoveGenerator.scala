@@ -7,25 +7,23 @@ import utils.{Coordinate, Move}
 
 object MoveGenerator {
 
-  def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
-    def _moves(cell: BoardCell): List[Move] = {
-      gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
-        .flatMap(_cutAfterPiece(_, cell)).toList
-    }
-
+  /** Not checking correct turn */
+  def coordPossibleMoves(cell: BoardCell, gameSnapshot: GameSnapshot): List[Move] = {
     def _cutAfterPiece(sequence: List[BoardCell], cell: BoardCell): List[Move] =
       sequence.takeWhile(_.getPiece.equals(Piece.Empty))
         .filter(_filterIfPawn(_, cell))
         .map(c => Move(cell.getCoordinate, c.getCoordinate))
-
     def _filterIfPawn(cellToInspect: BoardCell, movingCell: BoardCell): Boolean = {
       (!movingCell.getPiece.equals(Piece.WhiteKing) && !gameSnapshot.getBoard.specialCoordinates.contains(cellToInspect.getCoordinate)) ||
         movingCell.getPiece.equals(Piece.WhiteKing)
     }
-
+    gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
+      .flatMap(_cutAfterPiece(_, cell)).toList
+  }
+  def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     gameSnapshot.getBoard.rows.flatMap(_.flatMap(c =>
       if (isOwner(c.getPiece, gameSnapshot.getPlayerToMove))
-        _moves(c)
+        coordPossibleMoves(c, gameSnapshot)
       else List.empty
     ))
   }.toList
