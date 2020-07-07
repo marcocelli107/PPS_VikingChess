@@ -1,19 +1,28 @@
-package utils
+package model.game
 
-import model.Piece.Piece
-import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
+import model.game.BoardGame.DiagonalDirection.DiagonalDirection
+import model.game.BoardGame.OrthogonalDirection.OrthogonalDirection
+import model.game.Piece.Piece
 
 import scala.collection.immutable.HashMap
 
 /**
- * Util class representing a 2D coordinate
- */
+  * Util class representing a 2D coordinate
+  */
 
 object Coordinate {
   val COORD_STRING: String = "p"
+
+  implicit val coordinateOrdering: Ordering[Coordinate] = (a: Coordinate, b: Coordinate) => {
+    a.x compare b.x match {
+      case 0 => a.y compare b.y
+      case c => c
+    }
+  }
+
 }
 
-case class Coordinate(x: Int, y: Int)  {
+case class Coordinate(x: Int, y: Int) {
   override def toString: String = Coordinate.COORD_STRING + "(" + x + "," + y + ")"
 }
 
@@ -26,27 +35,27 @@ object BoardGame {
   trait BoardCell {
 
     /**
-     * Gets piece in the cell
-     *
-     * @return
-     *         the piece type
-     */
+      * Gets piece in the cell
+      *
+      * @return
+      * the piece type
+      */
     def getPiece: Piece
 
     /**
-     * Gets coordinate of the cell
-     *
-     * @return
-     *         the coordinate
-     */
+      * Gets coordinate of the cell
+      *
+      * @return
+      * the coordinate
+      */
     def getCoordinate: Coordinate
 
     /**
-     * Returns a string representation of the board
-     *
-     * @return
-     *         a string representation of the board
-     */
+      * Returns a string representation of the board
+      *
+      * @return
+      * a string representation of the board
+      */
     def toString: String
 
   }
@@ -73,20 +82,25 @@ object BoardGame {
     val Up, Right, Down, Left = Value
   }
 
+  object DiagonalDirection extends Enumeration {
+    type DiagonalDirection = Value
+    val UpRight, DownRight, DownLeft, UpLeft = Value
+  }
+
   trait Board {
     /**
-     * Defines board's cells list.
-     */
+      * Defines board's cells list.
+      */
     def rows: Seq[Seq[BoardCell]]
 
     /**
-     * Defines size of board's side.
-     */
+      * Defines size of board's side.
+      */
     def size: Int
 
     /**
-     * Gets a cell in the board from a coordinate.
-     */
+      * Gets a cell in the board from a coordinate.
+      */
     def getCell(coordinate: Coordinate): BoardCell
 
     def setCell(cell: BoardCell)
@@ -95,6 +109,8 @@ object BoardGame {
 
     def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]]
 
+    def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]]
+
     def specialCoordinates: List[Coordinate]
 
     def cornerCoordinates: List[Coordinate]
@@ -102,6 +118,8 @@ object BoardGame {
     def centerCoordinates: Coordinate
 
     def getCopy: Board
+
+    def consoleRepresentation: String
 
   }
 
@@ -115,10 +133,10 @@ object BoardGame {
 
       override def size: Int = allCells.length
 
-      override def getCell(coordinate: Coordinate): BoardCell = allCells (coordinate.x - 1) (coordinate.y - 1)
+      override def getCell(coordinate: Coordinate): BoardCell = allCells(coordinate.x - 1)(coordinate.y - 1)
 
       override def setCell(cell: BoardCell): Unit =
-        allCells = allCells.map(_.map(c => if(c.getCoordinate.equals(cell.getCoordinate)) cell else c))
+        allCells = allCells.map(_.map(c => if (c.getCoordinate.equals(cell.getCoordinate)) cell else c))
 
       override def equals(obj: Any): Boolean = this.rows.equals(obj.asInstanceOf[Board].rows)
 
@@ -130,6 +148,12 @@ object BoardGame {
           OrthogonalDirection.Down -> downCells(coordinate),
           OrthogonalDirection.Left -> leftCells(coordinate))
 
+      override def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]] =
+        HashMap(DiagonalDirection.UpRight -> upRightDiagonal(coordinate),
+          DiagonalDirection.UpLeft -> upLeftDiagonal(coordinate),
+          DiagonalDirection.DownRight -> downRightDiagonal(coordinate),
+          DiagonalDirection.DownLeft -> downLeftDiagonal(coordinate))
+
       private def upCells(coordinate: Coordinate): List[BoardCell] =
         (coordinate.x - 1 to 1 by -1).toList.map(Coordinate(_, coordinate.y)).map(getCell)
 
@@ -140,7 +164,22 @@ object BoardGame {
         (coordinate.x + 1 to size).toList.map(Coordinate(_, coordinate.y)).map(getCell)
 
       private def leftCells(coordinate: Coordinate): List[BoardCell] =
-        (coordinate.y - 1 to 1 by - 1).toList.map(Coordinate(coordinate.x, _)).map(getCell)
+        (coordinate.y - 1 to 1 by -1).toList.map(Coordinate(coordinate.x, _)).map(getCell)
+
+      private def upRightDiagonal(coordinate: Coordinate): List[BoardCell] =
+        (coordinate.x - 1 to 1 by -1).toList.map(x => Coordinate(x, coordinate.x + coordinate.y - x)).filter(isInBoard).map(getCell)
+
+      private def upLeftDiagonal(coordinate: Coordinate): List[BoardCell] =
+        (coordinate.x - 1 to 1 by -1).toList.map(x => Coordinate(x, coordinate.y - coordinate.x + x)).filter(isInBoard).map(getCell)
+
+      private def downRightDiagonal(coordinate: Coordinate): List[BoardCell] =
+        (coordinate.x + 1 to size).toList.map(x => Coordinate(x, coordinate.y + x - coordinate.x)).filter(isInBoard).map(getCell)
+
+      private def downLeftDiagonal(coordinate: Coordinate): List[BoardCell] =
+        (coordinate.x + 1 to size).toList.map(x => Coordinate(x, coordinate.x - x + coordinate.y)).filter(isInBoard).map(getCell)
+
+      private def isInBoard(coordinate: Coordinate): Boolean =
+        coordinate.x >= 1 && coordinate.x <= size & coordinate.y >= 1 && coordinate.y <= size
 
       override def specialCoordinates: List[Coordinate] =
         cornerCoordinates :+ centerCoordinates
@@ -152,6 +191,10 @@ object BoardGame {
       override def centerCoordinates: Coordinate = Coordinate(size / 2 + 1, size / 2 + 1)
 
       override def getCopy: Board = BoardImpl(allCells)
+
+      override def consoleRepresentation: String =
+        rows.map(_.map(_.getPiece.toString).flatMap(e => if (e == Piece.Empty.toString) "_" else e)
+          .mkString("  ") + "\n").mkString
     }
 
   }

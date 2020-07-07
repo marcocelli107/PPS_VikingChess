@@ -1,4 +1,4 @@
-package view
+package view.factories
 
 import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent}
@@ -7,6 +7,7 @@ import java.io.File
 
 import javax.imageio.ImageIO
 import javax.swing._
+import view.utils.ScreenSize
 
 trait MenuFactory {
 

@@ -1,4 +1,4 @@
-package view
+package view.utils
 
 import java.awt.Component
 
@@ -18,5 +18,3 @@ object JPanelAddAll {
   }
 
 }
-
-

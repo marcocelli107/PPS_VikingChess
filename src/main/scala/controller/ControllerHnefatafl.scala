@@ -1,15 +1,21 @@
 package controller
 
-import model.GameMode.GameMode
-import model.GameVariant.GameVariant
-import model.Level.Level
-import model.Player.Player
-import model.Snapshot.Snapshot
+import model.game.GameMode.GameMode
+import model.game.GameVariant.GameVariant
+import model.game.Level.Level
+import model.game.Player.Player
+import model.game.Snapshot.Snapshot
 import model._
+import model.game.{Coordinate, GameSnapshot, Move}
 import view.ViewHnefatafl
-import utils.{Coordinate, Move}
 
 trait ControllerHnefatafl {
+
+  /**
+    * Starts ViewGame.
+    *
+    */
+  def start: Unit
 
   /**
     * Calls model to a new game.
@@ -41,8 +47,7 @@ trait ControllerHnefatafl {
     * Calls model for making a move from coordinate to coordinate.
     *
     * @param move
-    *               move to make
-    *
+    * move to make
     * @return (board, numberBlackPiecesCaptured, numberWhitePiecesCaptured)
     */
   def makeMove(move: Move): Unit
@@ -51,7 +56,7 @@ trait ControllerHnefatafl {
     * Notifies the view that the move has been updated.
     *
     * @param gameSnapshot
-    *                 snapshot to show.
+    * snapshot to show.
     */
   def updateView(gameSnapshot: GameSnapshot): Unit
 
@@ -59,36 +64,33 @@ trait ControllerHnefatafl {
     * Notifies the viewer a change snapshot to view.
     *
     * @param gameSnapshot
-    *                 snapshot to show.
+    * snapshot to show.
     */
   def changeSnapshotView(gameSnapshot: GameSnapshot): Unit
 
   /**
-   * Checks if the cell at the specified coordinate is the central cell.
-   *
-   * @param coordinate
-   *                   coordinate of the cell to inspect
-   *
-   * @return boolean.
-   */
+    * Checks if the cell at the specified coordinate is the central cell.
+    *
+    * @param coordinate
+    * coordinate of the cell to inspect
+    * @return boolean.
+    */
   def isCentralCell(coordinate: Coordinate): Boolean
 
   /**
-   * Checks if the cell at the specified coordinate is a corner cell.
-   *
-   * @param coordinate
-   *                   coordinate of the cell to inspect
-   *
-   * @return boolean.
-   */
+    * Checks if the cell at the specified coordinate is a corner cell.
+    *
+    * @param coordinate
+    * coordinate of the cell to inspect
+    * @return boolean.
+    */
   def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
     * Checks if the cell at the specified coordinate is a init pawn cell.
     *
     * @param coordinate
-    *                   coordinate of the cell to inspect
-    *
+    * coordinate of the cell to inspect
     * @return boolean.
     */
   def isPawnCell(coordinate: Coordinate): Boolean
@@ -104,84 +106,84 @@ trait ControllerHnefatafl {
     * Returns a previous or later state of the current board.
     *
     * @param snapshotToShow
-    *                       indicates snapshot to show.
+    * indicates snapshot to show.
     */
   def changeSnapshot(snapshotToShow: Snapshot): Unit
 
   /**
-   * Undoes last move.
-   */
+    * Undoes last move.
+    */
   def undoMove(): Unit
 
   /**
     * Actives/Disables next and last move.
     */
   def activeNextLast()
+
   def disableNextLast()
 
   /**
     * Actives/Disables previous and first move.
     */
   def activeFirstPrevious()
+
   def disableFirstPrevious()
 
   /**
     * Actives/Disables undo move.
     */
   def activeUndo()
+
   def disableUndo()
 }
 
-object ControllerHnefatafl {
+object ControllerHnefatafl extends ControllerHnefatafl {
 
-  def apply: ControllerHnefatafl = ControllerHnefataflImpl()
+  private var viewGame: ViewHnefatafl = _
+  private var modelGame: ModelHnefatafl = _
 
-  case class ControllerHnefataflImpl() extends ControllerHnefatafl {
+  override def start: Unit = viewGame = ViewHnefatafl(this)
 
-    private val viewGame: ViewHnefatafl = ViewHnefatafl(this)
-    private var modelGame: ModelHnefatafl = _
-
-    override def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot = {
-      modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)
-      modelGame.createGame()
-    }
-
-    override def startGame(): Unit = modelGame.startGame()
-
-    override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = modelGame.showPossibleCells(coordinate)
-
-    override def getDimension: Int = modelGame.getDimension
-
-    override def makeMove(move: Move): Unit = modelGame.makeMove(move: Move)
-
-    override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
-
-    override def changeSnapshotView(gameSnapshot: GameSnapshot): Unit = viewGame.changeSnapshot(gameSnapshot)
-
-    override def isCentralCell(coordinate: Coordinate): Boolean = modelGame.isCentralCell(coordinate)
-
-    override def isCornerCell(coordinate: Coordinate): Boolean = modelGame.isCornerCell(coordinate)
-
-    override def isPawnCell(coordinate: Coordinate): Boolean = modelGame.isPawnCell(coordinate)
-
-    override def findKing(): Coordinate = modelGame.findKing()
-
-    override def changeSnapshot(snapshotToShow: Snapshot): Unit = modelGame.changeSnapshot(snapshotToShow)
-
-    override def undoMove(): Unit = modelGame.undoMove()
-
-    override def disableNextLast(): Unit = viewGame.disableNextLast()
-
-    override def disableFirstPrevious(): Unit = viewGame.disableFirstPrevious()
-
-    override def activeUndo(): Unit = viewGame.activeUndo()
-
-    override def disableUndo(): Unit = viewGame.disableUndo()
-
-    override def activeNextLast(): Unit = viewGame.activeNextLast()
-
-    override def activeFirstPrevious(): Unit = viewGame.activeFirstPrevious()
-
+  override def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot = {
+    modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)
+    modelGame.createGame()
   }
+
+  override def startGame(): Unit = modelGame.startGame()
+
+  override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = modelGame.showPossibleCells(coordinate)
+
+  override def getDimension: Int = modelGame.getDimension
+
+  override def makeMove(move: Move): Unit = modelGame.makeMove(move: Move)
+
+  override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
+
+  override def changeSnapshotView(gameSnapshot: GameSnapshot): Unit = viewGame.changeSnapshot(gameSnapshot)
+
+  override def isCentralCell(coordinate: Coordinate): Boolean = modelGame.isCentralCell(coordinate)
+
+  override def isCornerCell(coordinate: Coordinate): Boolean = modelGame.isCornerCell(coordinate)
+
+  override def isPawnCell(coordinate: Coordinate): Boolean = modelGame.isPawnCell(coordinate)
+
+  override def findKing(): Coordinate = modelGame.findKing()
+
+  override def changeSnapshot(snapshotToShow: Snapshot): Unit = modelGame.changeSnapshot(snapshotToShow)
+
+  override def undoMove(): Unit = modelGame.undoMove()
+
+  override def disableNextLast(): Unit = viewGame.disableNextLast()
+
+  override def disableFirstPrevious(): Unit = viewGame.disableFirstPrevious()
+
+  override def activeUndo(): Unit = viewGame.activeUndo()
+
+  override def disableUndo(): Unit = viewGame.disableUndo()
+
+  override def activeNextLast(): Unit = viewGame.activeNextLast()
+
+  override def activeFirstPrevious(): Unit = viewGame.activeFirstPrevious()
+
 }
 

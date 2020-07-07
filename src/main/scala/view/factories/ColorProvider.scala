@@ -1,7 +1,6 @@
-package view
+package view.factories
 
 import java.awt.Color
-
 
 object ColorProvider {
 

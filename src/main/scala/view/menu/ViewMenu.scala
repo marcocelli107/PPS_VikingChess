@@ -1,15 +1,18 @@
-package view
+package view.menu
 
-import java.awt.{Dimension, GridBagConstraints}
 import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.{Dimension, GridBagConstraints}
 
 import javax.swing._
-import model.GameMode.GameMode
-import model.GameVariant.GameVariant
-import model.Level.Level
-import model.Player.Player
-import model.{GameMode, GameVariant, Level, Player}
-import JPanelAddAll._
+import model.game.GameMode.GameMode
+import model.game.GameVariant.GameVariant
+import model.game.Level.Level
+import model.game.Player.Player
+import model.game.{GameMode, GameVariant, Level, Player}
+import view.ViewHnefatafl
+import view.factories.{GameFactory, MenuFactory}
+import view.utils.GridConstraints
+import view.utils.JPanelAddAll._
 
 trait ViewMenu {
 

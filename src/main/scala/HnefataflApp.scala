@@ -1,6 +1,6 @@
-import controller.ControllerHnefatafl.ControllerHnefataflImpl
+import controller.ControllerHnefatafl
 
 object HnefataflApp extends App {
-  new ControllerHnefataflImpl
+  ControllerHnefatafl.start
 }
 

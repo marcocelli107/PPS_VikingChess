@@ -1,17 +1,18 @@
 package model
 
-import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.MiniMax
-import model.GameMode.GameMode
-import model.GameSnapshot.GameSnapshotImpl
-import model.GameVariant.GameVariant
-import model.Level.Level
-import model.Player.Player
-import model.Snapshot.Snapshot
-import utils.BoardGame.Board
-import utils.{Coordinate, Move}
+import model.game.GameMode.GameMode
+import model.game.GameSnapshot.GameSnapshotImpl
+import model.game.GameVariant.GameVariant
+import model.game.Level.Level
+import model.game.Player.Player
+import model.game.Snapshot.Snapshot
+import model.game.BoardGame.Board
+import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg}
+import ia.pruning_alpha_beta.MiniMax
+import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
+import model.prolog.ParserProlog
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -116,14 +117,14 @@ object ModelHnefatafl {
 
   case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level, playerChosen: Player) extends ModelHnefatafl {
 
-    private val parserProlog: ParserProlog = ParserPrologImpl()
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
+    private val moveLogPrint: Boolean = false
 
     private var refIA: ActorRef = _
 
-    // TODO remove
     private var sequIA: MiniMax = _
+
 
     /**
      * Defines status of the current game.
@@ -151,10 +152,8 @@ object ModelHnefatafl {
 
     override def createGame(): GameSnapshot = {
 
-      game = parserProlog.createGame(currentVariant.toString.toLowerCase)
-
+      game = ParserProlog.createGame(currentVariant.toString.toLowerCase)
       storySnapshot = mutable.ListBuffer(GameSnapshotImpl(currentVariant, game._1, game._2, game._3, Option.empty, 0, 0))
-
       storySnapshot.last
     }
 
@@ -168,16 +167,16 @@ object ModelHnefatafl {
 
     override def showPossibleCells(cell: Coordinate): Seq[Coordinate] = {
       if (showingCurrentSnapshot)
-        parserProlog.showPossibleCells(cell)
+        ParserProlog.showPossibleCells(cell)
       else ListBuffer.empty
     }
 
 
     override def makeMove(move: Move): Unit = {
+      if(moveLogPrint)
+        println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
 
-      //println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
-
-      game = parserProlog.makeLegitMove(move)
+      game = ParserProlog.makeLegitMove(move)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
       var winner: Player = game._2
@@ -203,13 +202,13 @@ object ModelHnefatafl {
       }
     }
 
-    override def isCentralCell(coordinate: Coordinate): Boolean = parserProlog.isCentralCell(coordinate)
+    override def isCentralCell(coordinate: Coordinate): Boolean = ParserProlog.isCentralCell(coordinate)
 
-    override def isCornerCell(coordinate: Coordinate): Boolean = parserProlog.isCornerCell(coordinate)
+    override def isCornerCell(coordinate: Coordinate): Boolean = ParserProlog.isCornerCell(coordinate)
 
-    override def isPawnCell(coordinate: Coordinate): Boolean = parserProlog.isPawnCell(coordinate)
+    override def isPawnCell(coordinate: Coordinate): Boolean = ParserProlog.isPawnCell(coordinate)
 
-    override def findKing(): Coordinate = parserProlog.findKing()
+    override def findKing(): Coordinate = ParserProlog.findKing()
 
     override def changeSnapshot(previousOrNext: Snapshot): Unit = {
       previousOrNext match {
@@ -227,7 +226,7 @@ object ModelHnefatafl {
         storySnapshot -= storySnapshot.last
         currentSnapshot -= 1
         controller.activeFirstPrevious()
-        parserProlog.undoMove(storySnapshot.last.getBoard)
+        ParserProlog.undoMove(storySnapshot.last.getBoard)
         pveUndoMove()
         controller.changeSnapshotView(storySnapshot.last)
       }
@@ -247,7 +246,7 @@ object ModelHnefatafl {
       if(mode.equals(GameMode.PVE) & storySnapshot.size > 1) {
         storySnapshot -= storySnapshot.last
         currentSnapshot -= 1
-        parserProlog.undoMove(storySnapshot.last.getBoard)
+        ParserProlog.undoMove(storySnapshot.last.getBoard)
       }
     }
 
@@ -314,8 +313,8 @@ object ModelHnefatafl {
       */
     private def initIA(): Unit = {
       val system: ActorSystem = ActorSystem()
-      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA.depth)))
-      //sequIA = MiniMaxImpl(levelIA.depth)
+      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA)))
+      //sequIA = MiniMaxImpl(levelIA)
     }
 
     /**

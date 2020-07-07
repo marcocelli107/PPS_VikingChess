@@ -1,8 +1,10 @@
-package view
+package view.factories
 
 import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent}
 import java.io.File
+
+import view.utils.ScreenSize
 
 //import javafx.scene.media.{Media, MediaPlayer}
 

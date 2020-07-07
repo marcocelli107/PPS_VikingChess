@@ -1,20 +1,21 @@
-package actor_ia
+package ia.minimax
 
 import akka.actor.ActorRef
-import utils.Move
+import model.game.Level.Level
+import model.game.Move
 
 import scala.collection.immutable
 
 object RootActor {
 
-  case class MaxRootActor() extends MaxActor() {
+  case class MaxRootActor(levelIA: Level) extends MaxActor(levelIA) {
 
     override def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
       rootUpdateBestMove(hashMapSonRef, sonRef)
 
   }
 
-  case class MinRootActor() extends MinActor() {
+  case class MinRootActor(levelIA: Level) extends MinActor(levelIA) {
 
     override def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
       rootUpdateBestMove(hashMapSonRef, sonRef)

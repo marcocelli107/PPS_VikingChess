@@ -1,16 +1,18 @@
-package view
+package view.game
 
 import java.awt.event.ActionListener
 import java.awt.{Dimension, GridBagConstraints}
 
 import javax.swing._
-import model.Piece.Piece
-import model.Player.Player
-import model.Snapshot.Snapshot
-import model._
-import utils.BoardGame.{Board, BoardCell}
-import utils.{Coordinate, Move}
-import JPanelAddAll._
+import model.game.BoardGame.{Board, BoardCell}
+import model.game.Piece.Piece
+import model.game.Player.Player
+import model.game.Snapshot.Snapshot
+import model.game._
+import view.ViewHnefatafl
+import view.factories.{Cell, ColorProvider, GameFactory, MenuFactory}
+import view.utils.GridConstraints
+import view.utils.JPanelAddAll._
 
 import scala.collection.mutable
 

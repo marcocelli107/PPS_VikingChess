@@ -1,4 +1,4 @@
-package model
+package model.game
 
 /**
   * Defines Enumeration for the game mode.

@@ -1,29 +1,64 @@
-package actor_ia
+package ia.minimax
 
 import akka.actor.{Actor, ActorRef, Props}
-import ia.EvaluationFunction
-import model.Player.Player
-import model._
-import utils.Move
+import ia.evaluation_function.EvaluationFunction
+import model.game.Level.Level
+import model.game.Player.Player
+import model.game.{GameSnapshot, Move, MoveGenerator, Player}
+import scala.collection.{immutable, mutable}
 
-import scala.collection.mutable
-import scala.collection.immutable
-
+/**
+ * The InitMsg message tells the actors to start exploring the tree starting from a specific snapshot,
+ *
+ * with a specific level of depth and for a specific move.
+ *
+ * @param gameSnapshot
+ *                     initial game snapshot
+ * @param depth
+ *              depth of search in the tree
+ * @param move
+ *             useful move to calculate the new search snapshot
+ * */
 case class InitMsg(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move])
 
+/**
+ * The MakeMoveMsg message tells himself to make the move and calculate the new game snapshot
+ *
+ * */
 case class MakeMoveMsg()
 
+/**
+ * The CheckLeafOrBranchMsg message tells himself to check if a new game snapshot is a terminal node,
+ *
+ * otherwise he continues to analyze the child nodes
+ *
+ * */
 case class CheckLeafOrBranchMsg()
 
+/**
+ * The EvaluationMsg message tells himself to evaluate that game snapshot
+ *
+ * */
 case class EvaluationMsg()
 
+/**
+ * The EvaluationMsg message tells himself to generate the children for the new computed game snapshot
+ *
+ * */
 case class GenerateChildrenMsg()
 
+/**
+ * The ValueSonMsg message is the message send from children to father with computed score
+ *
+ * @param score
+ *              computed score
+ * */
 case class ValueSonMsg(score: Int)
+
 
 case class ActorState(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, alfa: Int)
 
-abstract class MiniMaxActor() extends Actor {
+abstract class MiniMaxActor(levelIA: Level) extends Actor {
 
   override def receive: Receive = {
     case event: InitMsg =>
@@ -78,7 +113,7 @@ abstract class MiniMaxActor() extends Actor {
   def isTerminalNode(gameStatus: Player, depth: Int): Boolean = !gameStatus.equals(Player.None) || depth == 0
 
   def computeEvaluationFunction(fatherRef: ActorRef, currentGame: GameSnapshot, move: Move): Unit =
-    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame))
+    fatherRef ! ValueSonMsg(EvaluationFunction.score(currentGame, levelIA))
 
   def generateChildren(actorState: ActorState): Unit = {
     val gamePossibleMoves = MoveGenerator.gamePossibleMoves(actorState.gameSnapshot.getCopy)
