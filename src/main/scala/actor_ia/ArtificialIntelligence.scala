@@ -5,8 +5,20 @@ import akka.actor.{Actor, Props}
 import model._
 import utils.Move
 
+/**
+ * Message used by the IA to return at model the best computed move
+ *
+ * @param bestMove
+ *                 best move
+ */
 case class ReturnBestMoveMsg(bestMove: Move)
 
+/**
+ * Message used by the model to communicate at IA to start of the search for the best move for that snapshot
+ *
+ * @param gameSnapshot
+ *                     game snapshot
+*/
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
 object ArtificialIntelligenceImpl {

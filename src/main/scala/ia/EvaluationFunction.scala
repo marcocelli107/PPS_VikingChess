@@ -416,6 +416,8 @@ object EvaluationFunction {
       cordon.size * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon
   }
 
+
+
   def checkNotCircleCordon(cordon: Seq[Coordinate]): Int = {
     if(isCorrectNotCircleCordon(cordon)) {
       var sequences: (Seq[BoardCell],Seq[BoardCell]) = (Seq.empty,Seq.empty)

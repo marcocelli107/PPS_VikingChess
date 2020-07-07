@@ -3,7 +3,7 @@ import actor_ia.MoveGenerator
 import model._
 import utils.Move
 
-trait MiniMax {
+sealed trait MiniMax {
 
   def findBestMove(gameSnapshot: GameSnapshot):Move
 
