@@ -200,7 +200,7 @@ class EvaluationFunctionTest extends FunSuite {
     val numberOfTowers = 4
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreTower() == ScoreProvider.TowerCoefficient * numberOfTowers)
+    assert(EvaluationFunction.scoreTower == ScoreProvider.TowerCoefficient * numberOfTowers)
   }
 
   test("Test Score White King On Throne - Tablut") {
@@ -209,7 +209,7 @@ class EvaluationFunctionTest extends FunSuite {
 
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreKingOnThrone() == ScoreProvider.KingOnThrone)
+    assert(EvaluationFunction.scoreKingOnThrone == ScoreProvider.KingOnThrone)
   }
 
   test("Test Score White King Far From Throne - Tablut") {
@@ -231,7 +231,7 @@ class EvaluationFunctionTest extends FunSuite {
 
     val quadraticDistanceFromKingToThrone = 10
 
-    assert(EvaluationFunction.scoreKingOnThrone() == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
+    assert(EvaluationFunction.scoreKingOnThrone == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
   }
 
   test("Test Score Right Barricade On 3 Sides and Wrong Circle Cordon - Tawlbwrdd") {
@@ -250,7 +250,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon = 14 + 4
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
   test("Test Score Circle Cordon On All Sides - Tawlbwrdd") {
@@ -288,7 +288,7 @@ class EvaluationFunctionTest extends FunSuite {
     val whitePawnsInCordon: Int = 13
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
       + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
@@ -346,7 +346,7 @@ class EvaluationFunctionTest extends FunSuite {
     val whitePawnsInCordon: Int = 12
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
     + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
@@ -377,7 +377,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 10
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon)
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon)
   }
 
   test("Test Score Right Diagonal Barricade - Hnefatafl") {
@@ -393,7 +393,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 3
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
   test("Test Score Right Vertical Barricade - Tablut") {
@@ -425,7 +425,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 9
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
   test("Test Score Right Horizontal Barricade and Wrong Circle Cordon - Tawlbwrdd") {
@@ -453,7 +453,7 @@ class EvaluationFunctionTest extends FunSuite {
     val blackPawnsInCordon: Int = 13 + 4
     EvaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon() == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
+    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
   test("Tests Score Wrong Barricade (2 black, 1 white) - Tawlbwrdd"){
@@ -470,7 +470,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(1,10)))
 
     EvaluationFunction.usefulValues(snapshot)
-    val wrongBarricade = EvaluationFunction.scoreWrongBarricade()
+    val wrongBarricade = EvaluationFunction.scoreWrongBarricade
 
     assert(wrongBarricade._2 == 2 * ScoreProvider.WrongBarricade && wrongBarricade._1 == ScoreProvider.WrongBarricade)
   }
@@ -491,7 +491,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(3,4)))
 
     EvaluationFunction.usefulValues(snapshot)
-    val blackOnDiagonalScore = EvaluationFunction.scoreBlackOnKingDiagonal()
+    val blackOnDiagonalScore = EvaluationFunction.scoreBlackOnKingDiagonal
 
     assert(blackOnDiagonalScore == ScoreProvider.BlackOnDiagonalKing * 2)
   }
