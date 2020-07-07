@@ -8,17 +8,12 @@ import utils.{Coordinate, Move}
 
 import scala.collection.mutable.ListBuffer
 
-/**
-  *   @author Luca Nannini
-  *   @author Giovanni Maria Speciale
-  */
-
 @RunWith(classOf[JUnitRunner])
 class ParserTests extends FunSuite with MockFactory with Matchers {
 
   val parser: ParserProlog = ParserPrologImpl(TheoryGame.GameRules.toString)
 
-  test("Tests of a correct horizontal capture of white pawn.") {
+  test("Tests of a correct horizontal capture of white pawn - Hnefatafl") {
     inSequence {
       parser.createGame(GameVariant.Hnefatafl.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(4,4)))
@@ -28,7 +23,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     parser.showPossibleCells(Coordinate(4,5)) shouldBe ListBuffer.empty
   }
 
-  test("Tests of a correct vertical capture of black pawn.") {
+  test("Tests of a correct vertical capture of black pawn - Hnefatafl") {
     inSequence {
       parser.createGame(GameVariant.Hnefatafl.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(7,1), Coordinate(7,4)))
@@ -37,7 +32,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     parser.showPossibleCells(Coordinate(7,4)) shouldBe ListBuffer.empty
   }
 
-  test("Tests of a uncorrect capture of black pawn.") {
+  test("Tests of a uncorrect capture of black pawn - Hnefatafl") {
     inSequence {
       parser.createGame(GameVariant.Hnefatafl.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(2,6), Coordinate(3,6)))
@@ -47,7 +42,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._4 shouldBe 0
   }
 
-  test("Tests king captured in Brandubh.") {
+  test("Tests king captured - Brandubh") {
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,5)))
@@ -61,7 +56,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Black
   }
 
-  test("Tests white wins in Brandubh.") {
+  test("Tests white wins - Brandubh") {
     inSequence {
     parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(4,6), Coordinate(2,6)))
@@ -74,7 +69,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.White
   }
 
-  test("Tests king captured on throne in Brandubh.") {
+  test("Tests king captured on throne - Brandubh") {
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,6)))
@@ -90,7 +85,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Black
   }
 
-  test("Tests horizontal king captured in Tablut.") {
+  test("Tests horizontal king captured - Tablut") {
     inSequence {
       parser.createGame(GameVariant.Tablut.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(1,6), Coordinate(2,6)))
@@ -104,7 +99,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Black
   }
 
-  test("Tests vertical king captured in Tablut.") {
+  test("Tests vertical king captured - Tablut") {
     inSequence {
       parser.createGame(GameVariant.Tablut.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(4,1), Coordinate(4,3)))
@@ -118,7 +113,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Black
   }
 
-  test("Tests king captured far from throne in Tawlbwrdd.") {
+  test("Tests king captured far from throne - Tawlbwrdd") {
     inSequence {
       parser.createGame(GameVariant.Tawlbwrdd.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(6,9), Coordinate(1,9)))
@@ -134,7 +129,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Black
   }
 
-  test("Tests king not captured on 2 sides next to throne in Brandubh") {
+  test("Tests king not captured on 2 sides next to throne - Brandubh") {
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(4,6), Coordinate(1,6)))
@@ -150,7 +145,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.None
   }
 
-  test("Tests draw in Brandubh.") {
+  test("Tests draw - Brandubh") {
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(4, 6), Coordinate(1, 6)))
@@ -174,7 +169,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Draw
   }
 
-  test("Tests 1 deep clone."){
+  test("Tests 1 deep clone"){
     var copyParser: ParserProlog = null
 
     parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
@@ -186,12 +181,12 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     parser.makeLegitMove(Move(Coordinate(1,5), Coordinate(3,5)))
     parser.makeLegitMove(Move(Coordinate(4,3), Coordinate(1,3)))
 
-
     assert(!parser.equals(copyParser))
   }
 
-  test("Tests 2 deep clone."){
+  test("Tests 2 deep clone"){
     var copyParser: ParserProlog = null
+
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       parser.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,5)))
@@ -202,8 +197,9 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     assert(parser.equals(copyParser))
   }
 
-  test("Tests 3 deep clone.") {
+  test("Tests 3 deep clone") {
     var copyParser: ParserProlog = null
+
     inSequence {
       parser.createGame(GameVariant.Brandubh.toString().toLowerCase())
       copyParser = parser.copy()
@@ -212,7 +208,4 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     assert(parser.showPossibleCells(Coordinate(1, 4)).isEmpty)
     assert(copyParser.showPossibleCells(Coordinate(1, 4)).nonEmpty)
   }
-
-
-
 }
