@@ -577,6 +577,7 @@ class EvaluationFunctionTest extends FunSuite {
 
     EvaluationFunction.usefulValues(snapshot)
 
+    println(snapshot.getBoard.consoleRepresentation)
     assert(EvaluationFunction.computeNewcomerScore(snapshot) == -28 &&
       EvaluationFunction.computeStandardScore(snapshot) == -900 &&
       EvaluationFunction.computeAdvancedScore(snapshot) == -900)

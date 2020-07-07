@@ -1,6 +1,7 @@
 package ia
 
-import actor_ia.{MoveGenerator, ScoreProvider}
+import actor_ia.{ArtificialIntelligenceImpl, FindBestMoveMsg, MoveGenerator, ScoreProvider}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import model._
 import utils.BoardGame.OrthogonalDirection.OrthogonalDirection
 import utils.BoardGame.{Board, BoardCell, OrthogonalDirection}
@@ -20,6 +21,7 @@ object EvaluationFunction {
   private var whiteCoords: Seq[Coordinate] = _
   private var gamePossibleMoves: Seq[Move] = _
   private var board: Board = _
+
 
   def score(snapshot: GameSnapshot, levelIA: Level.Val): Int = snapshot.getWinner match {
     case Player.Black => -ScoreProvider.BlackWin
@@ -99,7 +101,7 @@ object EvaluationFunction {
 
       newcomerScore -= scoreBlackSurroundTheKing() +
                         scoreBlackOnKingDiagonal() +
-                        scoreCapturedWhite(snapshot)
+                        scoreCapturedWhite(snapshot) 
       newcomerScore += scoreKingOnThrone() +
                         scoreKingIsInFreeRowOrColumn() +
                         scoreCapturedBlack(snapshot)
@@ -115,6 +117,7 @@ object EvaluationFunction {
       standardScore = -ScoreProvider.KingCatchableInOne
     }
     if(standardScore == 0 || standardScore.abs != ScoreProvider.PossibleWinInOne) {
+      //println(scoreBlackCordon())
       val scoreErroneousBarricade: (Int, Int) = scoreWrongBarricade()
       standardScore -= scoreBlackCordon() - scoreErroneousBarricade._2
       standardScore += scoreTower() - scoreErroneousBarricade._1
@@ -646,8 +649,8 @@ object blabla extends App {
   val prolog: ParserProlog = ParserPrologImpl(THEORY)
   var snapshot: GameSnapshot = _
   var game: (Player.Val, Player.Val, Board, Int) = _
-  game = prolog.createGame(GameVariant.Tablut.toString().toLowerCase)
-  snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+  game = prolog.createGame(GameVariant.Hnefatafl.toString().toLowerCase)
+  snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
   /*
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,5)))
@@ -678,7 +681,7 @@ object blabla extends App {
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))*/
 
 
-
+/*
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(3,2)))
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,7)))
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,3)))
@@ -691,16 +694,34 @@ object blabla extends App {
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(6,7)))
   snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,2)))
 
+ */
 
+
+
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,7)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(2,3)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,8), Coordinate(5,8)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,10), Coordinate(9,10)))
+  snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,7)))
 
   EvaluationFunction.usefulValues(snapshot)
 
+
+  println(snapshot.getBoard.consoleRepresentation)
+
+
+
+  println(EvaluationFunction.computeNewcomerScore(snapshot))
+  println(EvaluationFunction.scoreBlackCordon())
+  //println(EvaluationFunction.computeStandardScore())
+  //println(EvaluationFunction.cordons)
 
   //println(snapshot.getBoard.consoleRepresentation)
 
   //println("Newcomer: " + EvaluationFunction.computeNewcomerScore(snapshot))
   //println("Standard: " + EvaluationFunction.computeStandardScore(snapshot))
-  println("Advanced: " + EvaluationFunction.computeAdvancedScore(snapshot))
+  //println("Advanced: " + EvaluationFunction.computeAdvancedScore(snapshot))
 
 
 }
