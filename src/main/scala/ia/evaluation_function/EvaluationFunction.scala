@@ -5,7 +5,6 @@ import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import model.game.Level.Level
 import model.game.Piece.Piece
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator, Piece, Player}
-
 import scala.collection.immutable.HashMap
 
 object EvaluationFunction {
@@ -271,8 +270,6 @@ object EvaluationFunction {
     }
     else 0
   }
-
-
 
   /**
     * WHITE SCORES

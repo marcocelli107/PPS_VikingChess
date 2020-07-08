@@ -3,6 +3,7 @@ package ia.pruning_alpha_beta
 import ia.evaluation_function.EvaluationFunction
 import model.game.Level.Level
 import model.game.MaxMin.MaxMin
+import model.game.Player.Player
 import model.game.{GameSnapshot, MaxMin, Move, MoveGenerator, Player}
 
 sealed trait MiniMax {
@@ -17,20 +18,32 @@ object MiniMaxImpl {
 
 class MiniMaxImpl(levelIA: Level) extends MiniMax {
 
-  override def findBestMove(gameSnapshot: GameSnapshot): Move = {
+    override def findBestMove(gameSnapshot: GameSnapshot): Move = {
 
-    @scala.annotation.tailrec
-    def _findBestMove(bestCoord: Option[Move], bestScore: Int, gamePossibleMove: List[Move]): Move = gamePossibleMove match {
-      case Nil => bestCoord.get
-      case h :: t =>
-        val sonGameSnapshot = MoveGenerator.makeMove(gameSnapshot.getCopy, h)
-        val moveScore = pruningAlfaBeta(sonGameSnapshot, levelIA.depth, Int.MinValue, Int.MaxValue, MaxMin.min)
-        val (newBestCoord, newBestScore) = if (bestScore > moveScore && bestCoord.nonEmpty) (bestCoord.get, bestScore) else (h, moveScore)
-        _findBestMove(Option(newBestCoord), newBestScore, t)
+      @scala.annotation.tailrec
+      def _findBestMove(bestMove: Option[Move], bestScore: Int, gamePossibleMove: List[Move]): Move = gamePossibleMove match {
+        case Nil => bestMove.get
+        case h :: t =>
+          val sonGameSnapshot = MoveGenerator.makeMove(gameSnapshot.getCopy, h)
+          val moveScore = pruningAlfaBeta(sonGameSnapshot, levelIA.depth - 1 , Int.MinValue, Int.MaxValue, getMinOrMaxPhase(gameSnapshot.getPlayerToMove))
+          val (newBestMove, newBestScore) = chooseTheBest(h,bestMove,bestScore,moveScore,gameSnapshot.getPlayerToMove)
+          _findBestMove(newBestMove , newBestScore, t)
+      }
+
+      _findBestMove(Option.empty, Int.MinValue, MoveGenerator.gamePossibleMoves(gameSnapshot))
     }
 
-    _findBestMove(Option.empty, Int.MinValue, MoveGenerator.gamePossibleMoves(gameSnapshot))
-  }
+    private def chooseTheBest(move: Move, bestCoord: Option[Move], bestScore:Int, newScore:Int, iaPlayer: Player):(Option[Move],Int) =  iaPlayer match {
+      case Player.White if (newScore > bestScore && bestCoord.nonEmpty) => (Option(move), newScore)
+      case Player.Black if (newScore < bestScore && bestCoord.nonEmpty) => (Option(move), newScore)
+      case _  if bestCoord.isEmpty=> (Option(move),newScore )
+      case _ => (bestCoord,bestScore)
+    }
+
+    private def getMinOrMaxPhase(iaPlayer: Player): MaxMin = iaPlayer match {
+      case Player.Black => MaxMin.min
+      case _ => MaxMin.Max
+    }
 
 
   def pruningAlfaBeta(sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin): Int = (depth, phase) match {
