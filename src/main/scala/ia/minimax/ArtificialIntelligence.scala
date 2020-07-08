@@ -1,6 +1,6 @@
 package ia.minimax
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, PoisonPill, Props}
 import ia.minimax.RootActor.{MaxRootActor, MinRootActor}
 import model.game.Level.Level
 import model.game.Player.Player
@@ -23,6 +23,8 @@ case class ReturnBestMoveMsg(bestMove: Move)
 */
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
+case class RestartMsg()
+
 object ArtificialIntelligenceImpl {
 
   def apply(model: ModelHnefatafl, levelIA: Level): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, levelIA)
@@ -32,7 +34,12 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
-    case event: ReturnBestMoveMsg => model.makeMove(event.bestMove); context.stop(sender())
+    case event: ReturnBestMoveMsg => model.makeMove(event.bestMove); context.stop(sender()); self ! PoisonPill
+    case _: RestartMsg => context.become(restartState)
+  }
+
+  def restartState: Receive = {
+    case _: ReturnBestMoveMsg => context.stop(sender()); self ! PoisonPill
   }
 
   def findBestMove(gameSnapshot: GameSnapshot): Unit = {

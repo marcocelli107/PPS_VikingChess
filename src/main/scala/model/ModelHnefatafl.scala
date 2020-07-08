@@ -9,7 +9,7 @@ import model.game.Level.Level
 import model.game.Player.Player
 import model.game.Snapshot.Snapshot
 import model.game.BoardGame.Board
-import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg}
+import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg, RestartMsg}
 import ia.pruning_alpha_beta.MiniMax
 import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
 import model.prolog.ParserProlog
@@ -120,7 +120,7 @@ object ModelHnefatafl {
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
     private val moveLogPrint: Boolean = false
-
+    private var system: ActorSystem = _
     private var refIA: ActorRef = _
 
     //private var sequIA: MiniMax = _
@@ -160,7 +160,7 @@ object ModelHnefatafl {
     override def startGame(): Unit = {
       if(mode.equals(GameMode.PVE)) {
         initIA()
-        if (iaTurn)
+        if(iaTurn)
           makeMoveIA()
       }
     }
@@ -198,7 +198,7 @@ object ModelHnefatafl {
 
       controller.updateView(storySnapshot.last)
 
-      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn){
+      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn) {
         makeMoveIA()
       }
     }
@@ -235,18 +235,22 @@ object ModelHnefatafl {
         controller.disableFirstPrevious()
         controller.disableUndo()
       }
-      if(iaTurn)
-        makeMoveIA()
+      if(mode.equals(GameMode.PVE)) {
+        refIA ! RestartMsg()
+        if(iaTurn)
+          makeMoveIA()
+      }
     }
 
     /**
       * Sends a messages to IA actor for make a move.
       */
     private def makeMoveIA(): Unit = {
-      //SEQUENTIAL IA
+      //SEQUENTIAL PRUNING ALPHA-BETA
       //makeMove(sequIA.findBestMove(storySnapshot.last))
 
-      //PARALLEL
+      //MINIMAX ACTORS
+      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA)))
       refIA ! FindBestMoveMsg(storySnapshot.last)
     }
 
@@ -301,8 +305,7 @@ object ModelHnefatafl {
       * Actives the IA Actor
       */
     private def initIA(): Unit = {
-      val system: ActorSystem = ActorSystem()
-      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA)))
+      system = ActorSystem()
       //sequIA = MiniMaxImpl(levelIA)
     }
 
