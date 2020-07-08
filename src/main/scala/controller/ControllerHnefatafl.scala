@@ -15,7 +15,7 @@ trait ControllerHnefatafl {
     * Starts ViewGame.
     *
     */
-  def start: Unit
+  def start(): Unit
 
   /**
     * Calls model to a new game.
@@ -142,7 +142,7 @@ object ControllerHnefatafl extends ControllerHnefatafl {
   private var viewGame: ViewHnefatafl = _
   private var modelGame: ModelHnefatafl = _
 
-  override def start: Unit = viewGame = ViewHnefatafl(this)
+  override def start(): Unit = viewGame = ViewHnefatafl(this)
 
   override def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot = {
     modelGame = ModelHnefatafl(this, variant, gameMode, levelIA, playerChosen)

@@ -123,7 +123,7 @@ object ModelHnefatafl {
 
     private var refIA: ActorRef = _
 
-    private var sequIA: MiniMax = _
+    //private var sequIA: MiniMax = _
 
 
     /**
@@ -166,9 +166,12 @@ object ModelHnefatafl {
     }
 
     override def showPossibleCells(cell: Coordinate): Seq[Coordinate] = {
-      if (showingCurrentSnapshot)
-        ParserProlog.showPossibleCells(cell)
-      else ListBuffer.empty
+      if(!iaTurn)
+        if (showingCurrentSnapshot)
+          ParserProlog.showPossibleCells(cell)
+        else ListBuffer.empty
+      else
+        ListBuffer.empty
     }
 
 
@@ -186,9 +189,7 @@ object ModelHnefatafl {
 
       storySnapshot += GameSnapshot(currentVariant, game._1, winner, game._3, Option(move), pieceCaptured._1, pieceCaptured._2)
 
-      //println(storySnapshot.last.getNumberCapturedWhites + ", " + storySnapshot.last.getNumberCapturedBlacks)
       currentSnapshot += 1
-
 
       if(!(refIA != null & storySnapshot.size <= 2) || mode.equals(GameMode.PVP)) {
         controller.activeFirstPrevious()
@@ -227,27 +228,15 @@ object ModelHnefatafl {
         currentSnapshot -= 1
         controller.activeFirstPrevious()
         ParserProlog.undoMove(storySnapshot.last.getBoard)
-        pveUndoMove()
         controller.changeSnapshotView(storySnapshot.last)
       }
       if(storySnapshot.size == 1) {
         controller.disableNextLast()
         controller.disableFirstPrevious()
         controller.disableUndo()
-        if(iaTurn)
-          makeMoveIA()
       }
-    }
-
-    /**
-      * Deletes an other snapshot for start from user move.
-      */
-    private def pveUndoMove(): Unit = {
-      if(mode.equals(GameMode.PVE) & storySnapshot.size > 1) {
-        storySnapshot -= storySnapshot.last
-        currentSnapshot -= 1
-        ParserProlog.undoMove(storySnapshot.last.getBoard)
-      }
+      if(iaTurn)
+        makeMoveIA()
     }
 
     /**
@@ -322,6 +311,6 @@ object ModelHnefatafl {
       *
       * @return boolean
       */
-    private def iaTurn: Boolean = !storySnapshot.last.getPlayerToMove.equals(playerChosen)
+    private def iaTurn: Boolean = !(storySnapshot.last.getPlayerToMove.equals(playerChosen) || playerChosen.equals(Player.None))
   }
 }
