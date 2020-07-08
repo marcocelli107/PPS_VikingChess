@@ -4,7 +4,6 @@ import model.game.BoardGame.OrthogonalDirection.OrthogonalDirection
 import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import model.game.Level.Level
 import model.game.Piece.Piece
-import model._
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator, Piece, Player}
 
 import scala.collection.immutable.HashMap
@@ -101,7 +100,9 @@ object EvaluationFunction {
       snapshot.getPlayerToMove.equals(Player.White))
       newcomerScore += ScoreProvider.KingEscapeToCorner
 
-    if (kingCapturedInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.Black))
+    if ((kingCapturedInOne(snapshot) ||
+        ((kingToCornerInOne(snapshot) || kingNearToCornerInOne(snapshot)) && kingIsLockable(snapshot)))
+        && snapshot.getPlayerToMove.equals(Player.Black))
       newcomerScore -= ScoreProvider.KingCatchableInOne
 
     if(newcomerScore == 0) {
@@ -191,6 +192,23 @@ object EvaluationFunction {
   def kingCapturedInOne(gameSnapshot: GameSnapshot): Boolean = gameSnapshot.getVariant match {
     case GameVariant.Hnefatafl | GameVariant.Tawlbwrdd => kingCapturedInOneBigBoard()
     case _ => kingCapturedInOneSmallBoard(gameSnapshot)
+  }
+
+  /** Checks if the king is lockable.
+    *
+    * @param gameSnapshot
+    *                   current snapshot to checking block.
+    *
+    * @return boolean
+    */
+  def kingIsLockable(gameSnapshot: GameSnapshot): Boolean = {
+    val coordinateCornerToBlock = findCloserCorner(kingCoordinate)
+    for (black <- blackCoordinates) {
+      MoveGenerator.coordPossibleMoves(BoardCell(black, Piece.BlackPawn), gameSnapshot)
+        .map(_.to).contains(getOrthogonalCoordinates(coordinateCornerToBlock).values.filter(_.nonEmpty).map(_.get))
+      return true
+    }
+    false
   }
 
   /** Returns score according to who owns first and last three rows and columns.
@@ -379,7 +397,6 @@ object EvaluationFunction {
 
     score
   }
-
 
   private def isKingPossibleToMove(snapshot: GameSnapshot, listCoordinates: List[Coordinate]): Boolean =
     MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate,Piece.WhiteKing), snapshot).map(_.to).exists(listCoordinates.contains)
