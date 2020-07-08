@@ -253,7 +253,7 @@ object ViewMenu {
     private def selectVariantListener(variant: GameVariant): ActionListener = (_: ActionEvent) => {
       boardVariant = variant
       gameMode match {
-        case GameMode.PVP => view.switchOverlay(variantsPanel, playerChoicePanel)
+        case GameMode.PVP => chosenPlayer = Player.None; view.resetGUI()
         case GameMode.PVE => view.switchOverlay(variantsPanel, diffPanel)
       }
     }
@@ -269,6 +269,5 @@ object ViewMenu {
         chosenPlayer = player
         view.resetGUI()
       }
-
   }
 }

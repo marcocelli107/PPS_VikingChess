@@ -177,7 +177,7 @@ object ViewHnefatafl {
     private var menuPanel, variantsPanel, difficultyPanel, inGameMenuPanel, playerChoicePanel: JPanel = _
     private var dimension: Int = _
     private val viewMainMenu: ViewMenu = ViewMenu(this)
-    private val viewMatch: ViewGame = ViewGame(this)
+    private val viewGame: ViewGame = ViewGame(this)
     private val frame: JFrame = GameFactory.createFrame
     private val overlayPanel: JPanel = GameFactory.createOverlayLayoutPanel
     private var gamePanel: JPanel = GameFactory.createGamePanel
@@ -208,14 +208,14 @@ object ViewHnefatafl {
 
     override def resetGUI(): Unit = {
       if (gamePanel.getComponents.length > 0) {
-        viewMatch.restoreGame()
+        viewGame.restoreGame()
         overlayPanel.remove(gamePanel)
       }
       val newGame: GameSnapshot = controller.newGame(viewMainMenu.getBoardVariant, viewMainMenu.getGameMode, viewMainMenu.getDifficulty, viewMainMenu.getPlayer)
       dimension = newGame.getBoard.size
-      gamePanel = viewMatch.initGamePanel()
+      gamePanel = viewGame.initGamePanel()
       overlayPanel.add(gamePanel)
-      viewMatch.update(newGame)
+      viewGame.update(newGame)
       showGame()
       controller.startGame()
     }
@@ -224,9 +224,9 @@ object ViewHnefatafl {
 
     override def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate] = controller.getPossibleMoves(coordinate)
 
-    override def update(gameSnapshot: GameSnapshot): Unit = viewMatch.update(gameSnapshot)
+    override def update(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
 
-    override def changeSnapshot(gameSnapshot: GameSnapshot): Unit = viewMatch.updateSnapshot(gameSnapshot)
+    override def changeSnapshot(gameSnapshot: GameSnapshot): Unit = viewGame.updateSnapshot(gameSnapshot)
 
     override def isCentralCell(coordinate: Coordinate): Boolean = controller.isCentralCell(coordinate)
 
@@ -240,17 +240,17 @@ object ViewHnefatafl {
 
     override def undoMove(): Unit = controller.undoMove()
 
-    override def disableNextLast(): Unit = viewMatch.disableNextLast()
+    override def disableNextLast(): Unit = viewGame.disableNextLast()
 
-    override def disableFirstPrevious(): Unit = viewMatch.disableFirstPrevious()
+    override def disableFirstPrevious(): Unit = viewGame.disableFirstPrevious()
 
-    override def activeUndo(): Unit = viewMatch.activeUndo()
+    override def activeUndo(): Unit = viewGame.activeUndo()
 
-    override def disableUndo(): Unit = viewMatch.disableUndo()
+    override def disableUndo(): Unit = viewGame.disableUndo()
 
-    override def activeNextLast(): Unit = viewMatch.activeNextLast()
+    override def activeNextLast(): Unit = viewGame.activeNextLast()
 
-    override def activeFirstPrevious(): Unit = viewMatch.activeFirstPrevious()
+    override def activeFirstPrevious(): Unit = viewGame.activeFirstPrevious()
 
     override def getPlayerChosen: Player = viewMainMenu.getPlayer
 
@@ -258,6 +258,7 @@ object ViewHnefatafl {
 
     private def showGame(): Unit = {
       playerChoicePanel.setVisible(false)
+      variantsPanel.setVisible(false)
       gamePanel.setVisible(true)
     }
   }
