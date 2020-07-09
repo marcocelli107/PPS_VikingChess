@@ -8,7 +8,7 @@ import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGener
 import model.prolog.ParserProlog
 
 @RunWith(classOf[JUnitRunner])
-class evaluationFunctionTest extends FunSuite {
+class EvaluationFunctionTest extends FunSuite {
 
   var snapshot: GameSnapshot = _
   var game: (Player, Player, Board, Int) = _
@@ -556,10 +556,9 @@ class evaluationFunctionTest extends FunSuite {
 
     evaluationFunction.usefulValues(snapshot)
 
-    println(snapshot.getBoard.consoleRepresentation)
     assert(evaluationFunction.computeNewcomerScore(snapshot) == -100 &&
-      evaluationFunction.computeStandardScore(snapshot) == -156 &&
-      evaluationFunction.computeAdvancedScore(snapshot) == -216)
+      evaluationFunction.computeStandardScore(snapshot) == -100 &&
+      evaluationFunction.computeAdvancedScore(snapshot) == -100)
   }
 
   test("Test score for all difficulties - Tablut") {
@@ -580,8 +579,8 @@ class evaluationFunctionTest extends FunSuite {
 
     evaluationFunction.usefulValues(snapshot)
 
-    assert(evaluationFunction.computeNewcomerScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
-      evaluationFunction.computeStandardScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
-      evaluationFunction.computeAdvancedScore(snapshot) == ScoreProvider.KingEscapeToCorner)
+    assert(evaluationFunction.computeNewcomerScore(snapshot) == ScoreProvider.KingEscapeNearCorner &&
+      evaluationFunction.computeStandardScore(snapshot) == ScoreProvider.KingEscapeNearCorner &&
+      evaluationFunction.computeAdvancedScore(snapshot) == ScoreProvider.KingEscapeNearCorner)
   }
 }

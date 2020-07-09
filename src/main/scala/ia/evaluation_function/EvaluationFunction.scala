@@ -5,6 +5,7 @@ import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import model.game.Level.Level
 import model.game.Piece.Piece
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator, Piece, Player}
+
 import scala.collection.immutable.HashMap
 
 class EvaluationFunction {
@@ -93,16 +94,15 @@ class EvaluationFunction {
     if (kingAdjacentToCorner)
       newcomerScore += ScoreProvider.KingEscapeToCorner
     else {
+      if (kingToCornerInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.White))
+        newcomerScore = ScoreProvider.KingEscapeToCorner
+      else if (kingNearToCornerInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.White))
+        newcomerScore = ScoreProvider.KingEscapeNearCorner
 
-      // TODO kingtocorner kingnearcorner e kingislockable ripetuti, salvare i booleani in useful values
-
-      if (kingToCornerInOne(snapshot))
-        newcomerScore += ScoreProvider.KingEscapeToCorner
-      else if (kingNearToCornerInOne(snapshot))
-        newcomerScore += ScoreProvider.KingEscapeNearCorner
-
-      if (kingCapturedInOne(snapshot))
-        newcomerScore -= ScoreProvider.KingCatchableInOne
+      if (kingCapturedInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.Black))
+        newcomerScore = -ScoreProvider.KingCatchableInOne
+      else if(kingIsLockable(snapshot) && snapshot.getPlayerToMove.equals(Player.Black))
+        newcomerScore = -ScoreProvider.KingLockable
 
       if (newcomerScore == 0) {
         newcomerScore -= scoreBlackSurroundTheKing +
@@ -112,7 +112,6 @@ class EvaluationFunction {
           scoreKingIsInFreeRowOrColumn +
           scoreCapturedBlack(snapshot)
       }
-
     }
 
     newcomerScore
@@ -127,10 +126,10 @@ class EvaluationFunction {
   def computeStandardScore(snapshot: GameSnapshot): Int = {
     var standardScore: Int = computeNewcomerScore(snapshot)
 
-    if (standardScore == 0 || standardScore.abs != ScoreProvider.PossibleWinInOne) {
+    if (standardScore == 0 && standardScore.abs != ScoreProvider.PossibleWinInOne && standardScore.abs != ScoreProvider.PossibleWinInTwo) {
       val scoreErroneousBarricade: (Int, Int) = scoreWrongBarricade
       standardScore -= scoreBlackCordon - scoreErroneousBarricade._2
-      standardScore += scoreTower - scoreErroneousBarricade._1
+      standardScore += scoreMovesKing(snapshot) + scoreTower - scoreErroneousBarricade._1
     }
     standardScore
   }
@@ -143,7 +142,7 @@ class EvaluationFunction {
    */
   def computeAdvancedScore(snapshot: GameSnapshot): Int = {
     var advancedScore: Int = computeStandardScore(snapshot)
-    if (advancedScore == 0 || advancedScore.abs != ScoreProvider.PossibleWinInOne) {
+    if (advancedScore == 0 && advancedScore.abs != ScoreProvider.PossibleWinInOne && advancedScore.abs != ScoreProvider.PossibleWinInTwo) {
       val scoreRowOrColumnFree: (Int, Int) = scoreOwnerFirstLastThreeRowsOrColumns
       advancedScore -= scoreLastPawnMovedCatchableInOne(snapshot) + scoreRowOrColumnFree._2
       advancedScore += scoreLastPawnMovedCatchableInOne(snapshot) + scoreRowOrColumnFree._1
@@ -197,7 +196,6 @@ class EvaluationFunction {
    * @return boolean
    */
   def kingIsLockable(gameSnapshot: GameSnapshot): Boolean = {
-    //val coordinateCornerToBlock = findCloserCorner(kingCoordinate)
     // TODO BRUTTO LIST DI ELEMENTO SOLO
     val coordinatesToBlock = cornerCoordinates.filter(c => isKingPossibleToMove(gameSnapshot, List(c)))
     if(coordinatesToBlock.size == 1) {
@@ -240,11 +238,6 @@ class EvaluationFunction {
     var whiteScore = 0
     var blackScore = 0
     board.cornerCoordinates.flatMap(c => getOrthogonalCoordinates(c)).filter(p => p._2 != Option.empty).grouped(2).foreach {
-      /*case h :: t if wrongBarricadeType(board.getCell(h._2.get), board.getCell(t.head._2.get))
-        .equals(Piece.BlackPawn) => blackScore += ScoreProvider.WrongCordon
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get), board.getCell(t.head._2.get))
-        .equals(Piece.WhitePawn) => whiteScore += ScoreProvider.WrongCordon
-      case _ =>*/
       case h :: t =>
         val cells = (board.getCell(h._2.get), board.getCell(t.head._2.get))
         blackScore += wrongBarricadeType(Piece.BlackPawn, cells)
@@ -400,12 +393,17 @@ class EvaluationFunction {
     score
   }
 
+  /** Returns score according to king possible moves.
+    *
+    * @return score int
+    */
+  def scoreMovesKing(gameSnapshot: GameSnapshot): Int =
+    MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), gameSnapshot).size * ScoreProvider.PossibleKingMove
+
   private def isKingPossibleToMove(snapshot: GameSnapshot, listCoordinates: List[Coordinate]): Boolean =
     MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), snapshot).map(_.to).exists(listCoordinates.contains)
 
-
-  // todo private
-  def wrongBarricadeType(color: Piece, cells: (BoardCell, BoardCell)): Int =
+  private def wrongBarricadeType(color: Piece, cells: (BoardCell, BoardCell)): Int =
     (cells._1.getPiece, cells._2.getPiece) match {
       case (`color`, `color`) => ScoreProvider.WrongBarricade * 2
       case (`color`, _) | (_, `color`) => ScoreProvider.WrongBarricade
@@ -751,13 +749,13 @@ _  _  _  b  _  _  _
 
   var snapshot = GameSnapshot(GameVariant.Brandubh, Player.Black, Player.None, board, Option(Move(Coordinate(4, 4), Coordinate(1, 4))), 0, 0)
 
-  println(snapshot.getBoard.consoleRepresentation)
+  //println(snapshot.getBoard.consoleRepresentation)
 
   val ef = new EvaluationFunction
   ef.usefulValues(snapshot)
   //println(EvaluationFunction.scoreBlackCordon)
-  println(ef.score(snapshot, Level.Standard))
-  println(ef.scoreWrongBarricade)
+  //println(ef.score(snapshot, Level.Standard))
+  //println(ef.scoreWrongBarricade)
 
 
 }
