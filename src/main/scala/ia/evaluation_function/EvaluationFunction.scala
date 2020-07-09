@@ -513,14 +513,15 @@ object EvaluationFunction {
       }
       else
       if(sequences._1.map(_.getCoordinate).contains(board.centerCoordinates))
-        (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) -
-          - (sequences._1.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
+        outalierPenalty(sequences._1, cordon)
       else
-        (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) -
-          - (sequences._2.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
+        outalierPenalty(sequences._2, cordon)
     } else
       0
   }
+
+  private def outalierPenalty(seq: Seq[BoardCell], cordon: Seq[Coordinate]):Int =
+    (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) - (seq.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
 
   private def isCorrectCircleCordon(innerCells: Seq[BoardCell]): Boolean = innerCells.count(_.getPiece.equals(Piece.Empty)) == 0 ||
     innerCells.count(_.getPiece.equals(Piece.WhitePawn)) > 3 || innerCells.exists(_.getPiece.equals(Piece.WhiteKing))
