@@ -4,7 +4,6 @@ import model.game.BoardGame.OrthogonalDirection.OrthogonalDirection
 import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import model.game.Level.Level
 import model.game.Piece.Piece
-import model._
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator, Piece, Player}
 
 import scala.collection.immutable.HashMap
