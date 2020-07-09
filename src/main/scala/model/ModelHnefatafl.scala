@@ -9,7 +9,7 @@ import model.game.Level.Level
 import model.game.Player.Player
 import model.game.Snapshot.Snapshot
 import model.game.BoardGame.Board
-import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg, RestartMsg}
+import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg, CloseMsg}
 import ia.pruning_alpha_beta.MiniMax
 import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
 import model.prolog.ParserProlog
@@ -47,6 +47,9 @@ trait ModelHnefatafl {
    * @return list buffer of the possible computed moves.
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
+
+  // TODO
+  def iaBestMove(move: Move): Unit
 
   /**
    * Calls parser for making a move from coordinate to coordinate.
@@ -121,7 +124,10 @@ object ModelHnefatafl {
     private var currentSnapshot: Int = 0
     private val moveLogPrint: Boolean = false
     private var system: ActorSystem = _
+    // TODO
+    //private var refIA: Option[ActorRef] = Option.empty
     private var refIA: ActorRef = _
+    private var iaSnapshot: GameSnapshot = _
 
     //private var sequIA: MiniMax = _
 
@@ -174,11 +180,15 @@ object ModelHnefatafl {
         ListBuffer.empty
     }
 
-
     override def makeMove(move: Move): Unit = {
       if(moveLogPrint)
         println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
-
+/*
+      println(move)
+      println(storySnapshot.last.getBoard.consoleRepresentation)
+      println(storySnapshot.last.getPlayerToMove)
+      println("")
+*/
       game = ParserProlog.makeLegitMove(move)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
@@ -191,17 +201,24 @@ object ModelHnefatafl {
 
       currentSnapshot += 1
 
-      if(!(refIA != null & storySnapshot.size <= 2) || mode.equals(GameMode.PVP)) {
-        controller.activeFirstPrevious()
-        controller.activeUndo()
-      }
+      controller.activeFirstPrevious()
+      controller.activeUndo()
 
       controller.updateView(storySnapshot.last)
 
-      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn) {
+      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn)
         makeMoveIA()
-      }
     }
+
+    override def iaBestMove(move: Move): Unit = {
+      // TODO
+      //refIA = Option.empty
+      if(notUndone())
+        makeMove(move)
+    }
+
+    // TODO
+    private def notUndone(): Boolean = iaSnapshot.equals(storySnapshot.last)
 
     override def isCentralCell(coordinate: Coordinate): Boolean = ParserProlog.isCentralCell(coordinate)
 
@@ -236,7 +253,11 @@ object ModelHnefatafl {
         controller.disableUndo()
       }
       if(mode.equals(GameMode.PVE)) {
-        refIA ! RestartMsg()
+        // TODO
+       /* if(refIA.nonEmpty) {
+          refIA.get ! CloseMsg()
+          refIA = Option.empty
+        }*/
         if(iaTurn)
           makeMoveIA()
       }
@@ -250,6 +271,7 @@ object ModelHnefatafl {
       //makeMove(sequIA.findBestMove(storySnapshot.last))
 
       //MINIMAX ACTORS
+      iaSnapshot = storySnapshot.last
       refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA)))
       refIA ! FindBestMoveMsg(storySnapshot.last)
     }

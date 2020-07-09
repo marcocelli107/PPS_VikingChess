@@ -10,6 +10,8 @@ object ScoreProvider {
 
    def KingCatchableInOne: Int = 900
 
+   def KingEscapeNearCorner: Int = 850
+
    def KingEscapeToCorner: Int = 900
 
    def KingDistanceToCornerDividend: Int = 900

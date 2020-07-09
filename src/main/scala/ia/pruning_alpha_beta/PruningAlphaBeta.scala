@@ -18,6 +18,8 @@ object MiniMaxImpl {
 
 class MiniMaxImpl(levelIA: Level) extends MiniMax {
 
+    val evaluationFunction = new EvaluationFunction
+
     override def findBestMove(gameSnapshot: GameSnapshot): Move = {
 
       @scala.annotation.tailrec
@@ -47,8 +49,8 @@ class MiniMaxImpl(levelIA: Level) extends MiniMax {
 
 
   def pruningAlfaBeta(sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin): Int = (depth, phase) match {
-    case (_, _) if isTerminalNode(sonGameSnapshot) => EvaluationFunction.score(sonGameSnapshot, levelIA)
-    case (0, _) => EvaluationFunction.score(sonGameSnapshot, levelIA)
+    case (_, _) if isTerminalNode(sonGameSnapshot) => evaluationFunction.score(sonGameSnapshot, levelIA)
+    case (0, _) => evaluationFunction.score(sonGameSnapshot, levelIA)
     case (_, MaxMin.Max) => maximizationPhase(sonGameSnapshot, depth, alfa, beta)
     case _ => minimizationPhase(sonGameSnapshot, depth, alfa, beta)
   }

@@ -418,4 +418,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
     assert(snapshot.getWinner.equals(Player.Draw))
   }
+
+
 }
