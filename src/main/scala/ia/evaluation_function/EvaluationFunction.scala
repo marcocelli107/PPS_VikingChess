@@ -5,10 +5,9 @@ import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
 import model.game.Level.Level
 import model.game.Piece.Piece
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator, Piece, Player}
-
 import scala.collection.immutable.HashMap
 
-object EvaluationFunction {
+class EvaluationFunction {
 
   private var boardSize: Int = _
   private var kingCoordinate: Coordinate = _
@@ -23,11 +22,11 @@ object EvaluationFunction {
 
 
   /**
-    * Initializes utils variables for evaluation function.
-    *
-    * @param gameSnapshot
-    *       current snapshot used to initialize variables.
-    */
+   * Initializes utils variables for evaluation function.
+   *
+   * @param gameSnapshot
+   * current snapshot used to initialize variables.
+   */
   def usefulValues(gameSnapshot: GameSnapshot): Unit = {
     board = gameSnapshot.getBoard
     boardSize = board.size
@@ -50,14 +49,13 @@ object EvaluationFunction {
   }
 
   /** Returns final score.
-    *
-    * @param snapshot
-    *                 current snapshot to evaluate.
-    * @param levelIA
-    *                difficulty chosen.
-    *
-    * @return total score int
-    */
+   *
+   * @param snapshot
+   * current snapshot to evaluate.
+   * @param levelIA
+   * difficulty chosen.
+   * @return total score int
+   */
   def score(snapshot: GameSnapshot, levelIA: Level): Int = snapshot.getWinner match {
     case Player.Black => -ScoreProvider.BlackWin
     case Player.White => ScoreProvider.WhiteWin
@@ -66,65 +64,70 @@ object EvaluationFunction {
   }
 
   /** Selects score computation according to difficulty.
-    *
-    * @param gameSnapshot
-    *                 current snapshot to evaluate.
-    * @param levelIA
-    *                difficulty chosen.
-    *
-    * @return total score int
-    */
+   *
+   * @param gameSnapshot
+   * current snapshot to evaluate.
+   * @param levelIA
+   * difficulty chosen.
+   * @return total score int
+   */
   def computeScore(gameSnapshot: GameSnapshot, levelIA: Level): Int = {
     usefulValues(gameSnapshot)
-    var score: Int = 0
 
     levelIA match {
-      case Level.Newcomer => score = computeNewcomerScore(gameSnapshot)
-      case Level.Standard => score = computeStandardScore(gameSnapshot)
-      case _ => score = computeAdvancedScore(gameSnapshot)
+      case Level.Newcomer => computeNewcomerScore(gameSnapshot)
+      case Level.Standard => computeStandardScore(gameSnapshot)
+      case _ => computeAdvancedScore(gameSnapshot)
     }
-    score
   }
 
   /** Returns score computation for difficulty Newcomer.
-    *
-    * @param snapshot
-    *                 current snapshot to evaluate.
-    *
-    * @return newcomer score
-    */
+   *
+   * @param snapshot
+   * current snapshot to evaluate.
+   * @return newcomer score
+   */
   def computeNewcomerScore(snapshot: GameSnapshot): Int = {
     var newcomerScore: Int = 0
 
-    if ((kingAdjacentToCorner || kingToCornerInOne(snapshot) || kingNearToCornerInOne(snapshot)) &&
-      snapshot.getPlayerToMove.equals(Player.White))
+    if (kingAdjacentToCorner)
       newcomerScore += ScoreProvider.KingEscapeToCorner
+    else {
 
-    if (kingCapturedInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.Black))
-      newcomerScore -= ScoreProvider.KingCatchableInOne
+      // TODO kingtocorner kingnearcorner e kingislockable ripetuti, salvare i booleani in useful values
 
-    if(newcomerScore == 0) {
-      newcomerScore -= scoreBlackSurroundTheKing +
-                        scoreBlackOnKingDiagonal +
-                        scoreCapturedWhite(snapshot)
-      newcomerScore += scoreKingOnThrone +
-                        scoreKingIsInFreeRowOrColumn +
-                        scoreCapturedBlack(snapshot)
+      if (kingToCornerInOne(snapshot))
+        newcomerScore += ScoreProvider.KingEscapeToCorner
+      else if (kingNearToCornerInOne(snapshot))
+        newcomerScore += ScoreProvider.KingEscapeNearCorner
+
+      if (kingCapturedInOne(snapshot))
+        newcomerScore -= ScoreProvider.KingCatchableInOne
+
+      if (newcomerScore == 0) {
+        newcomerScore -= scoreBlackSurroundTheKing +
+          scoreBlackOnKingDiagonal +
+          scoreCapturedWhite(snapshot)
+        newcomerScore += scoreKingOnThrone +
+          scoreKingIsInFreeRowOrColumn +
+          scoreCapturedBlack(snapshot)
+      }
+
     }
+
     newcomerScore
   }
 
   /** Returns score computation for difficulty Standard.
-    *
-    * @param snapshot
-    *                 current snapshot to evaluate.
-    *
-    * @return standard score
-    */
+   *
+   * @param snapshot
+   * current snapshot to evaluate.
+   * @return standard score
+   */
   def computeStandardScore(snapshot: GameSnapshot): Int = {
     var standardScore: Int = computeNewcomerScore(snapshot)
 
-    if(standardScore == 0 || standardScore.abs != ScoreProvider.PossibleWinInOne) {
+    if (standardScore == 0 || standardScore.abs != ScoreProvider.PossibleWinInOne) {
       val scoreErroneousBarricade: (Int, Int) = scoreWrongBarricade
       standardScore -= scoreBlackCordon - scoreErroneousBarricade._2
       standardScore += scoreTower - scoreErroneousBarricade._1
@@ -133,15 +136,14 @@ object EvaluationFunction {
   }
 
   /** Returns score computation for difficulty Advanced.
-    *
-    * @param snapshot
-    *                 current snapshot to evaluate.
-    *
-    * @return advanced score
-    */
+   *
+   * @param snapshot
+   * current snapshot to evaluate.
+   * @return advanced score
+   */
   def computeAdvancedScore(snapshot: GameSnapshot): Int = {
     var advancedScore: Int = computeStandardScore(snapshot)
-    if(advancedScore == 0 || advancedScore.abs != ScoreProvider.PossibleWinInOne) {
+    if (advancedScore == 0 || advancedScore.abs != ScoreProvider.PossibleWinInOne) {
       val scoreRowOrColumnFree: (Int, Int) = scoreOwnerFirstLastThreeRowsOrColumns
       advancedScore -= scoreLastPawnMovedCatchableInOne(snapshot) + scoreRowOrColumnFree._2
       advancedScore += scoreLastPawnMovedCatchableInOne(snapshot) + scoreRowOrColumnFree._1
@@ -151,51 +153,67 @@ object EvaluationFunction {
 
 
   /** Checks if the king is near a corner.
-    *
-    * @return boolean
-    */
+   *
+   * @return boolean
+   */
   def kingAdjacentToCorner: Boolean = kingAdjacentCells.values
     .filter(_.nonEmpty)
     .map(_.get.getCoordinate).exists(cornerCoordinates.contains(_))
 
   /** Checks if the king can move near a corner.
-    *
-    * @param gameSnapshot
-    *                     current snapshot to evaluate king's possible moves.
-    *
-    * @return boolean
-    */
+   *
+   * @param gameSnapshot
+   * current snapshot to evaluate king's possible moves.
+   * @return boolean
+   */
   def kingNearToCornerInOne(gameSnapshot: GameSnapshot): Boolean = {
     isKingPossibleToMove(gameSnapshot, getNearCornerCells)
   }
 
   /** Checks if the king can move to a corner.
-    *
-    * @param gameSnapshot
-    *                     current snapshot to evaluate king's possible moves.
-    *
-    * @return boolean
-    */
-  def kingToCornerInOne(gameSnapshot: GameSnapshot): Boolean = {
+   *
+   * @param gameSnapshot
+   * current snapshot to evaluate king's possible moves.
+   * @return boolean
+   */
+  def kingToCornerInOne(gameSnapshot: GameSnapshot): Boolean =
     isKingPossibleToMove(gameSnapshot, cornerCoordinates)
-  }
 
   /** Checks if the king is catchable.
-    *
-    * @param gameSnapshot
-    *                   current snapshot to checking king capture.
-    *
-    * @return boolean
-    */
+   *
+   * @param gameSnapshot
+   * current snapshot to checking king capture.
+   * @return boolean
+   */
   def kingCapturedInOne(gameSnapshot: GameSnapshot): Boolean = gameSnapshot.getVariant match {
     case GameVariant.Hnefatafl | GameVariant.Tawlbwrdd => kingCapturedInOneBigBoard()
     case _ => kingCapturedInOneSmallBoard(gameSnapshot)
   }
 
+  /** Checks if the king is lockable (black can obstruct white king direct way to the corner).
+   *
+   * @param gameSnapshot
+   * current snapshot to checking block.
+   * @return boolean
+   */
+  def kingIsLockable(gameSnapshot: GameSnapshot): Boolean = {
+    //val coordinateCornerToBlock = findCloserCorner(kingCoordinate)
+    // TODO BRUTTO LIST DI ELEMENTO SOLO
+    val coordinatesToBlock = cornerCoordinates.filter(c => isKingPossibleToMove(gameSnapshot, List(c)))
+    if(coordinatesToBlock.size == 1) {
+      for (black <- blackCoordinates) {
+        MoveGenerator.coordPossibleMoves(BoardCell(black, Piece.BlackPawn), gameSnapshot)
+          .map(_.to).contains(getOrthogonalCoordinates(coordinatesToBlock.head).values.filter(_.nonEmpty).map(_.get))
+        return true
+      }
+    }
+    false
+  }
+
   /** Returns score according to who owns first and last three rows and columns.
-    *
-    * @return (Int, Int): (scoreWhite, scoreBlack)
-    */
+   *
+   * @return (Int, Int): (scoreWhite, scoreBlack)
+   */
   def scoreOwnerFirstLastThreeRowsOrColumns: (Int, Int) = {
     var whiteScore = 0
     var blackScore = 0
@@ -215,33 +233,38 @@ object EvaluationFunction {
   }
 
   /** Returns score for a wrong barricade.
-    *
-    * @return (Int, Int): (scoreWhite, scoreBlack)
-    */
+   *
+   * @return (Int, Int): (scoreWhite, scoreBlack)
+   */
   def scoreWrongBarricade: (Int, Int) = {
     var whiteScore = 0
     var blackScore = 0
     board.cornerCoordinates.flatMap(c => getOrthogonalCoordinates(c)).filter(p => p._2 != Option.empty).grouped(2).foreach {
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get))
+      /*case h :: t if wrongBarricadeType(board.getCell(h._2.get), board.getCell(t.head._2.get))
         .equals(Piece.BlackPawn) => blackScore += ScoreProvider.WrongCordon
-      case h :: t if wrongBarricadeType(board.getCell(h._2.get),board.getCell(t.head._2.get))
+      case h :: t if wrongBarricadeType(board.getCell(h._2.get), board.getCell(t.head._2.get))
         .equals(Piece.WhitePawn) => whiteScore += ScoreProvider.WrongCordon
+      case _ =>*/
+      case h :: t =>
+        val cells = (board.getCell(h._2.get), board.getCell(t.head._2.get))
+        blackScore += wrongBarricadeType(Piece.BlackPawn, cells)
+        whiteScore += wrongBarricadeType(Piece.WhitePawn, cells)
       case _ =>
     }
+
     (whiteScore, blackScore)
   }
 
   /** Returns score for last pawn moved catchable in one.
-    *
-    * @param gameSnapshot
-    *                     current snapshot to checking last move.
-    *
-    * @return Int: score capture last pawn moved
-    */
+   *
+   * @param gameSnapshot
+   * current snapshot to checking last move.
+   * @return Int: score capture last pawn moved
+   */
   def scoreLastPawnMovedCatchableInOne(gameSnapshot: GameSnapshot): Int = {
     val lastMove = gameSnapshot.getLastMove
 
-    if(lastMove.nonEmpty) {
+    if (lastMove.nonEmpty) {
       val adjOrthogonalCells = mappingOrthogonalToAdjacent(board.orthogonalCells(gameSnapshot.getLastMove.get.to))
 
       if (gameSnapshot.getPlayerToMove.equals(Player.Black) && checkOrthogonalEmptyCells(Piece.BlackPawn, adjOrthogonalCells))
@@ -253,28 +276,26 @@ object EvaluationFunction {
     else 0
   }
 
-
-
   /**
-    * WHITE SCORES
-    */
+   * WHITE SCORES
+   */
 
   /** Returns score according to distance from throne.
-    *
-    * @return Int: scoreKingOnThrone
-    */
+   *
+   * @return Int: scoreKingOnThrone
+   */
   def scoreKingOnThrone: Int = {
-    if(kingCoordinate.equals(board.centerCoordinates)) ScoreProvider.KingOnThrone
-    else if(quadraticDistanceBetweenCells(kingCoordinate, findCloserCorner(kingCoordinate)) == 0)
+    if (kingCoordinate.equals(board.centerCoordinates)) ScoreProvider.KingOnThrone
+    else if (quadraticDistanceBetweenCells(kingCoordinate, findCloserCorner(kingCoordinate)) == 0)
       ScoreProvider.KingDistanceToCornerDividend
     else
       ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceBetweenCells(kingCoordinate, findCloserCorner(kingCoordinate))
   }
 
   /** Returns score for a white tower.
-    *
-    * @return Int: scoreTower
-    */
+   *
+   * @return Int: scoreTower
+   */
   def scoreTower: Int = {
     def _isSquare(list: List[BoardCell]): Boolean = {
       list.count(cell => cell.getPiece.equals(Piece.WhitePawn) || cell.getPiece.equals(Piece.WhiteKing)) == 3
@@ -296,18 +317,17 @@ object EvaluationFunction {
   }
 
   /** Returns score for a captured black piece.
-    *
-    * @param gameSnapshot
-    *                   current snapshot to checking number of blacks captured.
-    *
-    * @return Int: scoreCapture
-    */
+   *
+   * @param gameSnapshot
+   * current snapshot to checking number of blacks captured.
+   * @return Int: scoreCapture
+   */
   def scoreCapturedBlack(gameSnapshot: GameSnapshot): Int = gameSnapshot.getNumberCapturedBlacks * ScoreProvider.BlackCaptured
 
   /** Returns score for the row and column controlled from king.
-    *
-    * @return Int: score row, column owned
-    */
+   *
+   * @return Int: score row, column owned
+   */
   def scoreKingIsInFreeRowOrColumn: Int = {
     val rowWithoutKing = kingOrthogonalCells(OrthogonalDirection.Right) ++ kingOrthogonalCells(OrthogonalDirection.Left)
     val columnWithoutKing = kingOrthogonalCells(OrthogonalDirection.Up) ++ kingOrthogonalCells(OrthogonalDirection.Down)
@@ -318,28 +338,27 @@ object EvaluationFunction {
       case (_, column) if isSequenceFreeCells(column) => ScoreProvider.RowOrColumnOwnedKing
       case _ => 0
     }
+
     _scoreKingIsInFreeRowOrColumn()
   }
 
 
-
   /**
-    * BLACK SCORES
-    */
+   * BLACK SCORES
+   */
 
   /** Returns score for a captured white piece.
-    *
-    * @param gameSnapshot
-    *                   current snapshot to checking number of whites captured.
-    *
-    * @return Int: scoreCapture
-    */
+   *
+   * @param gameSnapshot
+   * current snapshot to checking number of whites captured.
+   * @return Int: scoreCapture
+   */
   def scoreCapturedWhite(gameSnapshot: GameSnapshot): Int = gameSnapshot.getNumberCapturedWhites * ScoreProvider.WhiteCaptured
 
   /** Returns score according to number of blacks surround to king.
-    *
-    * @return Int: scoreCapture
-    */
+   *
+   * @return Int: scoreCapture
+   */
   def scoreBlackSurroundTheKing: Int = {
     kingAdjacentCells.values.count(c => c.nonEmpty &&
       c.get.getPiece.equals(Piece.BlackPawn) &&
@@ -348,9 +367,9 @@ object EvaluationFunction {
   }
 
   /** Returns score according to number of blacks on king's diagonals.
-    *
-    * @return score int
-    */
+   *
+   * @return score int
+   */
   def scoreBlackOnKingDiagonal: Int = {
     var score = 0
     findNearBlacks(kingCoordinate).filter(c => (c.x != kingCoordinate.x) && (c.y != kingCoordinate.y)).foreach(c => board.getCell(c).getPiece match {
@@ -361,9 +380,9 @@ object EvaluationFunction {
   }
 
   /** Returns score for a black cordon.
-    *
-    * @return score int
-    */
+   *
+   * @return score int
+   */
   def scoreBlackCordon: Int = {
     var cordons: Seq[Seq[Coordinate]] = Seq.empty
 
@@ -374,23 +393,26 @@ object EvaluationFunction {
     val listCordons = cordons.distinct.filter(_.size >= 3)
     var score = 0
 
-    listCordons.foreach({score += checkCorrectCordon(_)})
+    listCordons.foreach({
+      score += checkCorrectCordon(_)
+    })
 
     score
   }
 
-
   private def isKingPossibleToMove(snapshot: GameSnapshot, listCoordinates: List[Coordinate]): Boolean =
-    MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate,Piece.WhiteKing), snapshot).map(_.to).exists(listCoordinates.contains)
+    MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), snapshot).map(_.to).exists(listCoordinates.contains)
 
-  private def wrongBarricadeType(firstCoordinate: BoardCell, secondCoordinate: BoardCell): Piece =
-    (firstCoordinate.getPiece, secondCoordinate.getPiece) match {
-      case (Piece.BlackPawn, Piece.BlackPawn) => Piece.BlackPawn
-      case (Piece.WhitePawn, Piece.WhitePawn) => Piece.WhitePawn
-      case _ => Piece.Empty
-  }
 
-  private def getNearCornerCells: List[Coordinate] =  board.cornerCoordinates.flatMap(board.orthogonalCells(_)).map(_._2).filter(_.nonEmpty).map(_.head).map(_.getCoordinate)
+  // todo private
+  def wrongBarricadeType(color: Piece, cells: (BoardCell, BoardCell)): Int =
+    (cells._1.getPiece, cells._2.getPiece) match {
+      case (`color`, `color`) => ScoreProvider.WrongBarricade * 2
+      case (`color`, _) | (_, `color`) => ScoreProvider.WrongBarricade
+      case _ => 0
+    }
+
+  private def getNearCornerCells: List[Coordinate] = board.cornerCoordinates.flatMap(board.orthogonalCells(_)).map(_._2).filter(_.nonEmpty).map(_.head).map(_.getCoordinate)
 
   private def createCordon(fromCoordinate: Coordinate, cordon: Seq[Coordinate]): Seq[Coordinate] = {
 
@@ -403,6 +425,7 @@ object EvaluationFunction {
             val nears = coordinates.flatMap(c => findNearBlacks(c).filter(!cordon.contains(_)))
             _explore(nears, (cordon ++ nears).distinct)
         }
+
       _explore(Seq(fromCoordinate), cordon)
     }
 
@@ -470,23 +493,23 @@ object EvaluationFunction {
   }
 
   private def checkCorrectCordon(cordon: Seq[Coordinate]): Int = {
-    if(isCircleCordon(cordon))
+    if (isCircleCordon(cordon))
       checkCircleCordon(cordon)
     else checkNotCircleCordon(cordon)
   }
 
   private def checkCircleCordon(cordon: Seq[Coordinate]): Int = {
-    val (_,inn) = splitBoardWithCircleCordon(cordon)
-    if(isCorrectCircleCordon(inn))
+    val (_, inn) = splitBoardWithCircleCordon(cordon)
+    if (isCorrectCircleCordon(inn))
       cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
-        + inn.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInsideCordon
+        +inn.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhiteInsideCordon
     else
       cordon.size * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon
   }
 
   private def checkNotCircleCordon(cordon: Seq[Coordinate]): Int = {
-    if(isCorrectNotCircleCordon(cordon)) {
-      var sequences: (Seq[BoardCell],Seq[BoardCell]) = (Seq.empty,Seq.empty)
+    if (isCorrectNotCircleCordon(cordon)) {
+      var sequences: (Seq[BoardCell], Seq[BoardCell]) = (Seq.empty, Seq.empty)
 
       if (isHorizontalCordon(cordon))
         sequences = splitBoardWithHorizontalCordon(cordon)
@@ -496,16 +519,16 @@ object EvaluationFunction {
       if (controlEmptyPortion(sequences._1) || controlEmptyPortion(sequences._2)) {
         cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon
       }
+      else if (sequences._1.map(_.getCoordinate).contains(board.centerCoordinates))
+        outalierPenalty(sequences._1, cordon)
       else
-      if(sequences._1.map(_.getCoordinate).contains(board.centerCoordinates))
-        (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) -
-          - (sequences._1.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
-      else
-        (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) -
-          - (sequences._2.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
+        outalierPenalty(sequences._2, cordon)
     } else
       0
   }
+
+  private def outalierPenalty(seq: Seq[BoardCell], cordon: Seq[Coordinate]): Int =
+    (cordon.size * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon) - (seq.count(c => c.getPiece.equals(Piece.WhitePawn) || c.getPiece.equals(Piece.WhiteKing)) * ScoreProvider.WhitePawnOuterCordon)
 
   private def isCorrectCircleCordon(innerCells: Seq[BoardCell]): Boolean = innerCells.count(_.getPiece.equals(Piece.Empty)) == 0 ||
     innerCells.count(_.getPiece.equals(Piece.WhitePawn)) > 3 || innerCells.exists(_.getPiece.equals(Piece.WhiteKing))
@@ -516,45 +539,46 @@ object EvaluationFunction {
   private def splitBoardWithCircleCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
 
     @scala.annotation.tailrec
-    def _splitBoardWithCircleCordon(cordon: Seq[Coordinate], output: Seq[(Seq[BoardCell],Seq[BoardCell])]): Seq[(Seq[BoardCell],Seq[BoardCell])] =
+    def _splitBoardWithCircleCordon(cordon: Seq[Coordinate], output: Seq[(Seq[BoardCell], Seq[BoardCell])]): Seq[(Seq[BoardCell], Seq[BoardCell])] =
       cordon match {
         case Nil => output
-        case h1::h2::t if  h1.x == h2.x  => _splitBoardWithCircleCordon(t, output :+ getRightAndLeft(h1,h2))
-        case _::t => _splitBoardWithCircleCordon(t, output)
-    }
+        case h1 :: h2 :: t if h1.x == h2.x => _splitBoardWithCircleCordon(t, output :+ getRightAndLeft(h1, h2))
+        case _ :: t => _splitBoardWithCircleCordon(t, output)
+      }
 
-    def getRightAndLeft( right: Coordinate, left: Coordinate): (Seq[BoardCell],Seq[BoardCell]) =
+    def getRightAndLeft(right: Coordinate, left: Coordinate): (Seq[BoardCell], Seq[BoardCell]) =
       (getSpecificOrthogonalCell(right, OrthogonalDirection.Right, board), getSpecificOrthogonalCell(left, OrthogonalDirection.Left, board))
 
     val inner = _splitBoardWithCircleCordon(cordon, Seq.empty).flatMap(elem => elem._1.intersect(elem._2)).toList
     val external = board.rows.flatten.diff(inner).filter(c => !cordon.contains(c.getCoordinate)).toList
 
-    (external,inner)
+    (external, inner)
   }
 
   private def splitBoardWithHorizontalCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
-    splitBoardWithNotCircleCordon(cordon,OrthogonalDirection.Up)  }
+    splitBoardWithNotCircleCordon(cordon, OrthogonalDirection.Up)
+  }
 
   private def splitBoardWithVerticalCordon(cordon: Seq[Coordinate]): (Seq[BoardCell], Seq[BoardCell]) = {
-    splitBoardWithNotCircleCordon(cordon,OrthogonalDirection.Left)
+    splitBoardWithNotCircleCordon(cordon, OrthogonalDirection.Left)
   }
 
   private def splitBoardWithNotCircleCordon(cordon: Seq[Coordinate], orthogonalDirection: OrthogonalDirection): (Seq[BoardCell], Seq[BoardCell]) = {
     val leftCordonCells: Seq[BoardCell] = cordon.flatMap(getSpecificOrthogonalCell(_, orthogonalDirection, board)).toList
-    val rightCordonCells: Seq[BoardCell] = board.rows.flatten.diff(leftCordonCells).filter(cell => !cordon.contains( cell.getCoordinate)).toList
+    val rightCordonCells: Seq[BoardCell] = board.rows.flatten.diff(leftCordonCells).filter(cell => !cordon.contains(cell.getCoordinate)).toList
     (leftCordonCells, rightCordonCells)
   }
 
-  private def isCircleCordon( cordon: Seq[Coordinate]): Boolean =
+  private def isCircleCordon(cordon: Seq[Coordinate]): Boolean =
     cordon.count(findNearBlacks(_).count(cordon.contains(_)) >= 2) == cordon.size
 
-  private def isHorizontalCordon( cordon: Seq[Coordinate]): Boolean =
+  private def isHorizontalCordon(cordon: Seq[Coordinate]): Boolean =
     cordon.filter(isOnAnySides(_))
       .map(getCurrentSide)
       .filter(_.nonEmpty)
       .map(_.get)
       .distinct
-      .count(c => c.equals(OrthogonalDirection.Left)  || c.equals(OrthogonalDirection.Right)) >= 2
+      .count(c => c.equals(OrthogonalDirection.Left) || c.equals(OrthogonalDirection.Right)) >= 2
 
   private def kingCapturedInOneBigBoard(): Boolean = {
     val nonWhiteKingAdjacentCells = kingAdjacentCells.values.filter(_.nonEmpty).filter(!_.get.getPiece.equals(Piece.WhitePawn))
@@ -621,7 +645,7 @@ object EvaluationFunction {
     var returnValue = false
 
     for (i <- adjOrthogonalCells.keys) {
-      if(adjOrthogonalCells.isDefinedAt(i) && adjOrthogonalCells(i).nonEmpty &&
+      if (adjOrthogonalCells.isDefinedAt(i) && adjOrthogonalCells(i).nonEmpty &&
         adjOrthogonalCells(i).get.getPiece.equals(piece) &&
         adjOrthogonalCells(oppositeOrthogonalDirection(i)).nonEmpty &&
         gamePossibleMoves.map(_.to).contains(adjOrthogonalCells(oppositeOrthogonalDirection(i)).get.getCoordinate))
@@ -630,9 +654,9 @@ object EvaluationFunction {
     returnValue
   }
 
-  private def getSpecificOrthogonalCell(coord: Coordinate, orthogonalDirection: OrthogonalDirection, localBoard: Board ):Seq[BoardCell] = {
+  private def getSpecificOrthogonalCell(coord: Coordinate, orthogonalDirection: OrthogonalDirection, localBoard: Board): Seq[BoardCell] = {
     val map = localBoard.orthogonalCells(coord)
-    if( map.keySet.contains(orthogonalDirection)){
+    if (map.keySet.contains(orthogonalDirection)) {
       return map(orthogonalDirection)
     }
     Seq.empty
@@ -670,4 +694,70 @@ object EvaluationFunction {
     orthogonal.map { case (k, v) => (k, v.take(1)) }
       .map { case (k, v) => if (v.nonEmpty) (k, Option(v.head)) else (k, Option.empty) }
   }
+}
+
+object aho extends App {
+
+  /*
+
+_  _  w  _  w  _  _
+_  _  _  b  _  _  _
+_  _  _  _  _  _  b
+b  b  _  k  _  _  _
+_  _  b  w  _  _  _
+_  _  _  _  _  _  _
+_  _  _  b  _  _  _
+
+/caso 1
+_  _  w  _  w  _  _
+_  _  _  b  _  _  _
+_  _  _  _  _  _  b
+b  b  _  _  _  _  k
+_  _  b  w  _  _  _
+_  _  _  _  _  _  _
+_  _  _  b  _  _  _
+
+
+/altro caso
+_  _  _  b  _  _  _
+_  _  _  b  _  b  _
+_  _  _  w  _  w  _
+b  b  _  _  _  k  _
+_  _  w  w  _  _  _
+_  _  _  _  _  b  _
+_  _  _  b  _  _  _
+   */
+
+  var s =
+    "_  _  _  b  _  _  _" +
+  "  _  _  _  _  _  _  b" +
+  "  _  _  _  w  _  _  b" +
+  "  b  b  w  _  w  b  _" +
+  "  _  _  _  _  _  _  _" +
+  "  _  _  _  _  _  w  b" +
+  "  _  _  _  k  _  b  _"
+  var b: Seq[Seq[BoardCell]] = Seq.empty
+  val l = s.split(" {2}").map(e => if (e.equals("_")) "e" else e).grouped(7).toList
+  for (i <- 1 to 7) {
+    var r: Seq[BoardCell] = Seq.empty
+    for (j <- 1 to 7) {
+      r :+= BoardCell(Coordinate(i, j), Piece.withName(l(i - 1)(j - 1)))
+    }
+    b :+= r
+  }
+  val board = Board(b)
+
+  //println(board.consoleRepresentation)
+
+  var snapshot = GameSnapshot(GameVariant.Brandubh, Player.Black, Player.None, board, Option(Move(Coordinate(4, 4), Coordinate(1, 4))), 0, 0)
+
+  println(snapshot.getBoard.consoleRepresentation)
+
+  val ef = new EvaluationFunction
+  ef.usefulValues(snapshot)
+  //println(EvaluationFunction.scoreBlackCordon)
+  println(ef.score(snapshot, Level.Standard))
+  println(ef.scoreWrongBarricade)
+
+
 }

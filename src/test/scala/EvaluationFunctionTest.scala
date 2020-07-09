@@ -8,10 +8,11 @@ import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGener
 import model.prolog.ParserProlog
 
 @RunWith(classOf[JUnitRunner])
-class EvaluationFunctionTest extends FunSuite {
+class evaluationFunctionTest extends FunSuite {
 
   var snapshot: GameSnapshot = _
   var game: (Player, Player, Board, Int) = _
+  var evaluationFunction = new EvaluationFunction
 
   test("Tests score king near corner - Brandubh"){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
@@ -25,7 +26,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(7,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,4),Coordinate(7,5)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
+    assert(evaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
   }
 
   test("Tests score king to corner in one - Brandubh"){
@@ -38,7 +39,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4),Coordinate(4,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,6),Coordinate(4,6)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
+    assert(evaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.KingEscapeToCorner)
   }
 
   test("Tests score capture king in one on throne - Tablut"){
@@ -56,7 +57,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(5,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,5), Coordinate(6,8)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
+    assert(evaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Tests score capture king near throne - Tablut"){
@@ -70,7 +71,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,4), Coordinate(6,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(5,4)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
+    assert(evaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Test score capture king far from throne - Brandubh") {
@@ -82,7 +83,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(6,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(4,2)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
+    assert(evaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Test score capture king far from throne - Tawlbwurdd") {
@@ -98,14 +99,14 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,2), Coordinate(9,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(10,6)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
+    assert(evaluationFunction.score(snapshot, Level.Standard) == -ScoreProvider.KingCatchableInOne)
   }
 
   test("Test initial score is draw - Brandubh") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.Draw)
+    assert(evaluationFunction.score(snapshot, Level.Newcomer) == ScoreProvider.Draw)
   }
 
   test("Test score black ahead - Brandubh") {
@@ -130,7 +131,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(3,5)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer) < -100)
+    assert(evaluationFunction.score(snapshot, Level.Newcomer) < -100)
   }
 
   test("Test score white ahead with rows and columns owned - Hnefatafl") {
@@ -151,7 +152,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,1), Coordinate(8,2)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Standard) > 50)
+    assert(evaluationFunction.score(snapshot, Level.Standard) > 50)
   }
 
   test("Test score black surround king on three side - Tawlbwrdd") {
@@ -167,7 +168,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(9,1)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,2)))
 
-    assert(EvaluationFunction.score(snapshot, Level.Newcomer) < -90)
+    assert(evaluationFunction.score(snapshot, Level.Newcomer) < -90)
   }
 
   test("Test score captured pieces (4 whites / 2 blacks) - Hnefatafl") {
@@ -188,8 +189,8 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(3,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(3,6)))
 
-    assert(EvaluationFunction.scoreCapturedBlack(snapshot) == 40 &&
-      EvaluationFunction.scoreCapturedWhite(snapshot) == 200)
+    assert(evaluationFunction.scoreCapturedBlack(snapshot) == 40 &&
+      evaluationFunction.scoreCapturedWhite(snapshot) == 200)
   }
 
   test("Test score white towers near throne - Hnefatafl") {
@@ -197,18 +198,18 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
 
     val numberOfTowers = 4
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreTower == ScoreProvider.TowerCoefficient * numberOfTowers)
+    assert(evaluationFunction.scoreTower == ScoreProvider.TowerCoefficient * numberOfTowers)
   }
 
   test("Test score white king on throne - Tablut") {
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
 
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreKingOnThrone == ScoreProvider.KingOnThrone)
+    assert(evaluationFunction.scoreKingOnThrone == ScoreProvider.KingOnThrone)
   }
 
   test("Test score white king far from throne - Tablut") {
@@ -226,11 +227,11 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(5,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(6,2)))
 
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
     val quadraticDistanceFromKingToThrone = 10
 
-    assert(EvaluationFunction.scoreKingOnThrone == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
+    assert(evaluationFunction.scoreKingOnThrone == ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceFromKingToThrone)
   }
 
   test("Test score right barricade on 3 sides and wrong circle cordon - Tawlbwrdd") {
@@ -248,9 +249,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,5), Coordinate(10,4)))
 
     val blackPawnsInCordon = 14 + 4
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
   test("Test score circle cordon on all sides - Tawlbwrdd") {
@@ -287,9 +288,9 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackPawnsInCordon: Int = 22
     val whitePawnsInCordon: Int = 13
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
       + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
@@ -345,9 +346,9 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackPawnsInCordon: Int = 19
     val whitePawnsInCordon: Int = 12
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon +
     + whitePawnsInCordon * ScoreProvider.WhiteInsideCordon)
   }
 
@@ -376,9 +377,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,4), Coordinate(5,4)))
 
     val blackPawnsInCordon: Int = 10
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon)
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon - ScoreProvider.WrongCordon)
   }
 
   test("Test score right diagonal barricade - Hnefatafl") {
@@ -392,9 +393,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
 
     val blackPawnsInCordon: Int = 3
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
   test("Test score right vertical barricade - Tablut") {
@@ -424,9 +425,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,1), Coordinate(3,3)))
 
     val blackPawnsInCordon: Int = 9
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon)
   }
 
   test("Test score right horizontal barricade and wrong circle cordon - Tawlbwrdd") {
@@ -452,9 +453,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(4,8)))
 
     val blackPawnsInCordon: Int = 13 + 4
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
+    assert(evaluationFunction.scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
   test("Tests score wrong barricade (2 black, 1 white) - Tawlbwrdd"){
@@ -470,10 +471,10 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,2), Coordinate(11,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,8), Coordinate(1,10)))
 
-    EvaluationFunction.usefulValues(snapshot)
-    val wrongBarricade = EvaluationFunction.scoreWrongBarricade
+    evaluationFunction.usefulValues(snapshot)
+    val wrongBarricade = evaluationFunction.scoreWrongBarricade
 
-    assert(wrongBarricade._2 == 2 * ScoreProvider.WrongBarricade && wrongBarricade._1 == ScoreProvider.WrongBarricade)
+    assert(wrongBarricade._2 == 4 * ScoreProvider.WrongBarricade && wrongBarricade._1 == 2 * ScoreProvider.WrongBarricade)
   }
 
   test("Tests score two black on king's diagonal - Tablut"){
@@ -491,8 +492,8 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(2,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(3,4)))
 
-    EvaluationFunction.usefulValues(snapshot)
-    val blackOnDiagonalScore = EvaluationFunction.scoreBlackOnKingDiagonal
+    evaluationFunction.usefulValues(snapshot)
+    val blackOnDiagonalScore = evaluationFunction.scoreBlackOnKingDiagonal
 
     assert(blackOnDiagonalScore == ScoreProvider.BlackOnDiagonalKing * 2)
   }
@@ -505,9 +506,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(3,5)))
 
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastBlackMovedCatchableInOne)
+    assert(evaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastBlackMovedCatchableInOne)
   }
 
   test("Test score last white moved catchable in one - Brandubh") {
@@ -517,9 +518,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(2,3)))
 
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastWhiteMovedCatchableInOne)
+    assert(evaluationFunction.scoreLastPawnMovedCatchableInOne(snapshot) == ScoreProvider.LastWhiteMovedCatchableInOne)
   }
   
   test("Test score for all difficulties - Hnefatafl") {
@@ -553,11 +554,12 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,8), Coordinate(10,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))
 
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.computeNewcomerScore(snapshot) == -100 &&
-      EvaluationFunction.computeStandardScore(snapshot) == -156 &&
-      EvaluationFunction.computeAdvancedScore(snapshot) == -216)
+    println(snapshot.getBoard.consoleRepresentation)
+    assert(evaluationFunction.computeNewcomerScore(snapshot) == -100 &&
+      evaluationFunction.computeStandardScore(snapshot) == -156 &&
+      evaluationFunction.computeAdvancedScore(snapshot) == -216)
   }
 
   test("Test score for all difficulties - Tablut") {
@@ -576,10 +578,10 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(6,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,2)))
 
-    EvaluationFunction.usefulValues(snapshot)
+    evaluationFunction.usefulValues(snapshot)
 
-    assert(EvaluationFunction.computeNewcomerScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
-      EvaluationFunction.computeStandardScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
-      EvaluationFunction.computeAdvancedScore(snapshot) == ScoreProvider.KingEscapeToCorner)
+    assert(evaluationFunction.computeNewcomerScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
+      evaluationFunction.computeStandardScore(snapshot) == ScoreProvider.KingEscapeToCorner &&
+      evaluationFunction.computeAdvancedScore(snapshot) == ScoreProvider.KingEscapeToCorner)
   }
 }

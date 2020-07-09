@@ -20,6 +20,7 @@ object MoveGenerator {
     gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
       .flatMap(_cutAfterPiece(_, cell)).toList
   }
+
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     gameSnapshot.getBoard.rows.flatMap(_.flatMap(c =>
       if (isOwner(c.getPiece, gameSnapshot.getPlayerToMove))

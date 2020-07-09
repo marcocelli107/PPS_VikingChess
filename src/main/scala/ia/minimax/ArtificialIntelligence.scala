@@ -23,7 +23,7 @@ case class ReturnBestMoveMsg(bestMove: Move)
 */
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
-case class RestartMsg()
+case class CloseMsg()
 
 object ArtificialIntelligenceImpl {
 
@@ -34,11 +34,11 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
-    case event: ReturnBestMoveMsg => model.makeMove(event.bestMove); context.stop(sender()); self ! PoisonPill
-    case _: RestartMsg => context.become(restartState)
+    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); context.stop(sender()); self ! PoisonPill
+    case _: CloseMsg => context.become(dyingState)
   }
 
-  def restartState: Receive = {
+  def dyingState: Receive = {
     case _: ReturnBestMoveMsg => context.stop(sender()); self ! PoisonPill
   }
 
