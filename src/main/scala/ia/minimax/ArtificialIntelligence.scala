@@ -23,6 +23,9 @@ case class ReturnBestMoveMsg(bestMove: Move)
 */
 case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
 
+/**
+  * Message used to change behaviour of the actor to dying.
+  */
 case class CloseMsg()
 
 object ArtificialIntelligenceImpl {
@@ -38,10 +41,16 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
     case _: CloseMsg => context.become(dyingState)
   }
 
+  /**
+    * Terminal behaviour of the IA actor
+    */
   def dyingState: Receive = {
     case _: ReturnBestMoveMsg => context.stop(sender()); self ! PoisonPill
   }
 
+  /**
+    * Creates Maximizator/Minimizator Actor according to IA player.
+    */
   def findBestMove(gameSnapshot: GameSnapshot): Unit = {
     var sonActor: Props = Props.empty
     if (iaIsBlack(gameSnapshot.getPlayerToMove))
