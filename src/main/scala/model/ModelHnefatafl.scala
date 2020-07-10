@@ -9,7 +9,7 @@ import model.game.Level.Level
 import model.game.Player.Player
 import model.game.Snapshot.Snapshot
 import model.game.BoardGame.Board
-import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg, RestartMsg}
+import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import ia.pruning_alpha_beta.MiniMax
 import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
 import model.prolog.ParserProlog
@@ -42,17 +42,22 @@ trait ModelHnefatafl {
    * Calls parser for the possible moves from a cell.
    *
    * @param cell
-   *                  coordinate of the Cell.
+   *             coordinate of the Cell.
    *
    * @return list buffer of the possible computed moves.
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
   /**
+    * Called by actor IA for best move.
+    */
+  def iaBestMove(move: Move): Unit
+
+  /**
    * Calls parser for making a move from coordinate to coordinate.
    *
    * @param move
-   *                    move to make
+   *            move to make
    *
    * @return updated board.
    */
@@ -62,7 +67,7 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is the central cell.
    *
    * @param coordinate
-   *                      coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    *
    * @return boolean.
    */
@@ -72,7 +77,7 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is a corner cell.
    *
    * @param coordinate
-   *                        coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    *
    * @return boolean.
    */
@@ -82,7 +87,7 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is a init pawn cell.
    *
    * @param coordinate
-   *                        coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    *
    * @return boolean.
    */
@@ -99,7 +104,7 @@ trait ModelHnefatafl {
    * Returns a previous or later state of the current board.
    *
    * @param snapshotToShow
-   *                        indicates snapshot to show.
+   *                      indicates snapshot to show.
    *
    * @return required board
    */
@@ -122,9 +127,7 @@ object ModelHnefatafl {
     private val moveLogPrint: Boolean = false
     private var system: ActorSystem = _
     private var refIA: ActorRef = _
-
-    //private var sequIA: MiniMax = _
-
+    private var iaSnapshot: GameSnapshot = _
 
     /**
      * Defines status of the current game.
@@ -174,7 +177,6 @@ object ModelHnefatafl {
         ListBuffer.empty
     }
 
-
     override def makeMove(move: Move): Unit = {
       if(moveLogPrint)
         println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
@@ -191,16 +193,18 @@ object ModelHnefatafl {
 
       currentSnapshot += 1
 
-      if(!(refIA != null & storySnapshot.size <= 2) || mode.equals(GameMode.PVP)) {
-        controller.activeFirstPrevious()
-        controller.activeUndo()
-      }
+      controller.activeFirstPrevious()
+      controller.activeUndo()
 
       controller.updateView(storySnapshot.last)
 
-      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn) {
+      if(mode.equals(GameMode.PVE) && storySnapshot.last.getWinner.equals(Player.None) && iaTurn)
         makeMoveIA()
-      }
+    }
+
+    override def iaBestMove(move: Move): Unit = {
+      if(notUndone)
+        makeMove(move)
     }
 
     override def isCentralCell(coordinate: Coordinate): Boolean = ParserProlog.isCentralCell(coordinate)
@@ -236,11 +240,12 @@ object ModelHnefatafl {
         controller.disableUndo()
       }
       if(mode.equals(GameMode.PVE)) {
-        refIA ! RestartMsg()
         if(iaTurn)
           makeMoveIA()
       }
     }
+
+    private def notUndone: Boolean = iaSnapshot.equals(storySnapshot.last)
 
     /**
       * Sends a messages to IA actor for make a move.
@@ -250,6 +255,7 @@ object ModelHnefatafl {
       //makeMove(sequIA.findBestMove(storySnapshot.last))
 
       //MINIMAX ACTORS
+      iaSnapshot = storySnapshot.last
       refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA)))
       refIA ! FindBestMoveMsg(storySnapshot.last)
     }

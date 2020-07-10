@@ -7,7 +7,16 @@ import model.game.Player.Player
 
 object MoveGenerator {
 
-  /** Not checking correct turn */
+  /**
+    * Returns possible moves from a cell.
+    *
+    * @param cell
+    *             cell to start.
+    * @param gameSnapshot
+    *             current snapshot.
+    *
+    * @return list of moves
+    */
   def coordPossibleMoves(cell: BoardCell, gameSnapshot: GameSnapshot): List[Move] = {
     def _cutAfterPiece(sequence: List[BoardCell], cell: BoardCell): List[Move] =
       sequence.takeWhile(_.getPiece.equals(Piece.Empty))
@@ -20,6 +29,15 @@ object MoveGenerator {
     gameSnapshot.getBoard.orthogonalCells(cell.getCoordinate).values
       .flatMap(_cutAfterPiece(_, cell)).toList
   }
+
+  /**
+    * Returns game possible move according to player to move.
+    *
+    * @param gameSnapshot
+    *                     current snapshot.
+    *
+    * @return list of moves
+    */
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     gameSnapshot.getBoard.rows.flatMap(_.flatMap(c =>
       if (isOwner(c.getPiece, gameSnapshot.getPlayerToMove))
@@ -28,6 +46,16 @@ object MoveGenerator {
     ))
   }.toList
 
+  /**
+    * Makes move.
+    *
+    * @param gameSnapshot
+    *             old snapshot to make a new move.
+    * @param move
+    *             new move to make.
+    *
+    * @return new game snapshot
+    */
   def makeMove(gameSnapshot: GameSnapshot, move: Move): GameSnapshot = {
     def _move(): Unit = {
       gameSnapshot.getBoard.setCell(BoardCell(move.to, gameSnapshot.getBoard.getCell(move.from).getPiece))
@@ -123,13 +151,31 @@ object MoveGenerator {
     GameSnapshot(gameSnapshot.getVariant, switchPlayer(), checkWinner(), gameSnapshot.getBoard, Option(move), capturedPieces._1, capturedPieces._2)
   }
 
-  def findKing(board: Board):Coordinate = {
+  /**
+    * Returns king's coordinate.
+    *
+    * @param board
+    *              board to find king's position.
+    *
+    * @return king coordinate
+    */
+  def findKing(board: Board): Coordinate = {
     board.rows.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).head.getCoordinate
   }
 
+  /**
+    * Checks if king is on throne.
+    *
+    * @return boolean
+    */
   def kingOnThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
     kingCoord.equals(gameSnapshot.getBoard.centerCoordinates)
 
+  /**
+    * Checks if king is near throne.
+    *
+    * @return boolean
+    */
   def kingNextToThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
     gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).values.map(_.head.getCoordinate)
       .toList.contains(kingCoord)
