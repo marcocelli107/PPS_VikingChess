@@ -442,7 +442,6 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackPawnsInCordon: Int = 13 + 4
 
-    println(snapshot.getBoard.consoleRepresentation)
     assert(EvaluationFunction(snapshot).scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon + ScoreProvider.RightCordon - ScoreProvider.WrongCordon)
   }
 
@@ -574,8 +573,6 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackPawnsInCordon = 8 + 4 + 4
 
-    println(snapshot.getBoard.consoleRepresentation)
-    println(EvaluationFunction(snapshot).scoreBlackCordon)
     assert(EvaluationFunction(snapshot).scoreBlackCordon == blackPawnsInCordon * ScoreProvider.PawnInCordon
       + ScoreProvider.RightCordon
       - ScoreProvider.WrongCordon - ScoreProvider.WrongCordon)

@@ -133,6 +133,10 @@ setIthElem(E, I, L, NL) :- setIthElem(E, I, L, 1, NL).
 setIthElem(E, I, [X|Xs], I, [E|Xs]) :- !.
 setIthElem(E, I, [X|Xs], C, [X|R]) :- C2 is C + 1, setIthElem(E, I, Xs, C2, R).
 
+%%% Checks if a list is not empty
+% [isNotEmpty(+List)]
+isNotEmpty([_|T]).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  							   Board			                		  %%
@@ -519,7 +523,7 @@ checkVictory(V, B, b, MoveCoord) :-
 %%% Checks if the game is drawn.
 % [checkDraw(+Game)]
 checkDraw(G) :- not(onePossibleMoveIsAvalaible(G)).
-onePossibleMoveIsAvalaible(G) :- gameBoard(G, B), findAnyMove(G, B).
+onePossibleMoveIsAvalaible(G) :- gamePossibleMoves(G,O), isNotEmpty(O). %gameBoard(G, B), findAnyMove(G, B).
 
 %%% Finds the king's coordinate in the specified +Board.
 % [findKing(+Board, -KingCoordinate)]
@@ -650,6 +654,12 @@ testOutIthElem :- testingList(L), ithElem(10, L, O).
 testSetIthElem :- testingList(L), setIthElem(elem, 4, L, [1,2,3,elem,5,6,7,8,9]).
 % no
 testSetOutIthElem :- testingList(L), setIthElem(elem, 10, L, O).
+
+% yes
+testNotEmptyList :- isNotEmpty([1,2,4,5,A,B,C]).
+
+% no
+testNotEmptyList2 :- isNotEmpty([]).
 
 % yes
 allTestsLists :-

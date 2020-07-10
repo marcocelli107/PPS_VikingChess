@@ -142,8 +142,6 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.None
   }
 
-  /*
-  //TODO FIX PROLOG DRAW IN ALL VARIANTS
   test("Tests draw 7x7 - Brandubh") {
     inSequence {
       ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase())
@@ -164,7 +162,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(6, 7), Coordinate(5, 7)))
       ParserProlog.makeLegitMove(Move(Coordinate(4, 6), Coordinate(4, 7)))
     }
-    val currentGame: (_, Player.Value, Board, _) = ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(4,6)))
+    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(4,6)))
     currentGame._2 shouldBe Player.Draw
   }
 
@@ -218,7 +216,6 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.Draw
   }
 
-
   test("Tests draw in 9x9 - Tablut") {
     inSequence {
       ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase())
@@ -253,5 +250,5 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
 
     currentGame._2 shouldBe Player.Draw
   }
-  */
+
 }
