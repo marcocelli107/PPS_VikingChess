@@ -80,6 +80,20 @@ object BoardGame {
   object OrthogonalDirection extends Enumeration {
     type OrthogonalDirection = Value
     val Up, Right, Down, Left = Value
+
+    implicit val orthogonalOrdering: Ordering[OrthogonalDirection] = (a: OrthogonalDirection, b: OrthogonalDirection) =>
+      a.directionToOrder compare b.directionToOrder
+
+    case class OrthogonalDirectionValue(direction: OrthogonalDirection) {
+      def directionToOrder: Int = direction match {
+        case OrthogonalDirection.Up => 1
+        case OrthogonalDirection.Right => 2
+        case OrthogonalDirection.Down => 3
+        case _ => 4
+      }
+    }
+
+    implicit def directionValue(direction: OrthogonalDirection): OrthogonalDirectionValue = OrthogonalDirectionValue(direction)
   }
 
   object DiagonalDirection extends Enumeration {
