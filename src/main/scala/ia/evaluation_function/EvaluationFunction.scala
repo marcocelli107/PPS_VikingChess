@@ -66,20 +66,8 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) {
       else if (kingNearCornerInOne && gameSnapshot.getPlayerToMove.equals(Player.White))
         newcomerScore = ScoreProvider.KingEscapeNearCorner
 
-<<<<<<< HEAD
-      // TODO kingtocorner kingnearcorner e kingislockable ripetuti, salvare i booleani in useful values
-
-      if (kingToCornerInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.White))
-        newcomerScore += ScoreProvider.KingEscapeToCorner
-      else if (kingNearToCornerInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.White))
-        newcomerScore += ScoreProvider.KingEscapeNearCorner
-
-      if (kingCapturedInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.Black))
-        newcomerScore -= ScoreProvider.KingCatchableInOne
-=======
       if (kingCapturedInOne && gameSnapshot.getPlayerToMove.equals(Player.Black))
         newcomerScore = -ScoreProvider.KingCatchableInOne
->>>>>>> 69d4d8588287a27d96adb18f546c5aaf97763bdc
 
       if (newcomerScore == 0) {
         newcomerScore -= scoreBlackSurroundTheKing +

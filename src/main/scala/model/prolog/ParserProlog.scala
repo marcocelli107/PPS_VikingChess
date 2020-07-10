@@ -21,7 +21,7 @@ sealed trait ParserPrologTrait {
    * Gives possible moves from the selected cell.
    *
    * @param cell
-   * coordinate of the Cell.
+   *            coordinate of the Cell.
    * @return seq of coordinates.
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
@@ -30,7 +30,7 @@ sealed trait ParserPrologTrait {
    * Sets player move if it's legit.
    *
    * @param move
-   * move to make
+   *            move to make
    * @return new board.
    */
   def makeLegitMove(move: Move): (Player, Player, Board, Int)
@@ -46,7 +46,7 @@ sealed trait ParserPrologTrait {
    * Checks if the cell at the specified coordinate is the central cell.
    *
    * @param coordinate
-   * coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    * @return boolean.
    */
   def isCentralCell(coordinate: Coordinate): Boolean
@@ -55,7 +55,7 @@ sealed trait ParserPrologTrait {
    * Checks if the cell at the specified coordinate is a corner cell.
    *
    * @param coordinate
-   * coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    * @return boolean.
    */
   def isCornerCell(coordinate: Coordinate): Boolean
@@ -64,7 +64,7 @@ sealed trait ParserPrologTrait {
    * Checks if the cell at the specified coordinate is a init pawn cell.
    *
    * @param coordinate
-   * coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    * @return boolean.
    */
   def isPawnCell(coordinate: Coordinate): Boolean
@@ -87,7 +87,7 @@ sealed trait ParserPrologTrait {
    * Undo some player move.
    *
    * @param oldBoard
-   * Board before changes
+   *                Board before changes
    * @return Unit.
    */
   def undoMove(oldBoard: Board): Unit
@@ -177,6 +177,7 @@ object ParserProlog extends ParserPrologTrait {
     private val prologListUselessChars: List[String] = List("','", "[", "]", "),", "(", ")")
     private val prologBoardUselessChars: List[String] = List("[", "]", "(", ")")
 
+    //TODO commentare?
     implicit class StringUtils(base: String) {
       implicit def clearChars(chars: List[String]): String = base.filter(e => !chars.contains(e.toString))
       implicit def dropRightComma: String = if (base.last.equals(',')) base.dropRight(1) else base

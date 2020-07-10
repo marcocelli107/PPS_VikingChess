@@ -538,16 +538,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))
 
 
-<<<<<<< HEAD
-    println(snapshot.getBoard.consoleRepresentation)
-    assert(evaluationFunction.computeNewcomerScore(snapshot) == -100 &&
-      evaluationFunction.computeStandardScore(snapshot) == -106 &&
-      evaluationFunction.computeAdvancedScore(snapshot) == -166)
-=======
     assert(EvaluationFunction(snapshot).computeNewcomerScore == -100 &&
       EvaluationFunction(snapshot).computeStandardScore == -100 &&
       EvaluationFunction(snapshot).computeAdvancedScore == -100)
->>>>>>> 69d4d8588287a27d96adb18f546c5aaf97763bdc
   }
 
   test("Test score for all difficulties - Tablut") {
