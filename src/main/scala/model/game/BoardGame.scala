@@ -9,10 +9,14 @@ import scala.collection.immutable.HashMap
 /**
   * Util class representing a 2D coordinate
   */
-
 object Coordinate {
   val COORD_STRING: String = "p"
 
+  /**
+    * Orders the coordinates according to rows.
+    *
+    * @return ordered coordinates.
+    */
   implicit val coordinateOrdering: Ordering[Coordinate] = (a: Coordinate, b: Coordinate) => {
     a.x compare b.x match {
       case 0 => a.y compare b.y
@@ -84,6 +88,11 @@ object BoardGame {
     type OrthogonalDirection = Value
     val Up, Right, Down, Left = Value
 
+    /**
+      * Orders the orthogonal directions clockwise as up, right, down, left.
+      *
+      * @return ordered orthogonal directions.
+      */
     implicit val orthogonalOrdering: Ordering[OrthogonalDirection] = (a: OrthogonalDirection, b: OrthogonalDirection) =>
       a.directionToOrder compare b.directionToOrder
 
@@ -96,6 +105,14 @@ object BoardGame {
       }
     }
 
+    /**
+      * Extracts implicitly direction value according to orthogonal direction.
+      *
+      * @param direction
+      *               orthogonal direction to extract.
+      *
+      * @return value to int
+      */
     implicit def directionValue(direction: OrthogonalDirection): OrthogonalDirectionValue = OrthogonalDirectionValue(direction)
   }
 
