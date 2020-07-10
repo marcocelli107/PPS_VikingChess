@@ -8,9 +8,13 @@ object ScoreProvider {
 
    def PossibleWinInOne: Int = 900
 
+   def PossibleWinInTwo: Int = 800
+
    def KingCatchableInOne: Int = 900
 
-   def KingEscapeNearCorner: Int = 850
+   def KingEscapeNearCorner: Int = 800
+
+   def KingLockable: Int = 800
 
    def KingEscapeToCorner: Int = 900
 
@@ -34,7 +38,7 @@ object ScoreProvider {
 
    def RowAndColumnOwnedKing: Int = 100
 
-   def BlackNearKing: Int = 50
+   def BlackNearKing: Int = 25
 
    def PawnInCordon: Int = 5
 
@@ -46,9 +50,11 @@ object ScoreProvider {
 
    def WrongBarricade: Int = 50
 
-   def BlackOnDiagonalKing: Int = 25
+   def BlackOnDiagonalKing: Int = 15
 
    def BlackCaptured: Int = 20
+
+   def PossibleKingMove: Int = 10
 
    def WhiteCaptured: Int = 50
 

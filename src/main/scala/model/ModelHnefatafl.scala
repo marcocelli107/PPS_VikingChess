@@ -9,7 +9,7 @@ import model.game.Level.Level
 import model.game.Player.Player
 import model.game.Snapshot.Snapshot
 import model.game.BoardGame.Board
-import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg, CloseMsg}
+import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg}
 import ia.pruning_alpha_beta.MiniMax
 import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
 import model.prolog.ParserProlog
@@ -48,7 +48,9 @@ trait ModelHnefatafl {
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
-  // TODO
+  /**
+    * Called by actor IA for best move.
+    */
   def iaBestMove(move: Move): Unit
 
   /**
@@ -124,13 +126,8 @@ object ModelHnefatafl {
     private var currentSnapshot: Int = 0
     private val moveLogPrint: Boolean = false
     private var system: ActorSystem = _
-    // TODO
-    //private var refIA: Option[ActorRef] = Option.empty
     private var refIA: ActorRef = _
     private var iaSnapshot: GameSnapshot = _
-
-    //private var sequIA: MiniMax = _
-
 
     /**
      * Defines status of the current game.
@@ -183,12 +180,7 @@ object ModelHnefatafl {
     override def makeMove(move: Move): Unit = {
       if(moveLogPrint)
         println("snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(" + move.from.x + "," + move.from.y + "), " + "Coordinate(" + move.to.x + "," + move.to.y + ")))")
-/*
-      println(move)
-      println(storySnapshot.last.getBoard.consoleRepresentation)
-      println(storySnapshot.last.getPlayerToMove)
-      println("")
-*/
+
       game = ParserProlog.makeLegitMove(move)
 
       val pieceCaptured: (Int, Int) = incrementCapturedPieces(game._1, game._4)
@@ -211,14 +203,9 @@ object ModelHnefatafl {
     }
 
     override def iaBestMove(move: Move): Unit = {
-      // TODO
-      //refIA = Option.empty
-      if(notUndone())
+      if(notUndone)
         makeMove(move)
     }
-
-    // TODO
-    private def notUndone(): Boolean = iaSnapshot.equals(storySnapshot.last)
 
     override def isCentralCell(coordinate: Coordinate): Boolean = ParserProlog.isCentralCell(coordinate)
 
@@ -253,15 +240,12 @@ object ModelHnefatafl {
         controller.disableUndo()
       }
       if(mode.equals(GameMode.PVE)) {
-        // TODO
-       /* if(refIA.nonEmpty) {
-          refIA.get ! CloseMsg()
-          refIA = Option.empty
-        }*/
         if(iaTurn)
           makeMoveIA()
       }
     }
+
+    private def notUndone: Boolean = iaSnapshot.equals(storySnapshot.last)
 
     /**
       * Sends a messages to IA actor for make a move.
