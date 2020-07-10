@@ -26,6 +26,9 @@ case class Coordinate(x: Int, y: Int) {
   override def toString: String = Coordinate.COORD_STRING + "(" + x + "," + y + ")"
 }
 
+/**
+  * Util class representing a move from coordinate to coordinate.
+  */
 case class Move(from: Coordinate, to: Coordinate) {
   override def toString: String = "move(from(" + from + ", to(" + to + "))"
 }
@@ -35,26 +38,26 @@ object BoardGame {
   trait BoardCell {
 
     /**
-      * Gets piece in the cell
+      * Gets piece in the cell.
       *
       * @return
-      * the piece type
+      *         the piece type
       */
     def getPiece: Piece
 
     /**
-      * Gets coordinate of the cell
+      * Gets coordinate of the cell.
       *
       * @return
-      * the coordinate
+      *        the coordinate
       */
     def getCoordinate: Coordinate
 
     /**
-      * Returns a string representation of the board
+      * Returns a string representation of the board.
       *
       * @return
-      * a string representation of the board
+      *         a string representation of the board
       */
     def toString: String
 
@@ -117,22 +120,49 @@ object BoardGame {
       */
     def getCell(coordinate: Coordinate): BoardCell
 
+    /**
+      * Sets a cell in the board.
+      */
     def setCell(cell: BoardCell)
 
+    /**
+      * Transforms a board in String.
+      */
     def toString: String
 
+    /**
+      * Creates a Map of orthogonal directions from a given coordinate.
+      */
     def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]]
 
+    /**
+      * Creates a Map of diagonal directions from a given coordinate.
+      */
     def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]]
 
+    /**
+      * Creates a list of special coordinates.
+      */
     def specialCoordinates: List[Coordinate]
 
+    /**
+      * Creates a list of corner coordinates.
+      */
     def cornerCoordinates: List[Coordinate]
 
+    /**
+      * Creates a coordinate of throne cell.
+      */
     def centerCoordinates: Coordinate
 
+    /**
+      * Creates a copy of current board.
+      */
     def getCopy: Board
 
+    /**
+      * Display a console representation of current board.
+      */
     def consoleRepresentation: String
 
   }

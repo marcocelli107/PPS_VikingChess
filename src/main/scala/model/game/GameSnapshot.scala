@@ -7,7 +7,7 @@ import model.game.Player.Player
 trait GameSnapshot {
 
   /**
-    * Gets game's variant
+    * Gets game's variant.
     *
     * @return variant
     */
@@ -21,14 +21,14 @@ trait GameSnapshot {
   def getPlayerToMove: Player
 
   /**
-    * Gets current game's winner
+    * Gets current game's winner.
     *
     * @return winner
     */
   def getWinner: Player
 
   /**
-    * Gets current game's board
+    * Gets current game's board.
     *
     * @return variant
     */

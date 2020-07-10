@@ -42,7 +42,7 @@ trait ModelHnefatafl {
    * Calls parser for the possible moves from a cell.
    *
    * @param cell
-   *                  coordinate of the Cell.
+   *             coordinate of the Cell.
    *
    * @return list buffer of the possible computed moves.
    */
@@ -57,7 +57,7 @@ trait ModelHnefatafl {
    * Calls parser for making a move from coordinate to coordinate.
    *
    * @param move
-   *                    move to make
+   *            move to make
    *
    * @return updated board.
    */
@@ -67,7 +67,7 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is the central cell.
    *
    * @param coordinate
-   *                      coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    *
    * @return boolean.
    */
@@ -77,7 +77,7 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is a corner cell.
    *
    * @param coordinate
-   *                        coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    *
    * @return boolean.
    */
@@ -87,7 +87,7 @@ trait ModelHnefatafl {
    * Checks if the cell at the specified coordinate is a init pawn cell.
    *
    * @param coordinate
-   *                        coordinate of the cell to inspect
+   *                  coordinate of the cell to inspect
    *
    * @return boolean.
    */
@@ -104,7 +104,7 @@ trait ModelHnefatafl {
    * Returns a previous or later state of the current board.
    *
    * @param snapshotToShow
-   *                        indicates snapshot to show.
+   *                      indicates snapshot to show.
    *
    * @return required board
    */
