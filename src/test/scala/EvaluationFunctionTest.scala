@@ -558,8 +558,8 @@ class evaluationFunctionTest extends FunSuite {
 
     println(snapshot.getBoard.consoleRepresentation)
     assert(evaluationFunction.computeNewcomerScore(snapshot) == -100 &&
-      evaluationFunction.computeStandardScore(snapshot) == -156 &&
-      evaluationFunction.computeAdvancedScore(snapshot) == -216)
+      evaluationFunction.computeStandardScore(snapshot) == -106 &&
+      evaluationFunction.computeAdvancedScore(snapshot) == -166)
   }
 
   test("Test score for all difficulties - Tablut") {

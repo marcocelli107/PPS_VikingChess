@@ -96,12 +96,12 @@ class EvaluationFunction {
 
       // TODO kingtocorner kingnearcorner e kingislockable ripetuti, salvare i booleani in useful values
 
-      if (kingToCornerInOne(snapshot))
+      if (kingToCornerInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.White))
         newcomerScore += ScoreProvider.KingEscapeToCorner
-      else if (kingNearToCornerInOne(snapshot))
+      else if (kingNearToCornerInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.White))
         newcomerScore += ScoreProvider.KingEscapeNearCorner
 
-      if (kingCapturedInOne(snapshot))
+      if (kingCapturedInOne(snapshot) && snapshot.getPlayerToMove.equals(Player.Black))
         newcomerScore -= ScoreProvider.KingCatchableInOne
 
       if (newcomerScore == 0) {
