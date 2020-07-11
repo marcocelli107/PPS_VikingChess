@@ -14,8 +14,6 @@ object ScoreProvider {
 
    def KingEscapeNearCorner: Int = 800
 
-   def KingLockable: Int = 800
-
    def KingEscapeToCorner: Int = 900
 
    def KingDistanceToCornerDividend: Int = 900
@@ -44,7 +42,7 @@ object ScoreProvider {
 
    def WhiteInsideCordon: Int = 10
 
-   def RightCordon: Int = 100
+   def RightCordon: Int = 80
 
    def WrongCordon: Int = 50
 
@@ -54,7 +52,7 @@ object ScoreProvider {
 
    def BlackCaptured: Int = 20
 
-   def PossibleKingMove: Int = 10
+   def PossibleKingMove: Int = 20
 
    def WhiteCaptured: Int = 50
 

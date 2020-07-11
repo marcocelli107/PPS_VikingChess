@@ -9,7 +9,7 @@ import model.game.Level.Level
 import model.game.Player.Player
 import model.game.Snapshot.Snapshot
 import model.game.BoardGame.Board
-import ia.minimax.{ArtificialIntelligenceImpl, FindBestMoveMsg}
+import ia.minimax.{ArtificialIntelligenceImpl, CloseMsg, FindBestMoveMsg}
 import ia.pruning_alpha_beta.MiniMax
 import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
 import model.prolog.ParserProlog
