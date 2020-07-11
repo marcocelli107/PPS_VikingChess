@@ -37,7 +37,7 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
-    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); context.stop(sender()); self ! PoisonPill
+    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); context.stop(sender());
     case _: CloseMsg => context.become(dyingState)
   }
 
@@ -49,7 +49,7 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
   }
 
   /**
-    * Creates Maximizator/Minimizator Actor according to IA player.
+    * Creates Maximizing/Minimizing Actor according to IA player.
     */
   def findBestMove(gameSnapshot: GameSnapshot): Unit = {
     var sonActor: Props = Props.empty

@@ -214,7 +214,6 @@ trait GameFactory {
   /**
     * Generates a sound for the moved piece.
     */
-  //def generateASoundForMove()
 }
 
 object GameFactory extends GameFactory {
@@ -226,7 +225,6 @@ object GameFactory extends GameFactory {
   ge.registerFont(f)
   private val centerCellIconPath: String = "src/main/resources/images/iconThrone.png"
   private val cornerCellIconPath: String =  "src/main/resources/images/iconCellWin.png"
-  //private val soundMovedPiece: String =  "src/main/resources/sounds/movedPiece.mp3"
 
   override def getSmallerSide: Int = smallerSide
 
@@ -281,15 +279,6 @@ object GameFactory extends GameFactory {
   override def createGameSubMenuPanel: JPanel = new GameSubMenuPanel
 
   override def createBagConstraints: GridBagConstraints = new GridBagConstraints()
-
-  //override def generateASoundForMove(): Unit = playMoveSound()
-
-  /*
-  private def playMoveSound(): Unit = {
-    val mediaPlayer: MediaPlayer = new MediaPlayer(new Media(soundMovedPiece))
-    mediaPlayer.play()
-  }
-  */
 
   private class BasicCell(private var defaultBackground: Color) extends Cell {
     private var isAPossibleMove: Boolean = false

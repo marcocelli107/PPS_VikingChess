@@ -80,10 +80,11 @@ object ViewGame {
   case class ViewMatchImpl(view: ViewHnefatafl) extends ViewGame {
 
     private val HEIGHT_DIMENSION = GameFactory.getSmallerSide * 8 / 100
-    private val SMALL_WIDTH_DIMENSION = GameFactory.getSmallerSide * 10 / 100
+    private val SMALL_WIDTH_DIMENSION = GameFactory.getSmallerSide * 11 / 100
     private val MEDIUM_WIDTH_DIMENSION = GameFactory.getSmallerSide * 20 / 100
     private val BIG_WIDTH_DIMENSION = GameFactory.getSmallerSide * 30 / 100
-    private val BETWEEN_COMPONENTS_DIMENSION = GameFactory.getSmallerSide * 55 / 100
+    private val BETWEEN_COMPONENTS_DIMENSION = GameFactory.getSmallerSide * 53 / 100
+    private val WIDTH_BETWEEN_LABELS_DIMENSION = GameFactory.getSmallerSide * 6 / 100
 
     private var gamePanel, northPanel, subNorthPanel, southPanel, subSouthPanel, boardPanel, boardPlusColumns,
         leftPanel, rightPanel: JPanel = _
@@ -130,9 +131,6 @@ object ViewGame {
 
     override def update(gameSnapshot: GameSnapshot): Unit = {
       updateSnapshot(gameSnapshot)
-
-      /* TODO NON FUNZIONA */
-      //ViewFactory.generateASoundForMove()
     }
 
     override def updateSnapshot(gameSnapshot: GameSnapshot): Unit = {
@@ -262,6 +260,8 @@ object ViewGame {
       playerWhiteLabel.setVisible(false)
       subNorthPanel.add(playerBlackLabel, GridConstraints.getLimits)
       subNorthPanel.add(playerWhiteLabel, GridConstraints.getLimits)
+
+      subNorthPanel.add(Box.createRigidArea(new Dimension(WIDTH_BETWEEN_LABELS_DIMENSION, 0)),GridConstraints.getLimits)
 
       playerOrWinnerLabel = GameFactory.createLabelPlayerToMoveWinner
       GridConstraints.incrementXConstraints()

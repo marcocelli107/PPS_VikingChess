@@ -122,16 +122,15 @@ object MenuFactory extends MenuFactory {
   private val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
   private val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
   ge.registerFont(f)
-  private val boardHnefataflIconPath: String =  "src/main/resources/images/iconBoardHnefatafl.png"
-  private val boardTawlbwrddIconPath: String =  "src/main/resources/images/iconBoardTawlbwrdd.png"
-  private val boardTablutIconPath: String =  "src/main/resources/images/iconBoardTablut.png"
-  private val boardBrandubhIconPath: String =  "src/main/resources/images/iconBoardBrandubh.png"
-  private val newcomerIconPath: String =  "src/main/resources/images/iconNewcomer.png"
-  private val amateurIconPath: String =  "src/main/resources/images/iconAmateur.png"
-  private val standardIconPath: String =  "src/main/resources/images/iconStandard.png"
-  private val advancedIconPath: String =  "src/main/resources/images/iconAdvanced.png"
-  private val whitePlayerIconPath: String =  "src/main/resources/images/iconWhitePlayer.jpeg"
-  private val blackPlayerIconPath: String =  "src/main/resources/images/iconBlackPlayer.jpeg"
+  private val boardHnefataflIconPath: String = "src/main/resources/images/iconBoardHnefatafl.png"
+  private val boardTawlbwrddIconPath: String = "src/main/resources/images/iconBoardTawlbwrdd.png"
+  private val boardTablutIconPath: String = "src/main/resources/images/iconBoardTablut.png"
+  private val boardBrandubhIconPath: String = "src/main/resources/images/iconBoardBrandubh.png"
+  private val newcomerIconPath: String = "src/main/resources/images/iconNewcomer.png"
+  private val standardIconPath: String = "src/main/resources/images/iconStandard.png"
+  private val advancedIconPath: String = "src/main/resources/images/iconAdvanced.png"
+  private val whitePlayerIconPath: String = "src/main/resources/images/iconWhitePlayer.jpeg"
+  private val blackPlayerIconPath: String = "src/main/resources/images/iconBlackPlayer.jpeg"
   private val HEIGHT_COMPONENT_MENU_DIMENSION: Int = smallerSide * 8 / 100
 
   override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
@@ -200,7 +199,7 @@ object MenuFactory extends MenuFactory {
 
     override protected def paintComponent(g: Graphics): Unit = {
       super.paintComponent(g)
-      g.drawImage(imageScaled, 0, 0, null)
+      g.drawImage(imageScaled, 0, 0,null)
     }
   }
 

@@ -2,16 +2,15 @@ package model
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
+import ia.minimax.{ArtificialIntelligenceImpl, CloseMsg, FindBestMoveMsg}
+import model.game.BoardGame.Board
 import model.game.GameMode.GameMode
 import model.game.GameSnapshot.GameSnapshotImpl
 import model.game.GameVariant.GameVariant
 import model.game.Level.Level
 import model.game.Player.Player
 import model.game.Snapshot.Snapshot
-import model.game.BoardGame.Board
-import ia.minimax.{ArtificialIntelligenceImpl, CloseMsg, FindBestMoveMsg}
-import ia.pruning_alpha_beta.MiniMax
-import model.game.{Coordinate, GameMode, GameSnapshot, Move, Player, Snapshot}
+import model.game._
 import model.prolog.ParserProlog
 
 import scala.collection.mutable
@@ -126,7 +125,7 @@ object ModelHnefatafl {
     private var currentSnapshot: Int = 0
     private val moveLogPrint: Boolean = false
     private var system: ActorSystem = _
-    private var refIA: ActorRef = _
+    private var refIA: Option[ActorRef] = Option.empty
     private var iaSnapshot: GameSnapshot = _
 
     /**
@@ -240,8 +239,11 @@ object ModelHnefatafl {
         controller.disableUndo()
       }
       if(mode.equals(GameMode.PVE)) {
-        if(iaTurn)
+        if(iaTurn) {
           makeMoveIA()
+        }
+
+
       }
     }
 
@@ -256,8 +258,11 @@ object ModelHnefatafl {
 
       //MINIMAX ACTORS
       iaSnapshot = storySnapshot.last
-      refIA = system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA)))
-      refIA ! FindBestMoveMsg(storySnapshot.last)
+      if(refIA.nonEmpty)
+        refIA.get ! CloseMsg()
+
+      refIA = Option(system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA))))
+      refIA.get ! FindBestMoveMsg(storySnapshot.last)
     }
 
     /**
