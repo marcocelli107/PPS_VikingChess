@@ -142,7 +142,7 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     currentGame._2 shouldBe Player.None
   }
 
-  test("Tests draw - Brandubh") {
+  test("Tests draw 7x7 - Brandubh") {
     inSequence {
       ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase())
       ParserProlog.makeLegitMove(Move(Coordinate(4, 6), Coordinate(1, 6)))
@@ -165,4 +165,90 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
     val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(4,6)))
     currentGame._2 shouldBe Player.Draw
   }
+
+  test("Tests draw 11x11 - Hnefatafl") {
+    inSequence {
+      ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase())
+      ParserProlog.makeLegitMove(Move(Coordinate(6,2), Coordinate(3,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(4,6), Coordinate(4,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,1), Coordinate(5,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,4), Coordinate(2,4)))
+      ParserProlog.makeLegitMove(Move(Coordinate(3,2), Coordinate(3,4)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,7), Coordinate(2,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(3,4), Coordinate(3,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,8), Coordinate(2,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(3,7), Coordinate(3,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(5,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(4,11), Coordinate(4,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,5), Coordinate(6,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,1), Coordinate(7,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(8,6), Coordinate(8,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(8,11), Coordinate(8,3)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,5), Coordinate(5,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,2), Coordinate(5,9)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,7), Coordinate(7,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(8,3), Coordinate(8,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,6), Coordinate(7,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,9), Coordinate(7,9)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,5), Coordinate(7,3)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,9), Coordinate(7,4)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,7), Coordinate(2,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(11,7), Coordinate(3,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,6), Coordinate(9,6)))
+      ParserProlog.makeLegitMove(Move(Coordinate(8,10), Coordinate(8,11)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,6), Coordinate(9,11)))
+      ParserProlog.makeLegitMove(Move(Coordinate(10,6), Coordinate(10,11)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,11), Coordinate(9,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(11,8), Coordinate(9,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,10), Coordinate(9,11)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,8), Coordinate(9,9)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,11), Coordinate(9,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(11,6), Coordinate(10,6)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,10), Coordinate(9,11)))
+      ParserProlog.makeLegitMove(Move(Coordinate(10,6), Coordinate(10,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,11), Coordinate(10,11)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,9), Coordinate(9,10)))
+      ParserProlog.makeLegitMove(Move(Coordinate(10,11), Coordinate(9,11)))
+
+    }
+    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(10,10), Coordinate(10,11)))
+
+    currentGame._2 shouldBe Player.Draw
+  }
+
+  test("Tests draw in 9x9 - Tablut") {
+    inSequence {
+      ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase())
+      ParserProlog.makeLegitMove(Move(Coordinate(5,2), Coordinate(7,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,3), Coordinate(1,3)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,2), Coordinate(1,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,4), Coordinate(2,4)))
+      ParserProlog.makeLegitMove(Move(Coordinate(1,2), Coordinate(2,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,7), Coordinate(1,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,8), Coordinate(1,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(3,5), Coordinate(3,6)))
+      ParserProlog.makeLegitMove(Move(Coordinate(2,2), Coordinate(2,3)))
+      ParserProlog.makeLegitMove(Move(Coordinate(3,6), Coordinate(3,9)))
+      ParserProlog.makeLegitMove(Move(Coordinate(2,5), Coordinate(2,9)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(5,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,9), Coordinate(6,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(4,5), Coordinate(4,2)))
+      ParserProlog.makeLegitMove(Move(Coordinate(1,8), Coordinate(4,8)))
+      ParserProlog.makeLegitMove(Move(Coordinate(5,5), Coordinate(2,5)))
+      ParserProlog.makeLegitMove(Move(Coordinate(4,8), Coordinate(4,3)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,5), Coordinate(6,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(1,6), Coordinate(6,6)))
+      ParserProlog.makeLegitMove(Move(Coordinate(7,5), Coordinate(6,5)))
+      ParserProlog.makeLegitMove(Move(Coordinate(6,1), Coordinate(6,4)))
+      ParserProlog.makeLegitMove(Move(Coordinate(2,5), Coordinate(2,6)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,6), Coordinate(9,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(2,6), Coordinate(3,6)))
+      ParserProlog.makeLegitMove(Move(Coordinate(9,7), Coordinate(1,7)))
+      ParserProlog.makeLegitMove(Move(Coordinate(3,6), Coordinate(1,6)))
+    }
+    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(6,6), Coordinate(2,6)))
+
+    currentGame._2 shouldBe Player.Draw
+  }
+
 }

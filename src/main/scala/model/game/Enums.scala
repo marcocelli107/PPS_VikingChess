@@ -28,6 +28,14 @@ object Player extends Enumeration {
     }
   }
 
+  /**
+    * Parses enum player in prolog player implicitly.
+    *
+    * @param player
+    *               player enum.
+    *
+    * @return player string
+    */
   implicit def getParserString(player: Player): ParserStringPlayer = ParserStringPlayer(player)
 }
 
@@ -47,6 +55,14 @@ object Level extends Enumeration {
     }
   }
 
+  /**
+    * Extracts implicitly depth according to difficulty.
+    *
+    * @param level
+    *               level difficulty IA.
+    *
+    * @return depth to int
+    */
   implicit def depth(level: Level): LevelDepth = LevelDepth(level)
 }
 
@@ -68,6 +84,14 @@ object GameVariant extends Enumeration {
     }
   }
 
+  /**
+    * Extracts implicitly size of board according to variant.
+    *
+    * @param gameVariant
+    *               game's variant.
+    *
+    * @return size to int
+    */
   implicit def getBoardSize(gameVariant: GameVariant): GameVariantBoardSize = GameVariantBoardSize(gameVariant)
 }
 

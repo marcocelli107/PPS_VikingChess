@@ -34,8 +34,8 @@ class MiniMaxImpl(levelIA: Level) extends MiniMax {
     }
 
     private def chooseTheBest(move: Move, bestCoord: Option[Move], bestScore:Int, newScore:Int, iaPlayer: Player):(Option[Move],Int) =  iaPlayer match {
-      case Player.White if (newScore > bestScore && bestCoord.nonEmpty) => (Option(move), newScore)
-      case Player.Black if (newScore < bestScore && bestCoord.nonEmpty) => (Option(move), newScore)
+      case Player.White if newScore > bestScore && bestCoord.nonEmpty => (Option(move), newScore)
+      case Player.Black if newScore < bestScore && bestCoord.nonEmpty => (Option(move), newScore)
       case _  if bestCoord.isEmpty=> (Option(move),newScore )
       case _ => (bestCoord,bestScore)
     }
@@ -47,8 +47,8 @@ class MiniMaxImpl(levelIA: Level) extends MiniMax {
 
 
   def pruningAlfaBeta(sonGameSnapshot: GameSnapshot, depth: Int, alfa: Int, beta: Int, phase: MaxMin): Int = (depth, phase) match {
-    case (_, _) if isTerminalNode(sonGameSnapshot) => EvaluationFunction.score(sonGameSnapshot, levelIA)
-    case (0, _) => EvaluationFunction.score(sonGameSnapshot, levelIA)
+    case (_, _) if isTerminalNode(sonGameSnapshot) => EvaluationFunction(sonGameSnapshot).score(levelIA)
+    case (0, _) => EvaluationFunction(sonGameSnapshot).score(levelIA)
     case (_, MaxMin.Max) => maximizationPhase(sonGameSnapshot, depth, alfa, beta)
     case _ => minimizationPhase(sonGameSnapshot, depth, alfa, beta)
   }

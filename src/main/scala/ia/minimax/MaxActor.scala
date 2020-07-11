@@ -5,7 +5,7 @@ import model.game.Level.Level
 
 class MaxActor(levelIA: Level) extends MiniMaxActor(levelIA) {
 
-  override def initAlfa: Int = Int.MinValue
+  override def initAlpha: Int = Int.MinValue
 
   override def createChild(): Props =
     Props(new MinActor(levelIA))
@@ -13,5 +13,4 @@ class MaxActor(levelIA: Level) extends MiniMaxActor(levelIA) {
   override def miniMaxComparison(score: Int, alfa: Int): Boolean = {
     score > alfa
   }
-
 }
