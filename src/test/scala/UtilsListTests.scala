@@ -18,16 +18,6 @@ class UtilsListTests extends FunSuite {
     assert(goal.isSuccess)
   }
 
-  test("Checks if a list is not empty.") {
-    goal = prolog.solve("testNotEmptyList.")
-    assert(goal.isSuccess)
-  }
-
-  test("Checks if a list is empty.") {
-    goal = prolog.solve("testNotEmptyList2.")
-    assert(!goal.isSuccess)
-  }
-
   test("Returns the size of a list.") {
     goal = prolog.solve("testSize.")
     assert(goal.isSuccess)

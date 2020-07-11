@@ -1,3 +1,4 @@
+import model.game.Player.Player
 import model.game.{Coordinate, GameVariant, Move, Player}
 import model.prolog.ParserProlog
 import org.junit.runner.RunWith
@@ -209,10 +210,9 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(9,11), Coordinate(10,11)))
       ParserProlog.makeLegitMove(Move(Coordinate(9,9), Coordinate(9,10)))
       ParserProlog.makeLegitMove(Move(Coordinate(10,11), Coordinate(9,11)))
-
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(10,10), Coordinate(10,11)))
 
+    val currentGame: (_, Player, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(10,10), Coordinate(10,11)))
     currentGame._2 shouldBe Player.Draw
   }
 

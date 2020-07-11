@@ -47,14 +47,4 @@ class PossibleMovesTests extends FunSuite {
     goal = prolog.solve("testGetCoordPossibleMovesKingSpecialCells.")
     assert(goal.isSuccess)
   }
-
-  test("Tests if a new game has at least one possible move.") {
-    goal = prolog.solve("testFindAnyMove.")
-    assert(goal.isSuccess)
-  }
-
-  test("Test if a game with empty board has no possible moves.") {
-    goal = prolog.solve("testFindNoMove.")
-    assert(goal.isSuccess)
-  }
 }
