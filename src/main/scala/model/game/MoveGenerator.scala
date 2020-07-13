@@ -1,7 +1,7 @@
 package model.game
 
-import model.game.BoardGame.OrthogonalDirection.OrthogonalDirection
-import model.game.BoardGame.{Board, BoardCell, OrthogonalDirection}
+import model.game.BoardGame.{Board, BoardCell}
+import model.game.OrthogonalDirection.OrthogonalDirection
 import model.game.Piece.Piece
 import model.game.Player.Player
 

@@ -1,7 +1,6 @@
 package model.game
 
-import model.game.BoardGame.DiagonalDirection.DiagonalDirection
-import model.game.BoardGame.OrthogonalDirection.OrthogonalDirection
+import model.game.OrthogonalDirection.OrthogonalDirection
 import model.game.Piece.Piece
 
 import scala.collection.immutable.HashMap
@@ -84,42 +83,7 @@ object BoardGame {
 
   }
 
-  object OrthogonalDirection extends Enumeration {
-    type OrthogonalDirection = Value
-    val Up, Right, Down, Left = Value
-
-    /**
-      * Orders the orthogonal directions clockwise as up, right, down, left.
-      *
-      * @return ordered orthogonal directions.
-      */
-    implicit val orthogonalOrdering: Ordering[OrthogonalDirection] = (a: OrthogonalDirection, b: OrthogonalDirection) =>
-      a.directionToOrder compare b.directionToOrder
-
-    case class OrthogonalDirectionValue(direction: OrthogonalDirection) {
-      def directionToOrder: Int = direction match {
-        case OrthogonalDirection.Up => 1
-        case OrthogonalDirection.Right => 2
-        case OrthogonalDirection.Down => 3
-        case _ => 4
-      }
-    }
-
-    /**
-      * Extracts implicitly direction value according to orthogonal direction.
-      *
-      * @param direction
-      *               orthogonal direction to extract.
-      *
-      * @return value to int
-      */
-    implicit def directionValue(direction: OrthogonalDirection): OrthogonalDirectionValue = OrthogonalDirectionValue(direction)
-  }
-
-  object DiagonalDirection extends Enumeration {
-    type DiagonalDirection = Value
-    val UpRight, DownRight, DownLeft, UpLeft = Value
-  }
+  // TODO RETURN NEI DOC DEL TRAIT
 
   trait Board {
     /**
@@ -153,11 +117,6 @@ object BoardGame {
     def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]]
 
     /**
-      * Creates a Map of diagonal directions from a given coordinate.
-      */
-    def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]]
-
-    /**
       * Creates a list of special coordinates.
       */
     def specialCoordinates: List[Coordinate]
@@ -182,6 +141,24 @@ object BoardGame {
       */
     def consoleRepresentation: String
 
+    /**
+     * Returns an Option of adjacent coordinates for all four orthogonal directions.
+     *
+     * @param coordinate
+     *                   coordinate of which to find adjacent coordinates.
+     * @return a map of OrthogonalDirection and Option of adjacent coordinate if it is in board.
+     */
+    def adjacentCoordinates(coordinate: Coordinate): Map[OrthogonalDirection, Option[Coordinate]]
+
+    def getSide(coordinate: Coordinate): Option[OrthogonalDirection]
+
+    def isOnAnySides(coordinate: Coordinate, sides: Seq[OrthogonalDirection] =
+      Seq(OrthogonalDirection.Up, OrthogonalDirection.Down, OrthogonalDirection.Right, OrthogonalDirection.Left)): Boolean
+
+    def adjacentCells(coordinate: Coordinate): Map[OrthogonalDirection, Option[BoardCell]]
+
+    def getSpecificOrthogonalCells(coordinate: Coordinate, orthogonalDirection: OrthogonalDirection): Seq[BoardCell]
+
   }
 
   object Board {
@@ -204,16 +181,12 @@ object BoardGame {
       override def toString: String = rows.map(_.mkString("[", ",", "]")).mkString("[", ",", "]")
 
       override def orthogonalCells(coordinate: Coordinate): Map[OrthogonalDirection, List[BoardCell]] =
-        HashMap(OrthogonalDirection.Up -> upCells(coordinate),
+        HashMap(
+          OrthogonalDirection.Up -> upCells(coordinate),
           OrthogonalDirection.Right -> rightCells(coordinate),
           OrthogonalDirection.Down -> downCells(coordinate),
-          OrthogonalDirection.Left -> leftCells(coordinate))
-
-      override def diagonalCells(coordinate: Coordinate): Map[DiagonalDirection, List[BoardCell]] =
-        HashMap(DiagonalDirection.UpRight -> upRightDiagonal(coordinate),
-          DiagonalDirection.UpLeft -> upLeftDiagonal(coordinate),
-          DiagonalDirection.DownRight -> downRightDiagonal(coordinate),
-          DiagonalDirection.DownLeft -> downLeftDiagonal(coordinate))
+          OrthogonalDirection.Left -> leftCells(coordinate)
+        )
 
       private def upCells(coordinate: Coordinate): List[BoardCell] =
         (coordinate.x - 1 to 1 by -1).toList.map(Coordinate(_, coordinate.y)).map(getCell)
@@ -226,21 +199,6 @@ object BoardGame {
 
       private def leftCells(coordinate: Coordinate): List[BoardCell] =
         (coordinate.y - 1 to 1 by -1).toList.map(Coordinate(coordinate.x, _)).map(getCell)
-
-      private def upRightDiagonal(coordinate: Coordinate): List[BoardCell] =
-        (coordinate.x - 1 to 1 by -1).toList.map(x => Coordinate(x, coordinate.x + coordinate.y - x)).filter(isInBoard).map(getCell)
-
-      private def upLeftDiagonal(coordinate: Coordinate): List[BoardCell] =
-        (coordinate.x - 1 to 1 by -1).toList.map(x => Coordinate(x, coordinate.y - coordinate.x + x)).filter(isInBoard).map(getCell)
-
-      private def downRightDiagonal(coordinate: Coordinate): List[BoardCell] =
-        (coordinate.x + 1 to size).toList.map(x => Coordinate(x, coordinate.y + x - coordinate.x)).filter(isInBoard).map(getCell)
-
-      private def downLeftDiagonal(coordinate: Coordinate): List[BoardCell] =
-        (coordinate.x + 1 to size).toList.map(x => Coordinate(x, coordinate.x - x + coordinate.y)).filter(isInBoard).map(getCell)
-
-      private def isInBoard(coordinate: Coordinate): Boolean =
-        coordinate.x >= 1 && coordinate.x <= size & coordinate.y >= 1 && coordinate.y <= size
 
       override def specialCoordinates: List[Coordinate] =
         cornerCoordinates :+ centerCoordinates
@@ -256,6 +214,59 @@ object BoardGame {
       override def consoleRepresentation: String =
         rows.map(_.map(_.getPiece.toString).flatMap(e => if (e == Piece.Empty.toString) "_" else e)
           .mkString("  ") + "\n").mkString
+
+      override def adjacentCoordinates(coordinate: Coordinate): Map[OrthogonalDirection, Option[Coordinate]] =
+        HashMap(
+          OrthogonalDirection.Up ->
+            filterOutOfBoardCoordinate(Coordinate(coordinate.x - 1, coordinate.y)),
+          OrthogonalDirection.Right ->
+            filterOutOfBoardCoordinate(Coordinate(coordinate.x, coordinate.y + 1)),
+          OrthogonalDirection.Down ->
+            filterOutOfBoardCoordinate(Coordinate(coordinate.x + 1, coordinate.y)),
+          OrthogonalDirection.Left ->
+            filterOutOfBoardCoordinate(Coordinate(coordinate.x, coordinate.y - 1))
+        )
+
+      private def filterOutOfBoardCoordinate(coordinate: Coordinate): Option[Coordinate] =
+        if (!outOfBoard(coordinate))
+          Option(coordinate)
+        else
+          Option.empty
+
+      private def outOfBoard(coordinate: Coordinate): Boolean =
+        coordinate.x > size || coordinate.x < 1 || coordinate.y > size || coordinate.y < 1
+
+      override def getSide(coordinate: Coordinate): Option[OrthogonalDirection] = coordinate match {
+        case c if isOnSide(c, OrthogonalDirection.Up) => Option(OrthogonalDirection.Up)
+        case c if isOnSide(c, OrthogonalDirection.Right) => Option(OrthogonalDirection.Right)
+        case c if isOnSide(c, OrthogonalDirection.Down) => Option(OrthogonalDirection.Down)
+        case c if isOnSide(c, OrthogonalDirection.Left) => Option(OrthogonalDirection.Left)
+        case _ => Option.empty
+      }
+
+      private def isOnSide(coordinate: Coordinate, side: OrthogonalDirection): Boolean = side match {
+        case OrthogonalDirection.Up => coordinate.x == 1
+        case OrthogonalDirection.Right => coordinate.y == size
+        case OrthogonalDirection.Down => coordinate.x == size
+        case OrthogonalDirection.Left => coordinate.y == 1
+        case _ => false
+      }
+
+      override def isOnAnySides(coordinate: Coordinate, sides: Seq[OrthogonalDirection] =
+        Seq(OrthogonalDirection.Up, OrthogonalDirection.Down, OrthogonalDirection.Right, OrthogonalDirection.Left)): Boolean =
+          sides.exists(isOnSide(coordinate, _))
+
+      override def adjacentCells(coordinate: Coordinate): Map[OrthogonalDirection, Option[BoardCell]] =
+        adjacentCoordinates(coordinate).map { case (k, v) => if(v.nonEmpty) (k, Option(getCell(v.get))) else (k, Option.empty) }
+
+      override def getSpecificOrthogonalCells(coordinate: Coordinate, orthogonalDirection: OrthogonalDirection): Seq[BoardCell] =
+        orthogonalDirection match {
+          case OrthogonalDirection.Up => upCells(coordinate)
+          case OrthogonalDirection.Right => rightCells(coordinate)
+          case OrthogonalDirection.Down => downCells(coordinate)
+          case _ => leftCells(coordinate)
+        }
+
     }
 
   }

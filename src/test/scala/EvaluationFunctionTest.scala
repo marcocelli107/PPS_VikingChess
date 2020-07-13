@@ -460,7 +460,7 @@ class EvaluationFunctionTest extends FunSuite {
 
     val wrongBarricade = EvaluationFunction(snapshot).scoreWrongBarricade
 
-    assert(wrongBarricade._2 == 4 * ScoreProvider.WrongBarricade && wrongBarricade._1 == 2 * ScoreProvider.WrongBarricade)
+    assert(wrongBarricade.blackScore == 4 * ScoreProvider.WrongBarricade && wrongBarricade.whiteScore == 2 * ScoreProvider.WrongBarricade)
   }
 
   test("Tests score two black on king's diagonal - Tablut"){

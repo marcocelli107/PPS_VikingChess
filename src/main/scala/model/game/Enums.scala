@@ -122,3 +122,63 @@ object MaxMin extends Enumeration {
   val Max, min = Value
 }
 
+
+object OrthogonalDirection extends Enumeration {
+  type OrthogonalDirection = Value
+  val Up, Right, Down, Left = Value
+
+  /**
+   * Orders the orthogonal directions clockwise as up, right, down, left.
+   *
+   * @return ordered orthogonal directions.
+   */
+  implicit val orthogonalOrdering: Ordering[OrthogonalDirection] = (a: OrthogonalDirection, b: OrthogonalDirection) =>
+    a.directionToSort compare b.directionToSort
+
+  case class OrthogonalDirectionValue(direction: OrthogonalDirection) {
+    /**
+     * Returns an integer for direction sorting
+     *
+     * @return integer for sorting
+     */
+    def directionToSort: Int = direction match {
+      case OrthogonalDirection.Up => 1
+      case OrthogonalDirection.Right => 2
+      case OrthogonalDirection.Down => 3
+      case _ => 4
+    }
+  }
+
+  /**
+   * Extracts implicitly direction value for sorting according to orthogonal direction.
+   *
+   * @param direction
+   *               orthogonal direction to sort.
+   *
+   * @return an OrthogonalDirectionValue for sorting.
+   */
+  implicit def directionValue(direction: OrthogonalDirection): OrthogonalDirectionValue = OrthogonalDirectionValue(direction)
+
+  case class OrthogonalOpposite(direction: OrthogonalDirection) {
+    /**
+     * Returns the opposite orthogonal direction
+     *
+     * @return the opposite orthogonal direction
+     */
+    def opposite: OrthogonalDirection = direction match {
+      case OrthogonalDirection.Up => OrthogonalDirection.Down
+      case OrthogonalDirection.Right => OrthogonalDirection.Left
+      case OrthogonalDirection.Down => OrthogonalDirection.Up
+      case OrthogonalDirection.Left => OrthogonalDirection.Right
+    }
+  }
+
+  /**
+   * Implicitly returns the opposite orthogonal direction.
+   *
+   * @param direction
+   *        the orthogonal direction of which finding the opposite.
+   * @return the OrthogonalOpposite
+   */
+  implicit def orthogonalOpposite(direction: OrthogonalDirection): OrthogonalOpposite = OrthogonalOpposite(direction)
+}
