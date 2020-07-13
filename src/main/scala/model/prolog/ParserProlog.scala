@@ -142,10 +142,10 @@ object ParserProlog extends ParserPrologTrait {
       s"${move.from.toString}," +
       s"${move.to.toString}, L, (V,P,W,B)).")
 
-    setGameTerms(goal)
+    if(goal.isSuccess)
+      setGameTerms(goal)
 
-    (goal.getTerm("P").parsePlayer, goal.getTerm("W").parsePlayer,
-      board.parseBoard(getBoardSize), goal.getTerm("L").toString.toInt)
+    (playerToMove.parsePlayer, winner.parsePlayer, board.parseBoard(getBoardSize), 0)
   }
 
   override def findKing(): Coordinate =

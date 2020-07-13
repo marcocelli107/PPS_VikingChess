@@ -117,16 +117,19 @@ trait ModelHnefatafl {
 
 object ModelHnefatafl {
 
+  val MIN_IA_TIME = 750
+
   def apply(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): ModelHnefatafl = ModelHnefataflImpl(controller, newVariant, gameMode, levelIA, playerChosen)
 
   case class ModelHnefataflImpl(controller: ControllerHnefatafl, newVariant: GameVariant, gameMode: GameMode, level: Level, playerChosen: Player) extends ModelHnefatafl {
 
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
-    private val moveLogPrint: Boolean = true
+    private val moveLogPrint: Boolean = false
     private var system: ActorSystem = _
     private var refIA: Option[ActorRef] = Option.empty
     private var iaSnapshot: GameSnapshot = _
+    private var iaAskTime: Long = _
 
     /**
      * Defines status of the current game.
@@ -202,6 +205,9 @@ object ModelHnefatafl {
     }
 
     override def iaBestMove(move: Move): Unit = {
+      val timeLapse = System.currentTimeMillis() - iaAskTime
+      if(timeLapse < MIN_IA_TIME)
+        Thread.sleep(MIN_IA_TIME - timeLapse)
       if(notUndone)
         makeMove(move)
     }
@@ -226,7 +232,7 @@ object ModelHnefatafl {
     }
 
     override def undoMove(): Unit = {
-      if (showingCurrentSnapshot & storySnapshot.last.getLastMove.nonEmpty) {
+      if(showingCurrentSnapshot && storySnapshot.last.getLastMove.nonEmpty) {
         storySnapshot -= storySnapshot.last
         currentSnapshot -= 1
         controller.activeFirstPrevious()
@@ -239,11 +245,8 @@ object ModelHnefatafl {
         controller.disableUndo()
       }
       if(mode.equals(GameMode.PVE)) {
-        if(iaTurn) {
+        if(iaTurn)
           makeMoveIA()
-        }
-
-
       }
     }
 
@@ -263,6 +266,7 @@ object ModelHnefatafl {
 
       refIA = Option(system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA))))
       refIA.get ! FindBestMoveMsg(storySnapshot.last)
+      iaAskTime = System.currentTimeMillis()
     }
 
     /**
