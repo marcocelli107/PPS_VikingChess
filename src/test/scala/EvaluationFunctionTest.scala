@@ -130,7 +130,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(3,5)))
 
-    assert(EvaluationFunction(snapshot).score(Level.Newcomer) < -100)
+    assert(EvaluationFunction(snapshot).score(Level.Newcomer) < 0)
   }
 
   test("Test score white ahead with rows and columns owned - Hnefatafl") {
@@ -151,7 +151,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,1), Coordinate(8,2)))
 
-    assert(EvaluationFunction(snapshot).score(Level.Standard) > 50)
+    assert(EvaluationFunction(snapshot).score(Level.Standard) > 0)
   }
 
   test("Test score black surround king on three side - Tawlbwrdd") {
@@ -167,7 +167,7 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(9,1)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,2)))
 
-    assert(EvaluationFunction(snapshot).score(Level.Newcomer) < -50)
+    assert(EvaluationFunction(snapshot).scoreBlackSurroundTheKing == ScoreProvider.BlackNearKing * 3)
   }
 
   test("Test score captured pieces (4 whites / 2 blacks) - Hnefatafl") {
@@ -504,7 +504,35 @@ class EvaluationFunctionTest extends FunSuite {
 
     assert(EvaluationFunction(snapshot).scoreLastPawnMovedCatchableInOne == ScoreProvider.LastWhiteMovedCatchableInOne)
   }
-  
+
+  test("Test score last black move catchable in one by king") {
+    game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(1,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(6,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7), Coordinate(5,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(5,5)))
+
+    assert(EvaluationFunction(snapshot).scoreLastPawnMovedCatchableInOne == ScoreProvider.LastBlackMovedCatchableInOne)
+  }
+
+  test("Test score last black move catchable in one by still king") {
+    game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7), Coordinate(2,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,4), Coordinate(2,6)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(1,5)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(2,3)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,7), Coordinate(4,7)))
+    snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,5)))
+
+    assert(EvaluationFunction(snapshot).scoreLastPawnMovedCatchableInOne == ScoreProvider.LastBlackMovedCatchableInOne)
+  }
+
   test("Test score for all difficulties - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
     snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
@@ -536,10 +564,10 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,8), Coordinate(10,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))
 
-
-    assert(EvaluationFunction(snapshot).computeNewcomerScore == -100 &&
-      EvaluationFunction(snapshot).computeStandardScore == -100 &&
-      EvaluationFunction(snapshot).computeAdvancedScore == -100)
+// TODO
+    assert(EvaluationFunction(snapshot).score(Level.Newcomer) == -100 &&
+      EvaluationFunction(snapshot).score(Level.Standard) == -100 &&
+      EvaluationFunction(snapshot).score(Level.Advanced) == -100)
   }
 
   test("Test score for all difficulties - Tablut") {
@@ -558,9 +586,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,7), Coordinate(6,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,6), Coordinate(7,2)))
 
-    assert(EvaluationFunction(snapshot).computeNewcomerScore == ScoreProvider.KingEscapeNearCorner &&
-      EvaluationFunction(snapshot).computeStandardScore == ScoreProvider.KingEscapeNearCorner &&
-      EvaluationFunction(snapshot).computeAdvancedScore == ScoreProvider.KingEscapeNearCorner)
+    assert(EvaluationFunction(snapshot).score(Level.Newcomer) == ScoreProvider.KingEscapeNearCorner &&
+      EvaluationFunction(snapshot).score(Level.Standard) == ScoreProvider.KingEscapeNearCorner &&
+      EvaluationFunction(snapshot).score(Level.Advanced) == ScoreProvider.KingEscapeNearCorner)
   }
 
   test("Test score barricade on up and right sides and wrong double circle cordon - Tawlbwrdd") {

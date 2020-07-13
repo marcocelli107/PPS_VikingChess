@@ -123,7 +123,7 @@ object ModelHnefatafl {
 
     private var storySnapshot: mutable.ListBuffer[GameSnapshot] = _
     private var currentSnapshot: Int = 0
-    private val moveLogPrint: Boolean = false
+    private val moveLogPrint: Boolean = true
     private var system: ActorSystem = _
     private var refIA: Option[ActorRef] = Option.empty
     private var iaSnapshot: GameSnapshot = _

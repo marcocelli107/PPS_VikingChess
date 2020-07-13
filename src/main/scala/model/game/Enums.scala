@@ -1,5 +1,7 @@
 package model.game
 
+import model.game.Player.Player
+
 /**
   * Defines Enumeration for the game mode.
   */
@@ -104,6 +106,17 @@ object Piece extends Enumeration {
   val BlackPawn: Value = Value("b")
   val WhiteKing: Value = Value("k")
   val Empty: Value = Value("e")
+
+  case class PieceOwner(piece: Piece) {
+    def pieceOwner: Player = piece match {
+      case Piece.WhitePawn => Player.White
+      case Piece.WhiteKing => Player.White
+      case Piece.BlackPawn => Player.Black
+      case Piece.Empty => Player.None
+    }
+  }
+
+  implicit def getPieceOwner(piece: Piece): PieceOwner = PieceOwner(piece)
 }
 
 /**

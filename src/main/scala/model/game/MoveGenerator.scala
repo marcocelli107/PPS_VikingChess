@@ -2,7 +2,6 @@ package model.game
 
 import model.game.BoardGame.{Board, BoardCell}
 import model.game.OrthogonalDirection.OrthogonalDirection
-import model.game.Piece.Piece
 import model.game.Player.Player
 
 object MoveGenerator {
@@ -40,7 +39,7 @@ object MoveGenerator {
     */
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     gameSnapshot.getBoard.rows.flatMap(_.flatMap(c =>
-      if (isOwner(c.getPiece, gameSnapshot.getPlayerToMove))
+      if (c.getPiece.pieceOwner.equals(gameSnapshot.getPlayerToMove))
         coordPossibleMoves(c, gameSnapshot)
       else List.empty
     ))
@@ -65,8 +64,8 @@ object MoveGenerator {
     def _checkCaptures(adjacentCells: List[BoardCell]): List[Coordinate] = adjacentCells match {
       case l if l.size < 2 => Nil
       case h :: t
-        if (!isOwner(h.getPiece, gameSnapshot.getPlayerToMove) && !h.getPiece.equals(Piece.WhiteKing) && !h.getPiece.equals(Piece.Empty)) &&
-        (isOwner(t.head.getPiece, gameSnapshot.getPlayerToMove) || (gameSnapshot.getBoard.specialCoordinates.contains(t.head.getCoordinate) &&
+        if (!h.getPiece.pieceOwner.equals(gameSnapshot.getPlayerToMove) && !h.getPiece.equals(Piece.WhiteKing) && !h.getPiece.equals(Piece.Empty)) &&
+        (t.head.getPiece.pieceOwner.equals(gameSnapshot.getPlayerToMove) || (gameSnapshot.getBoard.specialCoordinates.contains(t.head.getCoordinate) &&
           t.head.getPiece.equals(Piece.Empty)))
         => List(h.getCoordinate)
       case _ => Nil
@@ -180,10 +179,4 @@ object MoveGenerator {
     gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).values.map(_.head.getCoordinate)
       .toList.contains(kingCoord)
 
-  private def isOwner(pawn: Piece, player: Player): Boolean = (pawn, player) match {
-    case (Piece.WhitePawn, Player.White) => true
-    case (Piece.WhiteKing, Player.White) => true
-    case (Piece.BlackPawn, Player.Black) => true
-    case _ => false
-  }
 }
