@@ -28,6 +28,12 @@ case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
   */
 case class CloseMsg()
 
+/**
+ * Message notifying the end of the delay time
+ */
+
+case class EndTimeMsg()
+
 object ArtificialIntelligenceImpl {
 
   def apply(model: ModelHnefatafl, levelIA: Level): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, levelIA)
@@ -36,8 +42,8 @@ object ArtificialIntelligenceImpl {
 case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) extends Actor {
 
   override def receive: Receive = {
-    case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
-    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); context.stop(sender());
+    case event: FindBestMoveMsg => findBestMove(event.gameSnapshot);
+    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); stopSender()
     case _: CloseMsg => context.become(dyingState)
   }
 
@@ -47,6 +53,23 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
   def dyingState: Receive = {
     case _: ReturnBestMoveMsg => context.stop(sender()); self ! PoisonPill
   }
+
+  def sleepState: Receive = {
+    case _: EndTimeMsg =>  context.become(receive) ; context.stop(sender());
+    case event: ReturnBestMoveMsg => context.become(delayReturnBestMoveState(event.bestMove))
+    case _: CloseMsg => context.become(preparationToDyingState)
+  }
+
+  def delayReturnBestMoveState(move: Move ): Receive = {
+    case _: EndTimeMsg => context.become(receive) ; self ! ReturnBestMoveMsg(move)
+    case _: CloseMsg => context.become(preparationToDyingState)
+  }
+
+  def preparationToDyingState: Receive = {
+    case _: EndTimeMsg => context.become(dyingState)
+  }
+
+  def stopSender(): Unit = if (!context.sender().equals(self) ) context.stop(sender())
 
   /**
     * Creates Maximizing/Minimizing Actor according to IA player.
@@ -59,6 +82,9 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
       sonActor = Props(MaxRootActor(levelIA))
     val refSonActor = context.actorOf(sonActor)
     refSonActor ! InitMsg(gameSnapshot.getCopy, levelIA.depth, Option.empty)
+
+    context.become(sleepState)
+    context.actorOf(Props(TimeActor())) ! StartMsg()
 
   }
 
