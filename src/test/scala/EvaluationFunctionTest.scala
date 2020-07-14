@@ -1,8 +1,6 @@
-import model.game.Player.Player
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import model.game.BoardGame.Board
 import model.ia.evaluation_function.{EvaluationFunction, ScoreProvider}
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator}
 import model.prolog.{ParserProlog, PrologSnapshot}
@@ -167,7 +165,9 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(9,1)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,2)))
 
-    assert(EvaluationFunction(snapshot).scoreBlackSurroundTheKing == ScoreProvider.BlackNearKing * 3)
+    val blackPiecesSurroundingKing = 3
+
+    assert(EvaluationFunction(snapshot).scoreBlackSurroundTheKing == ScoreProvider.BlackNearKing * blackPiecesSurroundingKing)
   }
 
   test("Test score captured pieces (4 whites / 2 blacks) - Hnefatafl") {
@@ -188,8 +188,11 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,7), Coordinate(3,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(3,6)))
 
-    assert(EvaluationFunction(snapshot).scoreCapturedBlack == 40 &&
-      EvaluationFunction(snapshot).scoreCapturedWhite == 200)
+    val nCapturedBack = 2
+    val nCapturedWhite = 4
+
+    assert(EvaluationFunction(snapshot).scoreCapturedBlack == nCapturedBack * ScoreProvider.BlackCaptured &&
+      EvaluationFunction(snapshot).scoreCapturedWhite == nCapturedWhite * ScoreProvider.WhiteCaptured)
   }
 
   test("Test score white towers near throne - Hnefatafl") {
@@ -460,7 +463,11 @@ class EvaluationFunctionTest extends FunSuite {
 
     val wrongBarricade = EvaluationFunction(snapshot).scoreWrongBarricade
 
-    assert(wrongBarricade.blackScore == 4 * ScoreProvider.WrongBarricade && wrongBarricade.whiteScore == 2 * ScoreProvider.WrongBarricade)
+    val wrongBarricadeBlacks = 4
+    val wrongBarricadeWhites = 2
+
+    assert(wrongBarricade.blackScore == wrongBarricadeBlacks * ScoreProvider.WrongBarricade &&
+      wrongBarricade.whiteScore == wrongBarricadeWhites * ScoreProvider.WrongBarricade)
   }
 
   test("Tests score two black on king's diagonal - Tablut"){
@@ -480,7 +487,9 @@ class EvaluationFunctionTest extends FunSuite {
 
     val blackOnDiagonalScore = EvaluationFunction(snapshot).scoreBlackOnKingDiagonal
 
-    assert(blackOnDiagonalScore == ScoreProvider.BlackOnDiagonalKing * 2)
+    val blacksOnKingsDiagonals = 2
+
+    assert(blackOnDiagonalScore == ScoreProvider.BlackOnDiagonalKing * blacksOnKingsDiagonals)
   }
 
   test("Test score last black moved catchable in one - Hnefatafl") {
@@ -564,10 +573,8 @@ class EvaluationFunctionTest extends FunSuite {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(10,8), Coordinate(10,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,7), Coordinate(9,9)))
 
-// TODO
-    assert(EvaluationFunction(snapshot).score(Level.Newcomer) == -100 &&
-      EvaluationFunction(snapshot).score(Level.Standard) == -100 &&
-      EvaluationFunction(snapshot).score(Level.Advanced) == -100)
+    assert(EvaluationFunction(snapshot).score(Level.Newcomer) == EvaluationFunction(snapshot).score(Level.Standard) &&
+      EvaluationFunction(snapshot).score(Level.Newcomer) == EvaluationFunction(snapshot).score(Level.Advanced))
   }
 
   test("Test score for all difficulties - Tablut") {

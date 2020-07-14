@@ -1,6 +1,5 @@
-import model.game.Player.Player
 import model.game.GameSnapshot.GameSnapshotImpl
-import model.game.{BoardGame, Coordinate, GameSnapshot, GameVariant, Move, MoveGenerator, Piece, Player}
+import model.game.{Coordinate, GameSnapshot, GameVariant, Move, MoveGenerator, Piece, Player}
 import model.prolog.{ParserProlog, PrologSnapshot}
 import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
@@ -17,7 +16,9 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
     snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
-    assert(MoveGenerator.gamePossibleMoves(snapshot).size == 40)
+    val initBrandubhPossibleMoves = 40
+
+    assert(MoveGenerator.gamePossibleMoves(snapshot).size == initBrandubhPossibleMoves)
   }
 
   test("Test possible moves - Brandubh."){
@@ -28,7 +29,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
       Move(Coordinate(1,4),Coordinate(1,6)), Move(Coordinate(1,4),Coordinate(1,3)),
       Move(Coordinate(1,4),Coordinate(1,2)), Move(Coordinate(2,4),Coordinate(2,5)),
       Move(Coordinate(2,4),Coordinate(2,6)), Move(Coordinate(2,4),Coordinate(2,7)),
-      Move(Coordinate(2,4),Coordinate(2,3)),  Move(Coordinate(2,4),Coordinate(2,2)),
+      Move(Coordinate(2,4),Coordinate(2,3)), Move(Coordinate(2,4),Coordinate(2,2)),
       Move(Coordinate(2,4),Coordinate(2,1)), Move(Coordinate(4,1),Coordinate(3,1)),
       Move(Coordinate(4,1),Coordinate(2,1)), Move(Coordinate(4,1),Coordinate(5,1)),
       Move(Coordinate(4,1),Coordinate(6,1)), Move(Coordinate(4,2),Coordinate(3,2)),
@@ -38,8 +39,8 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
       Move(Coordinate(4,6),Coordinate(2,6)), Move(Coordinate(4,6),Coordinate(1,6)),
       Move(Coordinate(4,6),Coordinate(5,6)), Move(Coordinate(4,6),Coordinate(6,6)),
       Move(Coordinate(4,6),Coordinate(7,6)), Move(Coordinate(4,7),Coordinate(3,7)),
-      Move (Coordinate(4,7),Coordinate(2,7)), Move(Coordinate(4,7),Coordinate(5,7)),
-      Move (Coordinate(4,7),Coordinate(6,7)), Move(Coordinate(6,4),Coordinate(6,5)),
+      Move(Coordinate(4,7),Coordinate(2,7)), Move(Coordinate(4,7),Coordinate(5,7)),
+      Move(Coordinate(4,7),Coordinate(6,7)), Move(Coordinate(6,4),Coordinate(6,5)),
       Move(Coordinate(6,4),Coordinate(6,6)), Move(Coordinate(6,4),Coordinate(6,7)),
       Move(Coordinate(6,4),Coordinate(6,3)), Move(Coordinate(6,4),Coordinate(6,2)),
       Move(Coordinate(6,4),Coordinate(6,1)), Move(Coordinate(7,4),Coordinate(7,5)),
@@ -54,7 +55,9 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
     snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
-    assert(MoveGenerator.gamePossibleMoves(snapshot).size == 116)
+    val initHnefataflPossibleMoves = 116
+
+    assert(MoveGenerator.gamePossibleMoves(snapshot).size == initHnefataflPossibleMoves)
   }
 
   test("Make moves from (1,4) to (4,4) - Hnefatafl"){
@@ -62,6 +65,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot,Move(Coordinate(1,4), Coordinate(4,4)))
+
     assert(snapshot.getBoard.getCell(Coordinate(4,4)).getPiece.equals( Piece.BlackPawn))
   }
 
@@ -137,7 +141,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(6,5)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,8), Coordinate(5,8)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(4,5)))
-
 
     assert(snapshot.getBoard.getCell(Coordinate(4,4)).getPiece.equals(Piece.Empty) &&
       snapshot.getBoard.getCell(Coordinate(4,6)).getPiece.equals(Piece.Empty) &&

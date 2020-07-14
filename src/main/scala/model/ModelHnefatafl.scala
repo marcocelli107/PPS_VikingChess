@@ -13,8 +13,6 @@ import model.game.Snapshot.Snapshot
 import model.game._
 import model.prolog.{ParserProlog, PrologSnapshot}
 
-import scala.collection.mutable
-
 /**
  * Represents a viking chess game.
  */

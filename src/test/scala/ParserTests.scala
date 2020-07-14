@@ -1,4 +1,3 @@
-import model.game.Player.Player
 import model.game.{Coordinate, GameVariant, Move, Player}
 import model.prolog.{ParserProlog, PrologSnapshot}
 import org.junit.runner.RunWith
