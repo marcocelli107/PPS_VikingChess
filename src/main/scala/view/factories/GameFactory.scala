@@ -100,11 +100,11 @@ trait GameFactory {
   def createBoardPlusColumnsPanel: JPanel
 
   /**
-   * Creates a game button.
+   * Creates a menu button.
    *
    * @return a button.
    */
-  def createGameButton(): JButton
+  def createMenuButton(): JButton
 
   /**
    * Creates a go to first move button.
@@ -252,7 +252,7 @@ object GameFactory extends GameFactory {
 
   override def createBlackPawn: JLabel = blackPawn()
 
-  override def createGameButton(): JButton = new GameButton()
+  override def createMenuButton(): JButton = menuButton()
 
   override def createFirstMoveButton(): JButton = firstMoveButton()
 
@@ -442,7 +442,7 @@ object GameFactory extends GameFactory {
     val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
     this.setLayout(gridBagLayout)
   }
-
+/*
   private class GameButton() extends JButton {
     private var imageIcon = new ImageIcon("src/main/resources/images/hamburgerMenu.png")
     private var image = imageIcon.getImage
@@ -455,42 +455,83 @@ object GameFactory extends GameFactory {
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
-  }
+  }*/
 
-  private class SnapshotButton(private val iconPath: String, private val hoverText: String) extends JButton {
+  private class GameButton(private val iconPath: String, private val hoverIconPath: String, private val hoverText: String, private val scale: Int) extends JButton {
     private var imageIcon = new ImageIcon(iconPath)
+    private var hoverImageIcon = new ImageIcon(hoverIconPath)
     private var image = imageIcon.getImage
-    image = image.getScaledInstance(smallerSide * 5 / 100, smallerSide * 5 / 100, Image.SCALE_SMOOTH)
+    scaleImage()
     imageIcon = new ImageIcon(image)
-    setIcon(imageIcon)
+    image = hoverImageIcon.getImage
+    scaleImage()
+    hoverImageIcon = new ImageIcon(image)
+    setNormalIcon()
     setCursor(new Cursor(Cursor.HAND_CURSOR))
     setHorizontalAlignment(SwingConstants.CENTER)
-    setEnabled(false)
     setToolTipText(hoverText)
     setBorderPainted(false)
     setOpaque(false)
     setContentAreaFilled(false)
+
+    addMouseListener(new MouseAdapter() {
+      override def mouseEntered(evt: MouseEvent): Unit = if(isEnabled) setHoverIcon()
+      override def mouseExited(evt: MouseEvent): Unit = setNormalIcon()
+    })
+
+    private def scaleImage(): Unit = image = {
+      val dimension = smallerSide * scale / 100
+      image.getScaledInstance(dimension, dimension, Image.SCALE_SMOOTH)
+    }
+
+    private def setNormalIcon(): Unit = setIcon(imageIcon)
+
+    private def setHoverIcon(): Unit = setIcon(hoverImageIcon)
   }
 
+  private class SnapshotButton(private val iconPath: String, private val hoverIconPath: String, private val hoverText: String, private val scale: Int)
+    extends GameButton(iconPath: String, hoverIconPath: String, hoverText: String, scale: Int) {
+    setEnabled(false)
+  }
+
+  private val menuButtonScale: Int = 7
+  private val snapshotButtonScale: Int = 5
+
+  private val menuButtonPath: String = "src/main/resources/images/hamburgerMenu.png"
+  private val menuButtonHoverPath: String = "src/main/resources/images/hamburgerMenuHover.png"
+  private val menuButtonHoverText: String = "Menu"
+  private def menuButton(): JButton =
+    new GameButton(menuButtonPath, menuButtonHoverPath, menuButtonHoverText, menuButtonScale)
+
   private val firstMoveButtonPath: String = "src/main/resources/images/iconFirstMove.png"
+  private val firstMoveButtonHoverPath: String = "src/main/resources/images/iconFirstMoveHover.png"
   private val firstMoveButtonHoverText: String = "Show First Move"
-  private def firstMoveButton(): JButton = new SnapshotButton(firstMoveButtonPath, firstMoveButtonHoverText)
+  private def firstMoveButton(): JButton =
+    new SnapshotButton(firstMoveButtonPath, firstMoveButtonHoverPath, firstMoveButtonHoverText, snapshotButtonScale)
 
   private val previousMoveButtonPath: String = "src/main/resources/images/iconPreviousMove.png"
+  private val previousMoveButtonHoverPath: String = "src/main/resources/images/iconPreviousMoveHover.png"
   private val previousMoveButtonHoverText: String = "Show Previous Move"
-  private def previousMoveButton(): JButton = new SnapshotButton(previousMoveButtonPath, previousMoveButtonHoverText)
+  private def previousMoveButton(): JButton =
+    new SnapshotButton(previousMoveButtonPath, previousMoveButtonHoverPath, previousMoveButtonHoverText, snapshotButtonScale)
 
   private val nextMoveButtonPath: String = "src/main/resources/images/iconNextMove.png"
+  private val nextMoveButtonHoverPath: String = "src/main/resources/images/iconNextMoveHover.png"
   private val nextMoveButtonHoverText: String = "Show Next Move"
-  private def nextMoveButton(): JButton = new SnapshotButton(nextMoveButtonPath, nextMoveButtonHoverText)
+  private def nextMoveButton(): JButton =
+    new SnapshotButton(nextMoveButtonPath, nextMoveButtonHoverPath, nextMoveButtonHoverText, snapshotButtonScale)
 
   private val lastMoveButtonPath: String = "src/main/resources/images/iconLastMove.png"
+  private val lastMoveButtonHoverPath: String = "src/main/resources/images/iconLastMoveHover.png"
   private val lastMoveButtonHoverText: String = "Show Last Move"
-  private def lastMoveButton(): JButton = new SnapshotButton(lastMoveButtonPath, lastMoveButtonHoverText)
+  private def lastMoveButton(): JButton =
+    new SnapshotButton(lastMoveButtonPath, lastMoveButtonHoverPath, lastMoveButtonHoverText, snapshotButtonScale)
 
   private val undoMoveButtonPath: String = "src/main/resources/images/iconUndoMove.png"
-  private val undoMoveButtonHoverText: String = "Turn Back"
-  private def undoMoveButton(): JButton = new SnapshotButton(undoMoveButtonPath, undoMoveButtonHoverText)
+  private val undoMoveButtonHoverPath: String = "src/main/resources/images/iconUndoMoveHover.png"
+  private val undoMoveButtonHoverText: String = "Go Back"
+  private def undoMoveButton(): JButton =
+    new SnapshotButton(undoMoveButtonPath, undoMoveButtonHoverPath, undoMoveButtonHoverText, snapshotButtonScale)
 
   private class Pawn(private val internalColor: Color, private val externalColor: Color,
               private val sizeMultiplier: Double) extends JLabel {

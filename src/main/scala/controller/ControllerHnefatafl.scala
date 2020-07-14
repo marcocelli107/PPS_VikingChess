@@ -9,6 +9,9 @@ import model._
 import model.game.{Coordinate, GameSnapshot, Move}
 import view.ViewHnefatafl
 
+/**
+ * A trait representing a hnefatafl game controller.
+ */
 trait ControllerHnefatafl {
 
   /**
@@ -137,6 +140,9 @@ trait ControllerHnefatafl {
   def disableUndo()
 }
 
+/**
+ * A hnefatafl game controller implementation.
+ */
 object ControllerHnefatafl extends ControllerHnefatafl {
 
   private var viewGame: ViewHnefatafl = _

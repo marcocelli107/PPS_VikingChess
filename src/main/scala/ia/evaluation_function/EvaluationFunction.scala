@@ -8,6 +8,11 @@ import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGener
 
 import scala.collection.immutable.HashMap
 
+/**
+ * A Hnefatafl evaluation function implementation with different IA levels.
+ * A negative score means black is better while a positive one means white is better.
+ */
+
 object EvaluationFunction {
   val MIN_CORDON_SIZE = 3
   val MIN_INNER_WHITE_IN_CORDON = 4

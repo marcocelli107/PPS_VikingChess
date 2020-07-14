@@ -1,39 +1,18 @@
 package ia.minimax
 
 import akka.actor.{Actor, PoisonPill, Props}
+import ia.messages.Messages._
 import ia.minimax.RootActor.{MaxRootActor, MinRootActor}
 import model.game.Level.Level
 import model.game.Player.Player
 import model._
-import model.game.{GameSnapshot, Move, Player}
+import model.game.{GameSnapshot, Player}
 
-/**
- * Message used by the IA to return at model the best computed move
- *
- * @param bestMove
- *                 best move
- */
-case class ReturnBestMoveMsg(bestMove: Move)
-
-/**
- * Message used by the model to communicate at IA to start of the search for the best move for that snapshot
- *
- * @param gameSnapshot
- *                     game snapshot
-*/
-case class FindBestMoveMsg(gameSnapshot: GameSnapshot)
-
-/**
-  * Message used to change behaviour of the actor to dying.
-  */
-case class CloseMsg()
-
-object ArtificialIntelligenceImpl {
-
-  def apply(model: ModelHnefatafl, levelIA: Level): ArtificialIntelligenceImpl = new ArtificialIntelligenceImpl(model, levelIA)
+object ArtificialIntelligence {
+  def apply(model: ModelHnefatafl, levelIA: Level): ArtificialIntelligence = new ArtificialIntelligence(model, levelIA)
 }
 
-case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) extends Actor {
+case class ArtificialIntelligence(model: ModelHnefatafl, levelIA: Level) extends Actor {
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot)
@@ -59,7 +38,6 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
       sonActor = Props(MaxRootActor(levelIA))
     val refSonActor = context.actorOf(sonActor)
     refSonActor ! InitMsg(gameSnapshot.getCopy, levelIA.depth, Option.empty)
-
   }
 
   private def iaIsBlack(iaPlayer: Player): Boolean = iaPlayer.equals(Player.Black)

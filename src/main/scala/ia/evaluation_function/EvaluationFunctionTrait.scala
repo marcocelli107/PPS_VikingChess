@@ -2,6 +2,10 @@ package ia.evaluation_function
 
 import model.game.Level.Level
 
+/**
+ * Trait representing an evaluation function for hnefatafl.
+ */
+
 trait EvaluationFunctionTrait {
 
   /** Returns final score.
@@ -104,4 +108,13 @@ trait EvaluationFunctionTrait {
 
 }
 
+/**
+ * Class representing a particular score that can be obtained both from white
+ * or black player.
+ *
+ * @param whiteScore
+ *                   score for white
+ * @param blackScore
+ *                   score for black
+ */
 case class FactionsScore(whiteScore: Int, blackScore: Int)

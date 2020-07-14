@@ -202,7 +202,7 @@ object ViewMenu {
       initMenuButton(panelChoseBlack, MenuFactory.createLabelBlackPlayer,
         MenuFactory.createPlayerButton(playerButtonString(Player.Black)), selectPlayerListener(Player.Black))
 
-      initPreviousMenuButton(playerChoicePanel, variantsPanel)
+      initPreviousMenuButton(playerChoicePanel, diffPanel)
 
       playerChoicePanel.addAll(Box.createRigidArea(DIMENSION_PANEL))(panelChoseWhite)(panelChoseBlack)(returnToMenu)(
         Box.createVerticalGlue)

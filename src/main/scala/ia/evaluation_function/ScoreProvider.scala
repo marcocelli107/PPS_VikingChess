@@ -1,5 +1,8 @@
 package ia.evaluation_function
 
+/**
+ * Object providing base scores for a hnefatafl evaluation function.
+ */
 object ScoreProvider {
 
    def WhiteWin: Int = 1000

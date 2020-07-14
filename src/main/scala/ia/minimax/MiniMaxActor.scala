@@ -2,6 +2,7 @@ package ia.minimax
 
 import akka.actor.{Actor, ActorRef, Props}
 import ia.evaluation_function.EvaluationFunction
+import ia.messages.Messages.ReturnBestMoveMsg
 import model.game.Level.Level
 import model.game.Player.Player
 import model.game.{GameSnapshot, Move, MoveGenerator, Player}
@@ -55,7 +56,6 @@ case class GenerateChildrenMsg()
  *              computed score
  */
 case class ValueSonMsg(score: Int)
-
 
 /**
   * State of the actor in current instant of computation

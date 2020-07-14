@@ -18,7 +18,7 @@ object ColorProvider {
 
     def getSpecialCellPossibleMovesColor: Color = new Color(34, 57, 64)
 
-    def getLightBrownColor: Color = new Color(200, 170, 109)
+    def getLightBrownColor: Color = Color.decode("#c29b56")
 
     def getBrownColor: Color = new Color(114, 73, 51)
 
@@ -37,5 +37,7 @@ object ColorProvider {
     def getSelectedCellColor: Color = Color.decode("#829769")
 
     def getSpecialCellSelectedCellColor: Color = Color.decode("#646f40")
+
+    def menuButtonHoverColor: Color = Color.decode("#a94413")
 
 }

@@ -129,8 +129,8 @@ object MenuFactory extends MenuFactory {
   private val newcomerIconPath: String = "src/main/resources/images/iconNewcomer.png"
   private val standardIconPath: String = "src/main/resources/images/iconStandard.png"
   private val advancedIconPath: String = "src/main/resources/images/iconAdvanced.png"
-  private val whitePlayerIconPath: String = "src/main/resources/images/iconWhitePlayer.jpeg"
-  private val blackPlayerIconPath: String = "src/main/resources/images/iconBlackPlayer.jpeg"
+  private val whitePlayerIconPath: String = "src/main/resources/images/iconWhitePlayer.png"
+  private val blackPlayerIconPath: String = "src/main/resources/images/iconBlackPlayer.png"
   private val HEIGHT_COMPONENT_MENU_DIMENSION: Int = smallerSide * 8 / 100
 
   override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
@@ -182,7 +182,7 @@ object MenuFactory extends MenuFactory {
     private val img = new ImageIcon("src/main/resources/images/logo.png")
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
-    menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 25 / 100))
+    menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 30 / 100))
     menuLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
     menuLabel.setIcon(img)
     chooseLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 6 / 100))
@@ -190,9 +190,9 @@ object MenuFactory extends MenuFactory {
     chooseLabel.setFont(new Font(f.getFontName, Font.BOLD, smallerSide * 6 / 100))
     chooseLabel.setText(string)
     chooseLabel.setForeground(ColorProvider.getWhiteColor)
-    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 5 / 100)))
+    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 10 / 100)))
     add(menuLabel)
-    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
+    add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 3 / 100)))
     add(chooseLabel)
     add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
 
@@ -228,7 +228,7 @@ object MenuFactory extends MenuFactory {
 
     addMouseListener(new MouseAdapter() {
       override def mouseEntered(e: MouseEvent): Unit = {
-        setForeground(ColorProvider.getNormalCellColor)
+        setForeground(ColorProvider.menuButtonHoverColor)
       }
 
       override def mouseExited(e: MouseEvent): Unit = {
@@ -243,7 +243,7 @@ object MenuFactory extends MenuFactory {
   private def playerButton(text: String): JButton = new MenuButton(text, smallerSide * 29 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
 
   private class IconLabel(pathIcon: String) extends JLabel {
-    private val ICON_DIMENSION: Int = smallerSide * 5 / 100
+    private val ICON_DIMENSION: Int = smallerSide * 6 / 100
     this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
     this.setMaximumSize(getPreferredSize)
     val img: BufferedImage = ImageIO.read(new File(pathIcon))

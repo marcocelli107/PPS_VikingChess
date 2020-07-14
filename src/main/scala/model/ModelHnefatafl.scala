@@ -2,7 +2,8 @@ package model
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import controller.ControllerHnefatafl
-import ia.minimax.{ArtificialIntelligenceImpl, CloseMsg, FindBestMoveMsg}
+import ia.messages.Messages._
+import ia.minimax.ArtificialIntelligence
 import model.game.BoardGame.Board
 import model.game.GameMode.GameMode
 import model.game.GameSnapshot.GameSnapshotImpl
@@ -129,7 +130,6 @@ object ModelHnefatafl {
     private var system: ActorSystem = _
     private var refIA: Option[ActorRef] = Option.empty
     private var iaSnapshot: GameSnapshot = _
-    private var iaAskTime: Long = _
 
     /**
      * Defines status of the current game.
@@ -205,9 +205,6 @@ object ModelHnefatafl {
     }
 
     override def iaBestMove(move: Move): Unit = {
-      val timeLapse = System.currentTimeMillis() - iaAskTime
-      if(timeLapse < MIN_IA_TIME)
-        Thread.sleep(MIN_IA_TIME - timeLapse)
       if(notUndone)
         makeMove(move)
     }
@@ -264,9 +261,8 @@ object ModelHnefatafl {
       if(refIA.nonEmpty)
         refIA.get ! CloseMsg()
 
-      refIA = Option(system.actorOf(Props(ArtificialIntelligenceImpl(this, levelIA))))
+      refIA = Option(system.actorOf(Props(ArtificialIntelligence(this, levelIA))))
       refIA.get ! FindBestMoveMsg(storySnapshot.last)
-      iaAskTime = System.currentTimeMillis()
     }
 
     /**

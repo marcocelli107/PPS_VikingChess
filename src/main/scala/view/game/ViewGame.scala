@@ -267,7 +267,7 @@ object ViewGame {
       GridConstraints.incrementXConstraints()
       subNorthPanel.add(playerOrWinnerLabel, GridConstraints.getLimits)
 
-      menuButton = GameFactory.createGameButton()
+      menuButton = GameFactory.createMenuButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
 
       northPanel.addAll(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))(subNorthPanel)(

@@ -10,7 +10,7 @@ class MaxActor(levelIA: Level) extends MiniMaxActor(levelIA) {
   override def createChild(): Props =
     Props(new MinActor(levelIA))
 
-  override def miniMaxComparison(score: Int, alfa: Int): Boolean = {
-    score > alfa
+  override def miniMaxComparison(score: Int, alpha: Int): Boolean = {
+    score > alpha
   }
 }
