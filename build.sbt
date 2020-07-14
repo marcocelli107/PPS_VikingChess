@@ -17,6 +17,7 @@ lazy val root = (project in file("."))
       "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
       "it.unibo.alice.tuprolog" % "tuprolog" % "3.1" ,
       "com.typesafe.akka" %% "akka-actor" % "2.6.6"
+
     ),
     crossPaths := false,
     Test / parallelExecution := false

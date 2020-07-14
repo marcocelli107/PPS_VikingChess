@@ -25,4 +25,15 @@ object Messages {
    */
   case class CloseMsg()
 
+  /**
+   * Message notifying the end of the delay time
+   */
+
+  case class EndTimeMsg()
+
+  /**
+   * Message notifying timer actor to activate
+   */
+  case class StartMsg()
+
 }
