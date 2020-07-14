@@ -2,9 +2,9 @@ package ia.minimax
 
 import akka.actor.{Actor, PoisonPill, Props}
 import ia.minimax.RootActor.{MaxRootActor, MinRootActor}
+import model._
 import model.game.Level.Level
 import model.game.Player.Player
-import model._
 import model.game.{GameSnapshot, Move, Player}
 
 /**
@@ -43,7 +43,7 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
 
   override def receive: Receive = {
     case event: FindBestMoveMsg => findBestMove(event.gameSnapshot);
-    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); stopSender()
+    case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); stopSender
     case _: CloseMsg => context.become(dyingState)
   }
 
@@ -52,6 +52,7 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
     */
   def dyingState: Receive = {
     case _: ReturnBestMoveMsg => context.stop(sender()); self ! PoisonPill
+    case _: EndTimeMsg => context.stop(sender()); self ! PoisonPill
   }
 
   def sleepState: Receive = {
@@ -62,14 +63,14 @@ case class ArtificialIntelligenceImpl(model: ModelHnefatafl, levelIA: Level) ext
 
   def delayReturnBestMoveState(move: Move ): Receive = {
     case _: EndTimeMsg => context.become(receive) ; self ! ReturnBestMoveMsg(move)
-    case _: CloseMsg => context.become(preparationToDyingState)
+    case _: CloseMsg => context.become(dyingState)
   }
 
   def preparationToDyingState: Receive = {
     case _: EndTimeMsg => context.become(dyingState)
   }
 
-  def stopSender(): Unit = if (!context.sender().equals(self) ) context.stop(sender())
+  def stopSender: Unit = if (!context.sender().equals(self) ) context.stop(sender())
 
   /**
     * Creates Maximizing/Minimizing Actor according to IA player.
