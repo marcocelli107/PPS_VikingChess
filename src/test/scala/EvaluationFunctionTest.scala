@@ -3,19 +3,19 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import model.game.BoardGame.Board
-import ia.evaluation_function.{EvaluationFunction, ScoreProvider}
+import model.ia.evaluation_function.{EvaluationFunction, ScoreProvider}
 import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGenerator}
-import model.prolog.ParserProlog
+import model.prolog.{ParserProlog, PrologSnapshot}
 
 @RunWith(classOf[JUnitRunner])
 class EvaluationFunctionTest extends FunSuite {
 
   var snapshot: GameSnapshot = _
-  var game: (Player, Player, Board, Int) = _
+  var game: PrologSnapshot = _
 
   test("Tests score king near corner - Brandubh"){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(3,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5),Coordinate(1,5)))
@@ -30,7 +30,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Tests score king to corner in one - Brandubh"){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6),Coordinate(3,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5),Coordinate(1,5)))
@@ -43,7 +43,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Tests score capture king in one on throne - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(1,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(2,3)))
@@ -61,7 +61,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Tests score capture king near throne - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(2,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(1,3)))
@@ -75,7 +75,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score capture king far from throne - Brandubh") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(3,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(2,3)))
@@ -87,7 +87,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score capture king far from throne - Tawlbwurdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(9,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,1)))
@@ -103,14 +103,14 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test initial score is draw - Brandubh") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     assert(EvaluationFunction(snapshot).score(Level.Newcomer) == ScoreProvider.Draw)
   }
 
   test("Test score black ahead - Brandubh") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(3,3)))
@@ -135,7 +135,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score white ahead with rows and columns owned - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,1), Coordinate(7,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(8,6), Coordinate(8,4)))
@@ -156,7 +156,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score black surround king on three side - Tawlbwrdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(3,4)))
@@ -172,7 +172,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score captured pieces (4 whites / 2 blacks) - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(2,4)))
@@ -194,7 +194,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score white towers near throne - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     val numberOfTowers = 4
 
@@ -203,14 +203,14 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score white king on throne - Tablut") {
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     assert(EvaluationFunction(snapshot).scoreKingOnThrone == ScoreProvider.KingOnThrone)
   }
 
   test("Test score white king far from throne - Tablut") {
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(8,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(1,3)))
@@ -230,7 +230,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score right barricade on 3 sides and wrong circle cordon - Tawlbwrdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,8)))
@@ -249,7 +249,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score circle cordon on all sides - Tawlbwrdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,5)))
@@ -288,7 +288,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score right circle cordon - Tawlbwrdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,4)))
@@ -345,7 +345,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score wrong circle cordon - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(6,2)))
@@ -374,7 +374,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score right diagonal barricade - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(2,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,3)))
@@ -389,7 +389,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score right vertical barricade - Tablut") {
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,1), Coordinate(6,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(4,4)))
@@ -420,7 +420,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score right horizontal barricade and wrong circle cordon - Tawlbwrdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,4)))
@@ -447,7 +447,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Tests score wrong barricade (2 black, 1 white) - Tawlbwrdd"){
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,5), Coordinate(1,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,11)))
@@ -465,7 +465,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Tests score two black on king's diagonal - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(2,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,9)))
@@ -485,7 +485,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score last black moved catchable in one - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,6), Coordinate(2,5)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(3,6)))
@@ -497,7 +497,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score last white moved catchable in one - Brandubh") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,2), Coordinate(5,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,3), Coordinate(2,3)))
@@ -507,7 +507,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score last black move catchable in one by king") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(1,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(6,5)))
@@ -520,7 +520,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score last black move catchable in one by still king") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,7), Coordinate(2,7)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,7)))
@@ -535,7 +535,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score for all difficulties - Hnefatafl") {
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,5)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,7)))
@@ -572,7 +572,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score for all difficulties - Tablut") {
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(3,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,7)))
@@ -593,7 +593,7 @@ class EvaluationFunctionTest extends FunSuite {
 
   test("Test score barricade on up and right sides and wrong double circle cordon - Tawlbwrdd") {
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshot(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,9), Coordinate(4,9)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,5)))

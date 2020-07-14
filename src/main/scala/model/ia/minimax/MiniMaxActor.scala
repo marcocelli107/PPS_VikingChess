@@ -1,61 +1,13 @@
-package ia.minimax
+package model.ia.minimax
 
 import akka.actor.{Actor, ActorRef, Props}
-import ia.evaluation_function.EvaluationFunction
-import ia.messages.Messages.ReturnBestMoveMsg
+import model.ia.evaluation_function.EvaluationFunction
+import model.ia.messages.Messages.{CheckLeafOrBranchMsg, EvaluationMsg, GenerateChildrenMsg, InitMsg, MakeMoveMsg, ReturnBestMoveMsg, ValueSonMsg}
 import model.game.Level.Level
 import model.game.Player.Player
 import model.game.{GameSnapshot, Move, MoveGenerator, Player}
 
 import scala.collection.{immutable, mutable}
-
-/**
- * The InitMsg message tells the actors to start exploring the tree starting from a specific snapshot,
- *
- * with a specific level of depth and for a specific move.
- *
- * @param gameSnapshot
- *                     initial game snapshot
- * @param depth
- *              depth of search in the tree
- * @param move
- *             useful move to calculate the new search snapshot
- */
-case class InitMsg(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move])
-
-/**
- * The MakeMoveMsg message tells himself to make the move and calculate the new game snapshot
- *
- */
-case class MakeMoveMsg()
-
-/**
- * The CheckLeafOrBranchMsg message tells himself to check if a new game snapshot is a terminal node,
- *
- * otherwise he continues to analyze the child nodes
- *
- */
-case class CheckLeafOrBranchMsg()
-
-/**
- * The EvaluationMsg message tells himself to evaluate that game snapshot
- *
- */
-case class EvaluationMsg()
-
-/**
- * The EvaluationMsg message tells himself to generate the children for the new computed game snapshot
- *
- */
-case class GenerateChildrenMsg()
-
-/**
- * The ValueSonMsg message is the message send from children to father with computed score
- *
- * @param score
- *              computed score
- */
-case class ValueSonMsg(score: Int)
 
 /**
   * State of the actor in current instant of computation
@@ -77,56 +29,65 @@ case class ValueSonMsg(score: Int)
   */
 case class ActorState(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, alpha: Int)
 
+/**
+ * An abstract implementation of a viking chess minimax node actor
+ *
+ * @param levelIA
+ *                IA difficulty
+ */
 abstract class MiniMaxActor(levelIA: Level) extends Actor {
 
+  /**
+   * @inheritdoc
+   */
   override def receive: Receive = {
     case event: InitMsg =>
-      context.become(initState(ActorState(event.gameSnapshot, event.depth, event.move, sender(), initAlpha)))
+      context.become(makingMoveBehaviour(ActorState(event.gameSnapshot, event.depth, event.move, sender(), initAlpha)))
       self ! MakeMoveMsg()
   }
 
   /**
-   * Initial state of each Actor in which waits for MakeMoveMsg request
+   * Behaviour in which the actor has to make his move
    *
    * @param actorState
    *                  actor state
    */
-  def initState(actorState: ActorState): Receive = {
+  def makingMoveBehaviour(actorState: ActorState): Receive = {
     case _: MakeMoveMsg => makeMove(actorState)
   }
 
   /**
-   * State of the actor in which choose if exploration is in a branch or in a leaf
+   * Behaviour in which the actor has to understand if it is a branch or a leaf
    *
    * @param actorState
    *                  actor state
    */
-  def exploringState(actorState: ActorState): Receive = {
+  def exploringBehaviour(actorState: ActorState): Receive = {
     case _: CheckLeafOrBranchMsg => checkLeafOrBranch(actorState)
   }
 
   /**
-   * State of the actor in which exploration stops and score of the leaf is evaluated
+   * Behaviour in which the actor is a leaf and evaluates his score
    *
    * @param actorState
    *                  actor state
    */
-  def leafState(actorState: ActorState): Receive = {
+  def leafBehaviour(actorState: ActorState): Receive = {
     case _: EvaluationMsg => computeEvaluationFunction(actorState.fatherRef, actorState.gameSnapshot)
   }
 
   /**
-   * State of the actor in which exploration continues and he generates new children
+   * Behaviour in which the actor is a branch and generates new children
    *
    * @param actorState
    *                  actor state
    */
-  def branchState(actorState: ActorState): Receive = {
+  def branchBehaviour(actorState: ActorState): Receive = {
     case _: GenerateChildrenMsg => generateChildren(actorState)
   }
 
   /**
-    * State of the actor in which waits his children evaluation and makes minimax comparison
+    * Behaviour in which the actor is waiting for his children evaluations and makes minimax comparison
     *
     * @param hashMapSonRef
     *                      Map reference of his children
@@ -143,29 +104,29 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
     * @param fatherRef
     *                  reference to the father
     */
-  def evaluatingChildren(hashMapSonRef: immutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alpha: Int, fatherRef: ActorRef): Receive = {
+  def evaluatingChildrenBehaviour(hashMapSonRef: immutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alpha: Int, fatherRef: ActorRef): Receive = {
     case event: ValueSonMsg => miniMax(hashMapSonRef, numberOfChildren, bestMove, alpha, fatherRef, sender(), event.score)
   }
 
   /**
-   * Method that creates child that will be extended by Min/Max Actors
+   * Method that creates child
    */
-  def createChild(): Props
+  protected def createChild(): Props
 
   /**
-   * Method that compares values to determine best score that will be extended by Min/Max Actors
+   * Method that compares values to determine best score
    */
-  def miniMaxComparison(score: Int, alpha: Int): Boolean
+  protected def miniMaxComparison: (Int, Int) => Boolean
 
   /**
-   * Method that initialize alpha value that will be extended by Min/Max Actors
+   * Method that initializes alpha value
    */
-  def initAlpha: Int
+  protected def initAlpha: Int
 
   private def makeMove(actorState: ActorState): Unit = {
     val currentSnapshot = newMoveSnapshot(actorState.gameSnapshot, actorState.move)
 
-    context.become(exploringState(ActorState(currentSnapshot, actorState.depth, actorState.move, actorState.fatherRef,
+    context.become(exploringBehaviour(ActorState(currentSnapshot, actorState.depth, actorState.move, actorState.fatherRef,
       actorState.alpha)))
     self ! CheckLeafOrBranchMsg()
   }
@@ -178,10 +139,10 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
 
   private def checkLeafOrBranch(actorState: ActorState): Unit =
     if (isTerminalNode(actorState.gameSnapshot.getWinner, actorState.depth)) {
-      context.become(leafState(actorState))
+      context.become(leafBehaviour(actorState))
       self ! EvaluationMsg()
     } else {
-      context.become(branchState(actorState))
+      context.become(branchBehaviour(actorState))
       self ! GenerateChildrenMsg()
     }
 
@@ -199,10 +160,9 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
       hashMapSonRef += context.actorOf(sonActor) -> possibleMove
     }
 
-    context.become(evaluatingChildren(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alpha, actorState.fatherRef))
+    context.become(evaluatingChildrenBehaviour(toImmutableMap(hashMapSonRef), gamePossibleMoves.size, Option.empty, actorState.alpha, actorState.fatherRef))
 
     hashMapSonRef.foreach { case (k, v) => k ! InitMsg(actorState.gameSnapshot.getCopy, actorState.depth - 1, Option(v)) }
-
   }
 
   private def miniMax(hashMapSonRef: immutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alpha: Int,
@@ -221,13 +181,24 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
         fatherRef ! ValueSonMsg(alpha)
       }
     } else {
-      context.become(evaluatingChildren(hashMapSonRef, newNumberOfChildren, newBestMove, newAlpha, fatherRef))
+      context.become(evaluatingChildrenBehaviour(hashMapSonRef, newNumberOfChildren, newBestMove, newAlpha, fatherRef))
     }
   }
 
+  /**
+   * Method which updates the best move if the node is the root or returns Option.empty
+   *
+   * @param hashMapSonRef
+   *                      children map
+   * @param sonRef
+   *                      children reference
+   * @return
+   *                      best move updated
+   */
   protected def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
     Option.empty
 
   private def toImmutableMap(mutableHashMap: mutable.HashMap[ActorRef, Move]): immutable.HashMap[ActorRef, Move] =
     collection.immutable.HashMap(mutableHashMap.toSeq: _*)
 }
+

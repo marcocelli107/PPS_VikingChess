@@ -1,7 +1,7 @@
-package ia.evaluation_function
+package model.ia.evaluation_function
 
 /**
- * Object providing base scores for a hnefatafl evaluation function.
+ * Object providing base scores for a viking chess evaluation function.
  */
 object ScoreProvider {
 

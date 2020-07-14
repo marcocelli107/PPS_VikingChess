@@ -6,98 +6,111 @@ import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
 import model.game.Player.Player
 import model.game.BoardGame.Board.BoardImpl
 import model.game.BoardGame.{Board, BoardCell}
-import model.game.{Coordinate, Move, Piece, Player}
+import model.game.{Coordinate, GameSnapshot, Move, Piece, Player}
 
+/**
+ * A prolog viking chess parser
+ */
 sealed trait ParserPrologTrait {
 
   /**
    * Creates a new Game.
    *
-   * @return game as (PlayerToMove, Winner, Board, PiecesCapturedInTurn).
+   * @return
+   *        new game state
    */
-  def createGame(newVariant: String): (Player, Player, Board, Int)
+  def createGame(newVariant: String): PrologSnapshot
 
   /**
-   * Gives possible moves from the selected cell.
+   * Returns the possible moves from the specified cell.
    *
    * @param cell
-   *            coordinate of the Cell.
-   * @return seq of coordinates.
+   *        coordinate of the Cell.
+   * @return
+   *        list of the possible coordinates where the piece in the specified coordinate can move
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
   /**
-   * Sets player move if it's legit.
+   * Makes a move if it is legit.
    *
    * @param move
-   *            move to make
-   * @return new board.
+   *        move to make
+   * @return
+   *        new game state
    */
-  def makeLegitMove(move: Move): (Player, Player, Board, Int)
+  def makeLegitMove(move: Move): Option[PrologSnapshot]
 
   /**
-   * Finds king on game board.
+   * Finds the king in the game board.
    *
-   * @return king's coordinate.
+   * @return
+   *        king's coordinate.
    */
   def findKing(): Coordinate
 
   /**
-   * Checks if the cell at the specified coordinate is the central cell.
+   * Checks if the specified coordinate is the central one.
    *
    * @param coordinate
-   *                  coordinate of the cell to inspect
-   * @return boolean.
+   *        coordinate of the cell to inspect
+   * @return
+   *        if the specified coordinate is the central one.
    */
   def isCentralCell(coordinate: Coordinate): Boolean
 
   /**
-   * Checks if the cell at the specified coordinate is a corner cell.
+   * Checks if the specified coordinate is a corner one.
    *
    * @param coordinate
-   *                  coordinate of the cell to inspect
-   * @return boolean.
+   *        coordinate of the cell to inspect
+   * @return
+   *        if the specified coordinate is a corner one
    */
   def isCornerCell(coordinate: Coordinate): Boolean
 
   /**
-   * Checks if the cell at the specified coordinate is a init pawn cell.
+   * Checks if the specified coordinate is an initial pawn cell.
    *
    * @param coordinate
-   *                  coordinate of the cell to inspect
-   * @return boolean.
+   *        coordinate of the cell to inspect
+   * @return
+   *        if the specified coordinate is an initial pawn cell
    */
   def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
-   * Get the Board
-   *
-   * @return the current board state.
-   */
-  def getCurrentBoard: Board
-
-  /**
-   * Player turn to move
-   *
-   * @return Player.
-   */
-  def getPlayer: Player
-
-  /**
-   * Undo some player move.
+   * Undoes the last move.
    *
    * @param oldBoard
-   *                Board before changes
-   * @return Unit.
+   *        Board before the last move
    */
   def undoMove(oldBoard: Board): Unit
 }
 
+/**
+ * Representing a prolog result game representation
+ *
+ * @param playerToMove
+ *        next player to move
+ * @param winner
+ *        new game winner
+ * @param board
+ *        new board
+ * @param nCaptures
+ *        captures occured after the last move
+ */
+case class PrologSnapshot(playerToMove: Player, winner: Player, board: Board, nCaptures: Int)
+
+/**
+ * A prolog viking chess parser
+ */
 object ParserProlog extends ParserPrologTrait {
 
   import ImplicitParser._
 
   val THEORY: String = "src/main/scala/model/prolog/gameRules.pl"
+
   private val engine: Prolog = new Prolog()
   private var goal: SolveInfo = _
   private var list: Term = new Struct()
@@ -118,48 +131,69 @@ object ParserProlog extends ParserPrologTrait {
     val IsInitialPawnCoord: Value = Value("isInitialPawnCoord")
     val UndoMove: Value = Value("undoMove")
   }
+
   engine.setTheory(new Theory(new FileInputStream(ParserProlog.THEORY)))
 
-  override def getCurrentBoard: Board = board.parseBoard(getBoardSize)
-
-  override def getPlayer: Player = playerToMove.parsePlayer
-
-  override def createGame(newVariant: String): (Player, Player, Board, Int) = {
+  /**
+   * @inheritdoc
+   */
+  override def createGame(newVariant: String): PrologSnapshot = {
     goal = engine.solve(s"${Predicate.NewGame}($newVariant,(V,P,W,B)).")
     setGameTerms(goal)
-    (goal.getTerm("P").parsePlayer, goal.getTerm("W").parsePlayer,
-      board.parseBoard(getBoardSize), 0)
+    PrologSnapshot(playerToMove.parsePlayer, winner.parsePlayer, board.parseBoard(getBoardSize), 0)
   }
 
+  /**
+   * @inheritdoc
+   */
   override def showPossibleCells(cell: Coordinate): Seq[Coordinate] = {
     goal = engine.solve(s"${Predicate.GetCoordPossibleMoves}(($variant,$playerToMove,$winner,$board), ${cell.toString}, L).")
     list = goal.getTerm("L")
     list.parseMoveList
   }
 
-  override def makeLegitMove(move: Move): (Player, Player, Board, Int) = {
+  /**
+   * @inheritdoc
+   */
+  override def makeLegitMove(move: Move): Option[PrologSnapshot] = {
     goal = engine.solve(s"${Predicate.MakeLegitMove}(($variant, $playerToMove, $winner, $board)," +
       s"${move.from.toString}," +
       s"${move.to.toString}, L, (V,P,W,B)).")
 
-    if(goal.isSuccess)
+    if(goal.isSuccess) {
       setGameTerms(goal)
-
-    (playerToMove.parsePlayer, winner.parsePlayer, board.parseBoard(getBoardSize), 0)
+      Option(PrologSnapshot(playerToMove.parsePlayer, winner.parsePlayer, board.parseBoard(getBoardSize), goal.getTerm("L").parseInt))
+    } else
+      Option.empty
   }
 
+  /**
+   * @inheritdoc
+   */
   override def findKing(): Coordinate =
     engine.solve(s"${Predicate.FindKing}($board, Coord).").getTerm("Coord").parseMoveList.head
 
+  /**
+   * @inheritdoc
+   */
   override def isCentralCell(coordinate: Coordinate): Boolean =
     engine.solve(s"${Predicate.BoardSize}($variant,S), ${Predicate.CentralCellCoord}(S, ${coordinate.toString}).").isSuccess
 
+  /**
+   * @inheritdoc
+   */
   override def isCornerCell(coordinate: Coordinate): Boolean =
     engine.solve(s"${Predicate.BoardSize}($variant,S), ${Predicate.CornerCellCoord}(S, ${coordinate.toString}).").isSuccess
 
+  /**
+   * @inheritdoc
+   */
   override def isPawnCell(coordinate: Coordinate): Boolean =
     engine.solve(s"${Predicate.IsInitialPawnCoord}($variant, ${coordinate.toString}).").isSuccess
 
+  /**
+   * @inheritdoc
+   */
   override def undoMove(oldBoard: Board): Unit =
     setGameTerms(engine.solve(s"${Predicate.UndoMove}(($variant,$playerToMove,$winner,$board), $oldBoard, (V, P, W, B))."))
 
@@ -170,14 +204,13 @@ object ParserProlog extends ParserPrologTrait {
     board = goal.getTerm("B")
   }
 
-  private def getBoardSize: Int = engine.solve(s"${Predicate.BoardSize}($variant,S).").getTerm("S").toString.toInt
+  private def getBoardSize: Int = engine.solve(s"${Predicate.BoardSize}($variant,S).").getTerm("S").parseInt
 
   object ImplicitParser {
 
     private val prologListUselessChars: List[String] = List("','", "[", "]", "),", "(", ")")
     private val prologBoardUselessChars: List[String] = List("[", "]", "(", ")")
 
-    //TODO commentare?
     implicit class StringUtils(base: String) {
       implicit def clearChars(chars: List[String]): String = base.filter(e => !chars.contains(e.toString))
       implicit def dropRightComma: String = if (base.last.equals(',')) base.dropRight(1) else base
@@ -213,6 +246,10 @@ object ParserProlog extends ParserPrologTrait {
 
     implicit class PlayerParser(base: Term) {
       implicit def parsePlayer: Player = Player.values.filter(_.parserString.equals(base.toString)).head
+    }
+
+    implicit class IntParser(base: Term) {
+      implicit def parseInt: Int = base.toString.toInt
     }
   }
 }

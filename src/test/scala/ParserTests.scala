@@ -1,6 +1,6 @@
 import model.game.Player.Player
 import model.game.{Coordinate, GameVariant, Move, Player}
-import model.prolog.ParserProlog
+import model.prolog.{ParserProlog, PrologSnapshot}
 import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.junit.JUnitRunner
@@ -36,8 +36,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(2,6), Coordinate(3,6)))
       ParserProlog.makeLegitMove(Move(Coordinate(6,4), Coordinate(4,4)))
     }
-    val currentGame: (_, _, _, Int) = ParserProlog.makeLegitMove(Move(Coordinate(1,5), Coordinate(4,5)))
-    currentGame._4 shouldBe 0
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(1,5), Coordinate(4,5)))
+    currentGame.get.nCaptures shouldBe 0
   }
 
   test("Tests king captured - Brandubh") {
@@ -50,8 +50,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(1,5), Coordinate(3,5)))
       ParserProlog.makeLegitMove(Move(Coordinate(4,3), Coordinate(1,3)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(6,5), Coordinate(5,5)))
-    currentGame._2 shouldBe Player.Black
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(6,5), Coordinate(5,5)))
+    currentGame.get.winner shouldBe Player.Black
   }
 
   test("Tests white wins - Brandubh") {
@@ -63,8 +63,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(4,4), Coordinate(4,7)))
       ParserProlog.makeLegitMove(Move(Coordinate(6,4), Coordinate(6,6)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(4,7), Coordinate(7,7)))
-    currentGame._2 shouldBe Player.White
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(4,7), Coordinate(7,7)))
+    currentGame.get.winner shouldBe Player.White
   }
 
   test("Tests king captured on throne - Brandubh") {
@@ -79,8 +79,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(6,4), Coordinate(5,4)))
       ParserProlog.makeLegitMove(Move(Coordinate(4,5), Coordinate(2,5)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(4,6), Coordinate(4,5)))
-    currentGame._2 shouldBe Player.Black
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(4,6), Coordinate(4,5)))
+    currentGame.get.winner shouldBe Player.Black
   }
 
   test("Tests horizontal king captured - Tablut") {
@@ -93,8 +93,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(1,6), Coordinate(2,6)))
       ParserProlog.makeLegitMove(Move(Coordinate(5,5), Coordinate(5,7)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(2,6), Coordinate(5,6)))
-    currentGame._2 shouldBe Player.Black
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(2,6), Coordinate(5,6)))
+    currentGame.get.winner shouldBe Player.Black
   }
 
   test("Tests vertical king captured - Tablut") {
@@ -107,8 +107,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(1,4), Coordinate(1,2)))
       ParserProlog.makeLegitMove(Move(Coordinate(5,5), Coordinate(5,3)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(8,3), Coordinate(6,3)))
-    currentGame._2 shouldBe Player.Black
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(8,3), Coordinate(6,3)))
+    currentGame.get.winner shouldBe Player.Black
   }
 
   test("Tests king captured far from throne - Tawlbwrdd") {
@@ -123,8 +123,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(1,5), Coordinate(1,4)))
       ParserProlog.makeLegitMove(Move(Coordinate(6,6), Coordinate(6,10)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(1,9), Coordinate(6,9)))
-    currentGame._2 shouldBe Player.Black
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(1,9), Coordinate(6,9)))
+    currentGame.get.winner shouldBe Player.Black
   }
 
   test("Tests king not captured on 2 sides next to throne - Brandubh") {
@@ -139,8 +139,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(2,5), Coordinate(3,5)))
       ParserProlog.makeLegitMove(Move(Coordinate(7,6), Coordinate(7,5)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(6,5), Coordinate(5,5)))
-    currentGame._2 shouldBe Player.None
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(6,5), Coordinate(5,5)))
+    currentGame.get.winner shouldBe Player.None
   }
 
   test("Tests draw 7x7 - Brandubh") {
@@ -163,8 +163,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(6, 7), Coordinate(5, 7)))
       ParserProlog.makeLegitMove(Move(Coordinate(4, 6), Coordinate(4, 7)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(4,6)))
-    currentGame._2 shouldBe Player.Draw
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(5,6), Coordinate(4,6)))
+    currentGame.get.winner shouldBe Player.Draw
   }
 
   test("Tests draw 11x11 - Hnefatafl") {
@@ -212,8 +212,8 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(10,11), Coordinate(9,11)))
     }
 
-    val currentGame: (_, Player, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(10,10), Coordinate(10,11)))
-    currentGame._2 shouldBe Player.Draw
+    val currentGame: Option[PrologSnapshot] = ParserProlog.makeLegitMove(Move(Coordinate(10,10), Coordinate(10,11)))
+    currentGame.get.winner shouldBe Player.Draw
   }
 
   test("Tests draw in 9x9 - Tablut") {
@@ -246,9 +246,9 @@ class ParserTests extends FunSuite with MockFactory with Matchers {
       ParserProlog.makeLegitMove(Move(Coordinate(9,7), Coordinate(1,7)))
       ParserProlog.makeLegitMove(Move(Coordinate(3,6), Coordinate(1,6)))
     }
-    val currentGame: (_, Player.Value, _, _) = ParserProlog.makeLegitMove(Move(Coordinate(6,6), Coordinate(2,6)))
+    val currentGame: Option[PrologSnapshot]= ParserProlog.makeLegitMove(Move(Coordinate(6,6), Coordinate(2,6)))
 
-    currentGame._2 shouldBe Player.Draw
+    currentGame.get.winner shouldBe Player.Draw
   }
 
 }

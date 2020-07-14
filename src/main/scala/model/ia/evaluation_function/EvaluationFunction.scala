@@ -1,4 +1,4 @@
-package ia.evaluation_function
+package model.ia.evaluation_function
 
 import model.game.BoardGame.{Board, BoardCell}
 import model.game.Level.Level
@@ -8,17 +8,19 @@ import model.game.{Coordinate, GameSnapshot, GameVariant, Level, Move, MoveGener
 
 import scala.collection.immutable.HashMap
 
-/**
- * A Hnefatafl evaluation function implementation with different IA levels.
- * A negative score means black is better while a positive one means white is better.
- */
-
 object EvaluationFunction {
   val MIN_CORDON_SIZE = 3
   val MIN_INNER_WHITE_IN_CORDON = 4
   val TOWER_SIZE = 4
 }
 
+/**
+ * A viking chess evaluation function implementation with different IA levels.
+ * A negative score means black is better while a positive one means white is better.
+ *
+ * @param gameSnapshot
+ *        game snapshot to evaluate
+ */
 case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunctionTrait {
 
   private val board: Board = gameSnapshot.getBoard
@@ -35,6 +37,9 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
     .map(_.getCoordinate).toList
   private val gamePossibleMoves: Seq[Move] = MoveGenerator.gamePossibleMoves(gameSnapshot)
 
+  /**
+   * @inheritdoc
+   */
   override def score(levelIA: Level): Int = gameSnapshot.getWinner match {
     case Player.Black => -ScoreProvider.BlackWin
     case Player.White => ScoreProvider.WhiteWin
@@ -93,14 +98,26 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
     advancedScore
   }
 
+  /**
+   * @inheritdoc
+   */
   override def kingAdjacentToCorner: Boolean = kingAdjacentCells.values
     .filter(_.nonEmpty)
     .map(_.get.getCoordinate).exists(cornerCoordinates.contains(_))
 
+  /**
+   * @inheritdoc
+   */
   override def kingNearCornerInOne: Boolean = kingCanMoveTo(getNearCornerCells)
 
+  /**
+   * @inheritdoc
+   */
   override def kingToCornerInOne: Boolean = kingCanMoveTo(cornerCoordinates)
 
+  /**
+   * @inheritdoc
+   */
   override def kingCapturedInOne: Boolean = gameSnapshot.getVariant match {
     case GameVariant.Hnefatafl | GameVariant.Tawlbwrdd => kingCapturedInOneBigBoard
     case _ => kingCapturedInOneSmallBoard
@@ -124,6 +141,9 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
     FactionsScore(whiteScore, blackScore)
   }
 
+  /**
+   * @inheritdoc
+   */
   override def scoreWrongBarricade: FactionsScore = {
     var whiteScore = 0
     var blackScore = 0
@@ -137,6 +157,9 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
     FactionsScore(whiteScore, blackScore)
   }
 
+  /**
+   * @inheritdoc
+   */
   override def scoreLastPawnMovedCatchableInOne: Int = {
     val lastMove = gameSnapshot.getLastMove
 
@@ -154,6 +177,9 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
     WHITE SCORES
    */
 
+  /**
+   * @inheritdoc
+   */
   override def scoreKingOnThrone: Int = {
     if (kingCoordinate.equals(board.centerCoordinates)) ScoreProvider.KingOnThrone
     else if (quadraticDistanceBetweenCells(kingCoordinate, findCloserCorner(kingCoordinate)) == 0)
@@ -162,6 +188,9 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
       ScoreProvider.KingDistanceToCornerDividend / quadraticDistanceBetweenCells(kingCoordinate, findCloserCorner(kingCoordinate))
   }
 
+  /**
+   * @inheritdoc
+   */
   override def scoreTower: Int = {
     def _isSquare(list: List[BoardCell]): Boolean =
       list.count(cell => cell.getPiece.equals(Piece.WhitePawn) || cell.getPiece.equals(Piece.WhiteKing)) ==
@@ -180,8 +209,14 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
     }.sum.toInt
   }
 
+  /**
+   * @inheritdoc
+   */
   override def scoreCapturedBlack: Int = gameSnapshot.getNumberCapturedBlacks * ScoreProvider.BlackCaptured
 
+  /**
+   * @inheritdoc
+   */
   override def scoreKingIsInFreeRowOrColumn: Int = {
     val rowWithoutKing = kingOrthogonalCells(OrthogonalDirection.Right) ++ kingOrthogonalCells(OrthogonalDirection.Left)
     val columnWithoutKing = kingOrthogonalCells(OrthogonalDirection.Up) ++ kingOrthogonalCells(OrthogonalDirection.Down)
@@ -200,24 +235,42 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
    * BLACK SCORES
    */
 
+  /**
+   * @inheritdoc
+   */
   override def scoreCapturedWhite: Int = gameSnapshot.getNumberCapturedWhites * ScoreProvider.WhiteCaptured
 
+  /**
+   * @inheritdoc
+   */
   override def scoreBlackSurroundTheKing: Int = {
     kingAdjacentCells.values.count(c => c.nonEmpty &&
       c.get.getPiece.equals(Piece.BlackPawn) &&
       !pawnCatchableInOne(c.get.getCoordinate)) * ScoreProvider.BlackNearKing
   }
 
+  /**
+   * @inheritdoc
+   */
   override def scoreBlackOnKingDiagonal: Int =
     findNearBlacks(kingCoordinate).filter(c => (c.x != kingCoordinate.x) && (c.y != kingCoordinate.y))
       .count(board.getCell(_).getPiece.equals(Piece.BlackPawn)) * ScoreProvider.BlackOnDiagonalKing
 
+  /**
+   * @inheritdoc
+   */
   override def scoreBlackCordon: Int = blackCoordinates.map(detectCordon(_, Seq.empty)).distinct
     .filter(_.size >= EvaluationFunction.MIN_CORDON_SIZE).foldLeft(0)(_ + scoreCorrectCordon(_))
 
+  /**
+   * @inheritdoc
+   */
   override def scoreMovesKing: Int =
-    MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), gameSnapshot).size * ScoreProvider.PossibleKingMove
+    MoveGenerator.cellPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), gameSnapshot).size * ScoreProvider.PossibleKingMove
 
+  /**
+   * @inheritdoc
+   */
   override def toString: String = {
     val wrongBarricade = scoreWrongBarricade
     val rowsAndColumnOwner = scoreOwnerFirstLastThreeRowsOrColumns
@@ -245,7 +298,7 @@ case class EvaluationFunction(gameSnapshot: GameSnapshot) extends EvaluationFunc
   }
 
   private def kingCanMoveTo(listCoordinates: List[Coordinate]): Boolean =
-    MoveGenerator.coordPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), gameSnapshot).map(_.to).exists(listCoordinates.contains)
+    MoveGenerator.cellPossibleMoves(BoardCell(kingCoordinate, Piece.WhiteKing), gameSnapshot).map(_.to).exists(listCoordinates.contains)
 
   private def wrongBarricadeType(color: Piece, cells: (BoardCell, BoardCell)): Int =
     (cells._1.getPiece, cells._2.getPiece) match {

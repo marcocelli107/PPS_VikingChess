@@ -11,6 +11,10 @@ import view.factories.GameFactory
 import view.game.ViewGame
 import view.menu.ViewMenu
 
+// TODO CONTROLLER SINGLETON
+
+
+
 trait ViewHnefatafl {
 
   /**
