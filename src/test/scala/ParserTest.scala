@@ -8,7 +8,7 @@ import org.scalatest.{FunSuite, Matchers}
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class ParserTests extends FunSuite with MockFactory with Matchers {
+class ParserTest extends FunSuite with MockFactory with Matchers {
 
   test("Tests of a correct horizontal capture of white pawn - Hnefatafl") {
     inSequence {

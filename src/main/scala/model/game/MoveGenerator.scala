@@ -17,8 +17,7 @@ object MoveGenerator {
     * @param gameSnapshot
     *         current snapshot
     *
-    * @return
-    *         list of possible moves from the cell
+    * @return list of possible moves from the cell
     */
   def cellPossibleMoves(cell: BoardCell, gameSnapshot: GameSnapshot): List[Move] = {
     def _cutAfterPiece(sequence: List[BoardCell], cell: BoardCell): List[Move] =
@@ -39,8 +38,7 @@ object MoveGenerator {
     * @param gameSnapshot
     *         current snapshot.
     *
-    * @return
-    *         list of possible moves
+    * @return list of possible moves
     */
   def gamePossibleMoves(gameSnapshot: GameSnapshot): List[Move] = {
     gameSnapshot.getBoard.rows.flatMap(_.flatMap(c =>
@@ -58,8 +56,7 @@ object MoveGenerator {
     * @param move
     *         move to make.
     *
-    * @return
-    *         new game snapshot
+    * @return new game snapshot
     */
   def makeMove(gameSnapshot: GameSnapshot, move: Move): GameSnapshot = {
     def _move(): Unit = {
@@ -157,8 +154,7 @@ object MoveGenerator {
     * @param board
     *         board where to find king's position.
     *
-    * @return
-    *         king coordinate
+    * @return king coordinate
     */
   def findKing(board: Board): Coordinate = {
     board.rows.flatten.filter(_.getPiece.equals(Piece.WhiteKing)).head.getCoordinate
@@ -167,8 +163,7 @@ object MoveGenerator {
   /**
     * Checks if the king is on throne.
     *
-    * @return
-    *         if the king is on throne
+    * @return if the king is on throne
     */
   def kingOnThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
     kingCoord.equals(gameSnapshot.getBoard.centerCoordinates)
@@ -176,8 +171,7 @@ object MoveGenerator {
   /**
     * Checks if the king is next to the throne.
     *
-    * @return
-    *         if the king is next to the throne
+    * @return if the king is next to the throne
     */
   def kingNextToThrone(gameSnapshot: GameSnapshot, kingCoord: Coordinate): Boolean =
     gameSnapshot.getBoard.orthogonalCells(gameSnapshot.getBoard.centerCoordinates).values.map(_.head.getCoordinate)

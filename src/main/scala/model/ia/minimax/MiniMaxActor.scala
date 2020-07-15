@@ -13,19 +13,19 @@ import scala.collection.{immutable, mutable}
   * State of the actor in current instant of computation
   *
   * @param gameSnapshot
-  *                     game state
+  *         game state
   *
   * @param depth
-  *              depth of exploration according to difficulty
+  *         depth of exploration according to difficulty
   *
   * @param move
-  *             move chosen by child actor
+  *         move chosen by child actor
   *
   * @param fatherRef
-  *                  father reference
+  *         father reference
   *
   * @param alpha
-  *              value used for comparison in minimax
+  *         value used for comparison in minimax
   */
 case class ActorState(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move], fatherRef: ActorRef, alpha: Int)
 
@@ -33,7 +33,7 @@ case class ActorState(gameSnapshot: GameSnapshot, depth: Int, move: Option[Move]
  * An abstract implementation of a viking chess minimax node actor
  *
  * @param levelIA
- *                IA difficulty
+ *        IA difficulty
  */
 abstract class MiniMaxActor(levelIA: Level) extends Actor {
 
@@ -50,7 +50,7 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
    * Behaviour in which the actor has to make his move
    *
    * @param actorState
-   *                  actor state
+   *        actor state
    */
   def makingMoveBehaviour(actorState: ActorState): Receive = {
     case _: MakeMoveMsg => makeMove(actorState)
@@ -60,7 +60,7 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
    * Behaviour in which the actor has to understand if it is a branch or a leaf
    *
    * @param actorState
-   *                  actor state
+   *        actor state
    */
   def exploringBehaviour(actorState: ActorState): Receive = {
     case _: CheckLeafOrBranchMsg => checkLeafOrBranch(actorState)
@@ -70,7 +70,7 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
    * Behaviour in which the actor is a leaf and evaluates his score
    *
    * @param actorState
-   *                  actor state
+   *        actor state
    */
   def leafBehaviour(actorState: ActorState): Receive = {
     case _: EvaluationMsg => computeEvaluationFunction(actorState.fatherRef, actorState.gameSnapshot)
@@ -80,7 +80,7 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
    * Behaviour in which the actor is a branch and generates new children
    *
    * @param actorState
-   *                  actor state
+   *        actor state
    */
   def branchBehaviour(actorState: ActorState): Receive = {
     case _: GenerateChildrenMsg => generateChildren(actorState)
@@ -90,19 +90,19 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
     * Behaviour in which the actor is waiting for his children evaluations and makes minimax comparison
     *
     * @param hashMapSonRef
-    *                      Map reference of his children
+    *         Map reference of his children
     *
     * @param numberOfChildren
-    *                         number of his children
+    *         number of his children
     *
     * @param bestMove
-    *                 best move
+    *         best move
     *
     * @param alpha
-    *             value to check for minimax algorithm
+    *         value to check for minimax algorithm
     *
     * @param fatherRef
-    *                  reference to the father
+    *         reference to the father
     */
   def evaluatingChildrenBehaviour(hashMapSonRef: immutable.HashMap[ActorRef, Move], numberOfChildren: Int, bestMove: Option[Move], alpha: Int, fatherRef: ActorRef): Receive = {
     case event: ValueSonMsg => miniMax(hashMapSonRef, numberOfChildren, bestMove, alpha, fatherRef, sender(), event.score)
@@ -189,11 +189,10 @@ abstract class MiniMaxActor(levelIA: Level) extends Actor {
    * Method which updates the best move if the node is the root or returns Option.empty
    *
    * @param hashMapSonRef
-   *                      children map
+   *        children map
    * @param sonRef
-   *                      children reference
-   * @return
-   *                      best move updated
+   *        children reference
+   * @return best move updated
    */
   protected def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
     Option.empty

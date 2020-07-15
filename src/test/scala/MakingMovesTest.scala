@@ -7,7 +7,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MakingMovesTests extends FunSuite {
+class MakingMovesTest extends FunSuite {
   val prolog: Prolog = new Prolog()
   val theory: Theory = new Theory(new FileInputStream(ParserProlog.THEORY))
   var goal: SolveInfo = _

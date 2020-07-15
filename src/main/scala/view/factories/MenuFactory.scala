@@ -12,116 +12,160 @@ import view.utils.ScreenSize
 trait MenuFactory {
 
   /**
-   * Creates a new MenuPanel.
+   * Creates a viking chess game frame.
+   *
+   * @return a viking chess game frame.
+   */
+  def createFrame: JFrame
+
+  /**
+   * Creates a new Menu Panel.
    *
    * @param string
-   *            text of the menù panel.
+   *         text of the menu panel.
    *
-   * @return a new MenuPanel.
+   * @return a new Menu Panel.
    */
   def createMenuPanel(string: String): JPanel
 
   /**
-   * Creates a button in main menu.
+   * Creates a button for main menu.
    *
    * @param text
-   *            text of button.
-   * @return a button.
+   *         text of button.
+   * @return a button for main menu
    */
   def createMainButton(text: String): JButton
 
   /**
-    * Creates a button in level menu.
+    * Creates a button for level selection menu.
     *
     * @param text
-    *            text of button.
-    * @return a button.
+    *         text of button.
+    * @return a button for level selection menu
     */
   def createLevelButton(text: String): JButton
 
   /**
-    * Creates a button in variant menu.
+    * Creates a button for variant selection menu.
     *
     * @param text
-    *            text of button.
-    * @return a button.
+    *         text of button.
+    * @return a button for variant selection menu.
     */
   def createVariantButton(text: String): JButton
 
   /**
-    * Creates a button in player menu.
+    * Creates a button for player selection menu.
     *
     * @param text
-    *            text of button.
-    * @return a button.
+    *         text of button.
+    * @return a button for player selection menu.
     */
   def createPlayerButton(text: String): JButton
 
   /**
-   * Sets the current board size to correctly define the dimension
-   * of the cells.
-   *
-   * @param variantBoardSize
-   *              variant board size
-   */
-  def setVariantBoardSize(variantBoardSize: Int): Unit
-
-  /**
     * Creates a sub menu player panel.
     *
-    * @return a panel.
+    * @return a sub menu player panel.
     */
   def createSubMenuPlayerPanel: JPanel
 
   /**
     * Creates a sub menu variant panel.
     *
-    * @return a panel.
+    * @return a sub menu variant panel.
     */
   def createSubMenuVariantPanel: JPanel
 
   /**
     * Creates a sub menu level panel.
     *
-    * @return a panel.
+    * @return a sub menu level panel.
     */
   def createSubMenuLevelPanel: JPanel
 
   /**
-    * Creates a label for each different variant.
+    * Creates a label for hnefatafl variant selection.
     *
-    * @return a label.
+    * @return a label for hnefatafl variant selection.
     */
   def createLabelBoardHnefatafl: JLabel
+
+  /**
+   * Creates a label for tawlbwrdd variant selection.
+   *
+   * @return a label for tawlbwrdd variant selection.
+   */
   def createLabelBoardTawlbwrdd: JLabel
+
+  /**
+   * Creates a label for tablut variant selection.
+   *
+   * @return a label for tablut variant selection.
+   */
   def createLabelBoardTablut: JLabel
+
+  /**
+   * Creates a label for brandubh variant selection.
+   *
+   * @return a label for brandubh variant selection.
+   */
   def createLabelBoardBrandubh: JLabel
 
   /**
-    * Creates a label for each different level.
+    * Creates a label for newcomer ia level selection.
     *
-    * @return a label.
+    * @return a label for newcomer ia level selection.
     */
   def createLabelNewcomer: JLabel
+
+  /**
+   * Creates a label for standard ia level selection.
+   *
+   * @return a label for standard ia level selection.
+   */
   def createLabelStandard: JLabel
+
+  /**
+   * Creates a label for advanced ia level selection.
+   *
+   * @return a label for advanced ia level selection.
+   */
   def createLabelAdvanced: JLabel
 
   /**
-    * Creates a label for player white or black.
+    * Creates a label for white player selection.
     *
-    * @return a label.
+    * @return a label for white player selection.
     */
   def createLabelWhitePlayer: JLabel
+
+  /**
+   * Creates a label for black player selection.
+   *
+   * @return a label for black player selection.
+   */
   def createLabelBlackPlayer: JLabel
 }
 
+/**
+ * Representing a view menu factory
+ */
 object MenuFactory extends MenuFactory {
 
-  private var cellDimension = 0
-  private val smallerSide: Int = ScreenSize.getSmallerSide * 9 / 10
+  private val smallerSide: Int = ScreenSize.getSmallerSide
+
+  private val FRAME_TITLE = "Viking Chess - Hnefatafl"
+  private val HEIGHT_MENU_COMPONENT_DIMENSION: Int = smallerSide * 8 / 100
+
   private val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
   private val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
   ge.registerFont(f)
+
+  private val iconAppPath: String = "src/main/resources/images/iconApp.png"
+  private val panelBackgroundPath: String = "src/main/resources/images/Cornice.png"
+  private val logoPath: String = "src/main/resources/images/logo.png"
   private val boardHnefataflIconPath: String = "src/main/resources/images/iconBoardHnefatafl.png"
   private val boardTawlbwrddIconPath: String = "src/main/resources/images/iconBoardTawlbwrdd.png"
   private val boardTablutIconPath: String = "src/main/resources/images/iconBoardTablut.png"
@@ -131,55 +175,114 @@ object MenuFactory extends MenuFactory {
   private val advancedIconPath: String = "src/main/resources/images/iconAdvanced.png"
   private val whitePlayerIconPath: String = "src/main/resources/images/iconWhitePlayer.png"
   private val blackPlayerIconPath: String = "src/main/resources/images/iconBlackPlayer.png"
-  private val HEIGHT_COMPONENT_MENU_DIMENSION: Int = smallerSide * 8 / 100
 
+  /**
+   * @inheritdoc
+   */
+  override def createFrame: JFrame = new Frame
+
+  /**
+   * @inheritdoc
+   */
   override def createMenuPanel(string: String): JPanel = new MenuPanel(string)
 
+  /**
+   * @inheritdoc
+   */
   override def createMainButton(s: String): JButton = mainButton(s)
 
+  /**
+   * @inheritdoc
+   */
   override def createLevelButton(s: String): JButton = levelButton(s)
 
+  /**
+   * @inheritdoc
+   */
   override def createVariantButton(s: String): JButton = variantButton(s)
 
+  /**
+   * @inheritdoc
+   */
   override def createPlayerButton(s: String): JButton = playerButton(s)
 
-  override def setVariantBoardSize(variantBoardSize: Int): Unit = cellDimension = smallerSide / variantBoardSize * 80 / 100
-
+  /**
+   * @inheritdoc
+   */
   override def createSubMenuPlayerPanel: JPanel = subMenuPlayerPanel()
 
+  /**
+   * @inheritdoc
+   */
   override def createSubMenuVariantPanel: JPanel = subMenuVariantPanel()
 
+  /**
+   * @inheritdoc
+   */
   override def createSubMenuLevelPanel: JPanel = subMenuLevelPanel()
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelBoardHnefatafl: JLabel = new IconLabel(boardHnefataflIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelBoardTawlbwrdd: JLabel = new IconLabel(boardTawlbwrddIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelBoardTablut: JLabel = new IconLabel(boardTablutIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelBoardBrandubh: JLabel = new IconLabel(boardBrandubhIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelNewcomer: JLabel = new IconLabel(newcomerIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelStandard: JLabel = new IconLabel(standardIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelAdvanced: JLabel = new IconLabel(advancedIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelWhitePlayer: JLabel = new IconLabel(whitePlayerIconPath)
 
+  /**
+   * @inheritdoc
+   */
   override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
 
+  private class Frame extends JFrame {
+    private val iconApp = new ImageIcon(iconAppPath)
+
+    setTitle(FRAME_TITLE)
+    setIconImage(iconApp.getImage)
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+    setResizable(false)
+    setSize(smallerSide, smallerSide)
+    setLocationRelativeTo(null)
+  }
+
   private class MenuPanel(string: String) extends JPanel {
-
     private val menuLabel = new JLabel()
-
     private val chooseLabel = new JLabel()
-
-    private val image = ImageIO.read(new File("src/main/resources/images/Cornice.png"))
-
+    private val image = ImageIO.read(new File(panelBackgroundPath))
     private val imageScaled = image.getScaledInstance(smallerSide, smallerSide * 98 / 100, Image.SCALE_DEFAULT)
-
-    private val img = new ImageIcon("src/main/resources/images/logo.png")
+    private val img = new ImageIcon(logoPath)
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
     menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 30 / 100))
@@ -196,7 +299,6 @@ object MenuFactory extends MenuFactory {
     add(chooseLabel)
     add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 1 / 100)))
 
-
     override protected def paintComponent(g: Graphics): Unit = {
       super.paintComponent(g)
       g.drawImage(imageScaled, 0, 0,null)
@@ -210,7 +312,6 @@ object MenuFactory extends MenuFactory {
   }
 
   private class MenuButton(s: String, sizePercentageWidth: Int, sizePercentageHeight: Int) extends EmptyButton(s) {
-
     private val FONT_DIMENSION = smallerSide * 5 / 100
     private val BUTTON_DIMENSION = new Dimension(sizePercentageWidth, sizePercentageHeight)
 
@@ -237,10 +338,13 @@ object MenuFactory extends MenuFactory {
     })
   }
 
-  private def mainButton(text: String): JButton = new MenuButton(text, smallerSide * 60 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
-  private def levelButton(text: String): JButton = new MenuButton(text, smallerSide * 25 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
-  private def variantButton(text: String): JButton = new MenuButton(text, smallerSide * 40 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
-  private def playerButton(text: String): JButton = new MenuButton(text, smallerSide * 29 / 100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def mainButton(text: String): JButton = new MenuButton(text, smallerSide * 60 / 100, HEIGHT_MENU_COMPONENT_DIMENSION)
+
+  private def levelButton(text: String): JButton = new MenuButton(text, smallerSide * 25 / 100, HEIGHT_MENU_COMPONENT_DIMENSION)
+
+  private def variantButton(text: String): JButton = new MenuButton(text, smallerSide * 40 / 100, HEIGHT_MENU_COMPONENT_DIMENSION)
+
+  private def playerButton(text: String): JButton = new MenuButton(text, smallerSide * 29 / 100, HEIGHT_MENU_COMPONENT_DIMENSION)
 
   private class IconLabel(pathIcon: String) extends JLabel {
     private val ICON_DIMENSION: Int = smallerSide * 6 / 100
@@ -262,10 +366,12 @@ object MenuFactory extends MenuFactory {
     setVisible(true)
     val gridBagLayout: GridBagLayout = new java.awt.GridBagLayout()
     setLayout(gridBagLayout)
-
   }
 
-  private def subMenuPlayerPanel(): JPanel = new SubMenuPanel(smallerSide * 40/100, HEIGHT_COMPONENT_MENU_DIMENSION)
-  private def subMenuVariantPanel(): JPanel = new SubMenuPanel(smallerSide * 70/100, HEIGHT_COMPONENT_MENU_DIMENSION)
-  private def subMenuLevelPanel(): JPanel = new SubMenuPanel(smallerSide * 50/100, HEIGHT_COMPONENT_MENU_DIMENSION)
+  private def subMenuPlayerPanel(): JPanel = new SubMenuPanel(smallerSide * 40/100, HEIGHT_MENU_COMPONENT_DIMENSION)
+
+  private def subMenuVariantPanel(): JPanel = new SubMenuPanel(smallerSide * 70/100, HEIGHT_MENU_COMPONENT_DIMENSION)
+
+  private def subMenuLevelPanel(): JPanel = new SubMenuPanel(smallerSide * 50/100, HEIGHT_MENU_COMPONENT_DIMENSION)
+
 }

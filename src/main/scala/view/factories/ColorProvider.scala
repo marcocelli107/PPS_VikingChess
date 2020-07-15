@@ -2,6 +2,9 @@ package view.factories
 
 import java.awt.Color
 
+/**
+ * Object providing view colors.
+ */
 object ColorProvider {
 
     def getBlackColor: Color = Color.BLACK

@@ -16,8 +16,7 @@ sealed trait ParserPrologTrait {
   /**
    * Creates a new Game.
    *
-   * @return
-   *        new game state
+   * @return new game state
    */
   def createGame(newVariant: String): PrologSnapshot
 
@@ -26,8 +25,7 @@ sealed trait ParserPrologTrait {
    *
    * @param cell
    *        coordinate of the Cell.
-   * @return
-   *        list of the possible coordinates where the piece in the specified coordinate can move
+   * @return list of the possible coordinates where the piece in the specified coordinate can move
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
@@ -36,16 +34,14 @@ sealed trait ParserPrologTrait {
    *
    * @param move
    *        move to make
-   * @return
-   *        new game state
+   * @return new game state
    */
   def makeLegitMove(move: Move): Option[PrologSnapshot]
 
   /**
    * Finds the king in the game board.
    *
-   * @return
-   *        king's coordinate.
+   * @return king's coordinate.
    */
   def findKing(): Coordinate
 
@@ -54,8 +50,7 @@ sealed trait ParserPrologTrait {
    *
    * @param coordinate
    *        coordinate of the cell to inspect
-   * @return
-   *        if the specified coordinate is the central one.
+   * @return if the specified coordinate is the central one.
    */
   def isCentralCell(coordinate: Coordinate): Boolean
 
@@ -64,8 +59,7 @@ sealed trait ParserPrologTrait {
    *
    * @param coordinate
    *        coordinate of the cell to inspect
-   * @return
-   *        if the specified coordinate is a corner one
+   * @return if the specified coordinate is a corner one
    */
   def isCornerCell(coordinate: Coordinate): Boolean
 
@@ -74,8 +68,7 @@ sealed trait ParserPrologTrait {
    *
    * @param coordinate
    *        coordinate of the cell to inspect
-   * @return
-   *        if the specified coordinate is an initial pawn cell
+   * @return if the specified coordinate is an initial pawn cell
    */
   def isPawnCell(coordinate: Coordinate): Boolean
 
@@ -85,7 +78,7 @@ sealed trait ParserPrologTrait {
    * @param oldBoard
    *        Board before the last move
    */
-  def undoMove(oldBoard: Board): Unit
+  def undoMove(oldBoard: Board)
 }
 
 /**

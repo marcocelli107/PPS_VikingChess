@@ -3,10 +3,10 @@ package view.factories
 import javax.swing.JButton
 
 /**
- * @author Luca Nannini
+ * Represents a view cell
  */
-
 trait Cell extends JButton {
+
   /**
    * Sets the cell as a possible move.
    */
@@ -36,8 +36,7 @@ trait Cell extends JButton {
   def setAsKingEscapedCell()
 
   /**
-   * Sets the cell as the one where the last move
-   * occured.
+   * Sets the cell as the one where the last move occurred.
    */
   def setAsLastMoveCell()
 

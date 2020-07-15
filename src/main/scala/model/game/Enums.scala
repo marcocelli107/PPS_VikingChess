@@ -31,8 +31,7 @@ object Player extends Enumeration {
     /**
      * Returns the corresponding prolog player string.
      *
-     * @return
-     *         prolog player string
+     * @return prolog player string
      */
     def parserString: String = player match {
       case Player.White => "w"
@@ -64,8 +63,7 @@ object Level extends Enumeration {
     /**
      * Returns the corresponding level depth.
      *
-     * @return
-     *         IA depth
+     * @return IA depth
      */
     def depth: Int = level match {
       case Level.Newcomer => 1
@@ -96,8 +94,7 @@ object GameVariant extends Enumeration {
     /**
      * Returns the corresponding board size.
      *
-     * @return
-     *         board size
+     * @return board size
      */
     def boardSize: Int = gameVariant match {
       case GameVariant.Tablut => 9
@@ -129,8 +126,7 @@ object Piece extends Enumeration {
     /**
      * Returns the corresponding Player owner.
      *
-     * @return
-     *        piece Player owner
+     * @return piece Player owner
      */
     def pieceOwner: Player = piece match {
       case Piece.WhitePawn => Player.White
@@ -169,8 +165,7 @@ object OrthogonalDirection extends Enumeration {
   /**
    * Implicit to order the orthogonal directions clockwise as up, right, down, left.
    *
-   * @return
-   *         comparing value
+   * @return comparing value
    */
   implicit val orthogonalOrdering: Ordering[OrthogonalDirection] = (a: OrthogonalDirection, b: OrthogonalDirection) =>
     a.directionToSort compare b.directionToSort
@@ -185,8 +180,7 @@ object OrthogonalDirection extends Enumeration {
     /**
      * Returns an integer for direction sorting.
      *
-     * @return
-     *         integer for sorting
+     * @return integer for sorting
      */
     def directionToSort: Int = direction match {
       case OrthogonalDirection.Up => 1
@@ -208,8 +202,7 @@ object OrthogonalDirection extends Enumeration {
     /**
      * Returns the opposite orthogonal direction.
      *
-     * @return
-     *         the opposite orthogonal direction
+     * @return the opposite orthogonal direction
      */
     def opposite: OrthogonalDirection = direction match {
       case OrthogonalDirection.Up => OrthogonalDirection.Down

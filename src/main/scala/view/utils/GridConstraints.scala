@@ -4,6 +4,9 @@ import java.awt.GridBagConstraints
 
 import view.factories.GameFactory
 
+/**
+ * Utility object handling GridBadConstraints
+ */
 object GridConstraints {
 
   private val limits: GridBagConstraints = GameFactory.createBagConstraints
@@ -33,7 +36,7 @@ object GridConstraints {
    * Sets anchor constraints
    *
    * @param constraint
-   *                           constraints to set as anchor
+   *         constraints to set as anchor
    */
   def setAnchor(constraint: Int): Unit = limits.anchor = constraint
 

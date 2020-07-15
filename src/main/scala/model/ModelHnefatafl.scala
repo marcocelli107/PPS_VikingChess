@@ -21,23 +21,21 @@ trait ModelHnefatafl {
   /**
     * Returns the dimension of the board of the current variant.
     *
-    * @return
-    *         dimension of the board
+    * @return dimension of the board
     */
   def getDimension: Int
 
   /**
    * Creates a new game.
    *
-   * @return
-   *         new game snapshot
+   * @return new game snapshot
    */
   def createGame(): GameSnapshot
 
   /**
     * Starts a created game.
     */
-  def startGame(): Unit
+  def startGame()
 
   /**
    * Returns the possible moves from the specified cell.
@@ -45,15 +43,14 @@ trait ModelHnefatafl {
    * @param cell
    *        coordinate of the cell
    *
-   * @return
-   *        list of the possible coordinates where the piece in the specified coordinate can move
+   * @return list of the possible coordinates where the piece in the specified coordinate can move
    */
   def showPossibleCells(cell: Coordinate): Seq[Coordinate]
 
   /**
     * Makes the best move for the IA
     */
-  def iaBestMove(move: Move): Unit
+  def iaBestMove(move: Move)
 
   /**
    * Makes a move if it is legit.
@@ -61,7 +58,7 @@ trait ModelHnefatafl {
    * @param move
    *        move to make
    */
-  def makeMove(move: Move): Unit
+  def makeMove(move: Move)
 
   /**
    * Checks if the specified coordinate is the central coordinate.
@@ -69,8 +66,7 @@ trait ModelHnefatafl {
    * @param coordinate
    *        coordinate to inspect
    *
-   * @return
-   *        if the specified coordinate is the central coordinate
+   * @return if the specified coordinate is the central coordinate
    */
   def isCentralCell(coordinate: Coordinate): Boolean
 
@@ -80,8 +76,7 @@ trait ModelHnefatafl {
    * @param coordinate
    *        coordinate of the cell to inspect
    *
-   * @return
-   *        if the specified coordinate is a corner coordinate
+   * @return if the specified coordinate is a corner coordinate
    */
   def isCornerCell(coordinate: Coordinate): Boolean
 
@@ -91,16 +86,14 @@ trait ModelHnefatafl {
    * @param coordinate
    *         coordinate to inspect
    *
-   * @return
-   *         if the specified coordinate is an initial pawn cell
+   * @return if the specified coordinate is an initial pawn cell
    */
   def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
    * Finds the king in the game board.
    *
-   * @return
-   *        king's coordinate.
+   * @return king's coordinate.
    */
   def findKing(): Coordinate
 
@@ -110,12 +103,12 @@ trait ModelHnefatafl {
    * @param snapshotToShow
    *        indicates the snapshot to show.
    */
-  def changeSnapshot(snapshotToShow: Snapshot): Unit
+  def changeSnapshot(snapshotToShow: Snapshot)
 
   /**
    * Undoes the last move.
    */
-  def undoMove(): Unit
+  def undoMove()
 }
 
 /**
@@ -244,7 +237,7 @@ object ModelHnefatafl {
         case Snapshot.Last => currentSnapshot = storySnapshot.size - 1; ControllerHnefatafl.disableNextLast(); ControllerHnefatafl.activeFirstPrevious()
       }
       val gameSnapshot = storySnapshot(currentSnapshot)
-      ControllerHnefatafl.changeSnapshotView(gameSnapshot)
+      ControllerHnefatafl.updateView(gameSnapshot)
     }
 
     /**
@@ -256,7 +249,7 @@ object ModelHnefatafl {
         currentSnapshot -= 1
         ControllerHnefatafl.activeFirstPrevious()
         ParserProlog.undoMove(storySnapshot.last.getBoard)
-        ControllerHnefatafl.changeSnapshotView(storySnapshot.last)
+        ControllerHnefatafl.updateView(storySnapshot.last)
       }
       if(storySnapshot.size == 1) {
         ControllerHnefatafl.disableNextLast()

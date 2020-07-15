@@ -12,64 +12,56 @@ trait GameSnapshot {
   /**
     * Returns the game variant.
     *
-    * @return
-    *         variant
+    * @return variant
     */
   def getVariant: GameVariant
 
   /**
     * Returns the current game player to move.
     *
-    * @return
-    *         player to move
+    * @return player to move
     */
   def getPlayerToMove: Player
 
   /**
     * Returns the current game winner.
     *
-    * @return
-    *         winner
+    * @return winner
     */
   def getWinner: Player
 
   /**
     * Returns the current game board.
     *
-    * @return
-    *         variant
+    * @return variant
     */
   def getBoard: Board
 
   /**
     * Returns the last move.
     *
-    * @return
-    *         optional of the last move
+    * @return optional of the last move
     */
   def getLastMove: Option[Move]
 
   /**
     * Returns the current number of captured blacks.
     *
-    * @return
-    *         captured blacks number
+    * @return captured blacks number
     */
   def getNumberCapturedBlacks: Int
 
   /**
     * Returns the current number of captured whites.
     *
-    * @return
-    *         captured whites number
+    * @return captured whites number
     */
   def getNumberCapturedWhites: Int
 
   /**
     * Returns a game snapshot copy.
     *
-    * @return
-    *         game snapshot copy
+    * @return game snapshot copy
     */
   def getCopy: GameSnapshot
 }

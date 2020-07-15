@@ -17,34 +17,31 @@ trait ControllerHnefatafl {
   /**
     * Starts ViewGame.
     */
-  def start(): Unit
+  def start()
 
   /**
     * Calls model to a new game.
     *
-    * @return
-    *         game snapshot
+    * @return new game snapshot
     */
   def newGame(variant: GameVariant, gameMode: GameMode, levelIA: Level, playerChosen: Player): GameSnapshot
 
   /**
     * Calls model to initialize IA in PVE mode.
     */
-  def startGame(): Unit
+  def startGame()
 
   /**
     * Calls model to get dimension of board.
     *
-    * @return
-    *         dimension
+    * @return board dimension
     */
   def getDimension: Int
 
   /**
     * Calls model for the possible moves from a specified coordinate.
     *
-    * @return
-    *         list of coordinates
+    * @return list of possible coordinate where you can move from the specified one
     */
   def getPossibleMoves(coordinate: Coordinate): Seq[Coordinate]
 
@@ -52,9 +49,9 @@ trait ControllerHnefatafl {
     * Calls model for making a move from coordinate to coordinate.
     *
     * @param move
-    *         move to make
+    *        move to make
     */
-  def makeMove(move: Move): Unit
+  def makeMove(move: Move)
 
   /**
     * Notifies the view that the move has been updated.
@@ -62,23 +59,14 @@ trait ControllerHnefatafl {
     * @param gameSnapshot
     *         snapshot to show.
     */
-  def updateView(gameSnapshot: GameSnapshot): Unit
-
-  /**
-    * Notifies the viewer a change snapshot to view.
-    *
-    * @param gameSnapshot
-    *         snapshot to show.
-    */
-  def changeSnapshotView(gameSnapshot: GameSnapshot): Unit
+  def updateView(gameSnapshot: GameSnapshot)
 
   /**
     * Checks if the cell at the specified coordinate is the central cell.
     *
     * @param coordinate
     *         coordinate of the cell to inspect
-    * @return
-    *         if the cell at the specified coordinate is the central cell
+    * @return if the cell at the specified coordinate is the central cell
     */
   def isCentralCell(coordinate: Coordinate): Boolean
 
@@ -87,8 +75,7 @@ trait ControllerHnefatafl {
     *
     * @param coordinate
     *         coordinate of the cell to inspect
-    * @return
-    *         if the cell at the specified coordinate is a corner cell
+    * @return if the cell at the specified coordinate is a corner cell
     */
   def isCornerCell(coordinate: Coordinate): Boolean
 
@@ -97,34 +84,31 @@ trait ControllerHnefatafl {
     *
     * @param coordinate
     *         coordinate of the cell to inspect
-    * @return
-    *         if the cell at the specified coordinate is a init pawn cell
+    * @return if the cell at the specified coordinate is a init pawn cell
     */
   def isPawnCell(coordinate: Coordinate): Boolean
 
   /**
     * Finds king coordinate in the current board.
     *
-    * @return
-    *         king coordinate to list.
+    * @return king coordinate to list.
     */
   def findKing(): Coordinate
 
   /**
     * Returns a previous or later state of the current board.
     *
-    * @param snapshotToShow
-    *         indicates snapshot to show.
+    * @param snapshotToShow indicates snapshot to show.
     */
-  def changeSnapshot(snapshotToShow: Snapshot): Unit
+  def changeSnapshot(snapshotToShow: Snapshot)
 
   /**
     * Undoes last move.
     */
-  def undoMove(): Unit
+  def undoMove()
 
   /**
-    * Activates next and last move.
+    * Enables next and last move.
     */
   def activeNextLast()
 
@@ -134,7 +118,7 @@ trait ControllerHnefatafl {
   def disableNextLast()
 
   /**
-    * Activates previous and first move.
+    * Enables previous and first move.
     */
   def activeFirstPrevious()
 
@@ -144,7 +128,7 @@ trait ControllerHnefatafl {
   def disableFirstPrevious()
 
   /**
-    * Activates undo move.
+    * Enables undo move.
     */
   def activeUndo()
 
@@ -165,7 +149,7 @@ object ControllerHnefatafl extends ControllerHnefatafl {
   /**
    * @inheritdoc
    */
-  override def start(): Unit = viewGame = ViewHnefatafl(this)
+  override def start(): Unit = viewGame = ViewHnefatafl()
 
   /**
    * @inheritdoc
@@ -199,11 +183,6 @@ object ControllerHnefatafl extends ControllerHnefatafl {
    * @inheritdoc
    */
   override def updateView(gameSnapshot: GameSnapshot): Unit = viewGame.update(gameSnapshot)
-
-  /**
-   * @inheritdoc
-   */
-  override def changeSnapshotView(gameSnapshot: GameSnapshot): Unit = viewGame.changeSnapshot(gameSnapshot)
 
   /**
    * @inheritdoc
