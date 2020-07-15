@@ -1,5 +1,8 @@
-package ia.evaluation_function
+package model.ia.evaluation_function
 
+/**
+ * Object providing base scores for a viking chess evaluation function.
+ */
 object ScoreProvider {
 
    def WhiteWin: Int = 1000

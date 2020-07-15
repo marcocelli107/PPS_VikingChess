@@ -1,7 +1,6 @@
-import model.game.Player.Player
 import model.game.GameSnapshot.GameSnapshotImpl
-import model.game.{BoardGame, Coordinate, GameSnapshot, GameVariant, Move, MoveGenerator, Piece, Player}
-import model.prolog.ParserProlog
+import model.game.{Coordinate, GameSnapshot, GameVariant, Move, MoveGenerator, Piece, Player}
+import model.prolog.{ParserProlog, PrologSnapshot}
 import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.junit.JUnitRunner
@@ -10,25 +9,27 @@ import org.scalatest.{FunSuite, Matchers}
 @RunWith(classOf[JUnitRunner])
 class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
-  var game: (Player, Player, BoardGame.Board, Int) = _
+  var game: PrologSnapshot = _
   var snapshot: GameSnapshot = _
 
   test("Test number of possible moves - Brandubh."){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
-    assert(MoveGenerator.gamePossibleMoves(snapshot).size == 40)
+    val initBrandubhPossibleMoves = 40
+
+    assert(MoveGenerator.gamePossibleMoves(snapshot).size == initBrandubhPossibleMoves)
   }
 
   test("Test possible moves - Brandubh."){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     val possibleMove_Brandubh = List(Move(Coordinate(1,4),Coordinate(1,5)),
       Move(Coordinate(1,4),Coordinate(1,6)), Move(Coordinate(1,4),Coordinate(1,3)),
       Move(Coordinate(1,4),Coordinate(1,2)), Move(Coordinate(2,4),Coordinate(2,5)),
       Move(Coordinate(2,4),Coordinate(2,6)), Move(Coordinate(2,4),Coordinate(2,7)),
-      Move(Coordinate(2,4),Coordinate(2,3)),  Move(Coordinate(2,4),Coordinate(2,2)),
+      Move(Coordinate(2,4),Coordinate(2,3)), Move(Coordinate(2,4),Coordinate(2,2)),
       Move(Coordinate(2,4),Coordinate(2,1)), Move(Coordinate(4,1),Coordinate(3,1)),
       Move(Coordinate(4,1),Coordinate(2,1)), Move(Coordinate(4,1),Coordinate(5,1)),
       Move(Coordinate(4,1),Coordinate(6,1)), Move(Coordinate(4,2),Coordinate(3,2)),
@@ -38,8 +39,8 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
       Move(Coordinate(4,6),Coordinate(2,6)), Move(Coordinate(4,6),Coordinate(1,6)),
       Move(Coordinate(4,6),Coordinate(5,6)), Move(Coordinate(4,6),Coordinate(6,6)),
       Move(Coordinate(4,6),Coordinate(7,6)), Move(Coordinate(4,7),Coordinate(3,7)),
-      Move (Coordinate(4,7),Coordinate(2,7)), Move(Coordinate(4,7),Coordinate(5,7)),
-      Move (Coordinate(4,7),Coordinate(6,7)), Move(Coordinate(6,4),Coordinate(6,5)),
+      Move(Coordinate(4,7),Coordinate(2,7)), Move(Coordinate(4,7),Coordinate(5,7)),
+      Move(Coordinate(4,7),Coordinate(6,7)), Move(Coordinate(6,4),Coordinate(6,5)),
       Move(Coordinate(6,4),Coordinate(6,6)), Move(Coordinate(6,4),Coordinate(6,7)),
       Move(Coordinate(6,4),Coordinate(6,3)), Move(Coordinate(6,4),Coordinate(6,2)),
       Move(Coordinate(6,4),Coordinate(6,1)), Move(Coordinate(7,4),Coordinate(7,5)),
@@ -52,22 +53,25 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test number of possible moves - Hnefatafl."){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
-    assert(MoveGenerator.gamePossibleMoves(snapshot).size == 116)
+    val initHnefataflPossibleMoves = 116
+
+    assert(MoveGenerator.gamePossibleMoves(snapshot).size == initHnefataflPossibleMoves)
   }
 
   test("Make moves from (1,4) to (4,4) - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot,Move(Coordinate(1,4), Coordinate(4,4)))
+
     assert(snapshot.getBoard.getCell(Coordinate(4,4)).getPiece.equals( Piece.BlackPawn))
   }
 
   test( "Vertical captured white test - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,6), Coordinate(6,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(6,3)))
@@ -79,7 +83,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test( "Vertical captured black test - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,6), Coordinate(4,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,5), Coordinate(3,6)))
@@ -90,7 +94,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test( "Double captured white test - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,4), Coordinate(6,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,5), Coordinate(7,6)))
@@ -108,7 +112,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test( "Triple captured white test - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(9,4), Coordinate(6,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(7,5), Coordinate(7,6)))
@@ -126,7 +130,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test( "Triple captured white test - Tawlbwrdd"){
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(4,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(4,4)))
@@ -138,7 +142,6 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,8), Coordinate(5,8)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,5), Coordinate(4,5)))
 
-
     assert(snapshot.getBoard.getCell(Coordinate(4,4)).getPiece.equals(Piece.Empty) &&
       snapshot.getBoard.getCell(Coordinate(4,6)).getPiece.equals(Piece.Empty) &&
       snapshot.getBoard.getCell(Coordinate(5,5)).getPiece.equals(Piece.Empty))
@@ -147,7 +150,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("1. Test white win in (1,1) - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(1,1)))
@@ -157,7 +160,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("2. Test white win in (1,11) - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(1,11)))
@@ -167,7 +170,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("3. Test white win in (11,11) - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(11,11)))
@@ -177,7 +180,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("4. Test white win in (11,1) - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(11,1)))
@@ -187,7 +190,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board king captured 3 sides and throne - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(4,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(2,5)))
@@ -208,7 +211,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board king far from throne, not been captured 3 sides - Tawlbwrdd"){
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,3), Coordinate(3,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,4), Coordinate(2,4)))
@@ -226,7 +229,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 11 king not captured on edge - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,1), Coordinate(2,1)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(2,5)))
@@ -243,7 +246,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 11 king on throne capture - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,8)))
@@ -276,7 +279,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 9 king on throne capture - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(3,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(2,4), Coordinate(4,3)))
@@ -310,7 +313,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 7 king on throne no captured three sides - Brandubh"){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(3,4)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,4), Coordinate(5,7)))
@@ -324,7 +327,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 9 king far from throne, vert capture - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(1,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(2,3)))
@@ -335,7 +338,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 9 king far from throne, horizontal capture - Tablut") {
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6, 9), Coordinate(8, 9)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5, 5), Coordinate(8, 8)))
@@ -346,7 +349,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 9 sneaky king not captured - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,9), Coordinate(7,9)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,5), Coordinate(6,9)))
@@ -357,7 +360,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 11 sneaky king not captured - Tawlbwrdd"){
     game = ParserProlog.createGame(GameVariant.Tawlbwrdd.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tawlbwrdd, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tawlbwrdd, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,9), Coordinate(7,9)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,6), Coordinate(6,10)))
@@ -368,7 +371,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 7 king next to throne captured three sides - Brandubh"){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(1,4), Coordinate(3,3)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,4), Coordinate(4,3)))
@@ -379,7 +382,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test king not captured on 2 sides next to throne - Brandubh") {
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(1,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,5), Coordinate(7,5)))
@@ -396,7 +399,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 7 Draw - Brandubh"){
     game = ParserProlog.createGame(GameVariant.Brandubh.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Brandubh, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(1,6)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(3,4), Coordinate(3,7)))
@@ -421,7 +424,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 9 Draw - Tablut"){
     game = ParserProlog.createGame(GameVariant.Tablut.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Tablut, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Tablut, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,2), Coordinate(7,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(5,3), Coordinate(1,3)))
@@ -456,7 +459,7 @@ class MoveGeneratorTest  extends FunSuite with MockFactory with Matchers {
 
   test("Test board 11 Draw - Hnefatafl"){
     game = ParserProlog.createGame(GameVariant.Hnefatafl.toString.toLowerCase)
-    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game._1, game._2, game._3, Option.empty, 0, 0)
+    snapshot = GameSnapshotImpl(GameVariant.Hnefatafl, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
 
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(6,2), Coordinate(3,2)))
     snapshot = MoveGenerator.makeMove(snapshot, Move(Coordinate(4,6), Coordinate(4,2)))
