@@ -17,7 +17,7 @@ object RootActor {
 
     override def updateBestMove(hashMapSonRef: immutable.HashMap[ActorRef, Move], sonRef: ActorRef): Option[Move] =
       rootUpdateBestMove(hashMapSonRef, sonRef)
-
+    
   }
 
   /** Represents minimizing root
