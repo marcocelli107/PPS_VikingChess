@@ -11,17 +11,20 @@ import model.game.Snapshot.Snapshot
 import model.game._
 import view.ViewHnefatafl
 import view.factories.{Cell, ColorProvider, GameFactory, MenuFactory}
-import view.utils.GridConstraints
+import view.utils.{GridConstraints, ScreenSize}
 import view.utils.JPanelAddAll._
 
 import scala.collection.mutable
 
+/**
+ * Represents a hnefatafl game view
+ */
 trait ViewGame {
 
   /**
-    * Initializes the game panel.
+    * Returns the initialized game panel.
     *
-    * @return panel
+    * @return the initialized game panel
     */
   def initGamePanel(): JPanel
 
@@ -31,60 +34,69 @@ trait ViewGame {
   def restoreGame()
 
   /**
-    * Gets the label of the player to move or of the winner.
+    * Returns player's to move or winner's label.
     *
-    * @return label
+    * @return player's to move or winner's label
     */
   def getLabelPlayer: JLabel
-
-  /**
-    * Updates view to current snapshot.
-    *
-    * @param gameSnapshot
-    *                 snapshot to update.
-    */
-  def update(gameSnapshot: GameSnapshot)
 
   /**
     * Shows the specified snapshot of the game.
     *
     * @param gameSnapshot
-    *                 snapshot to show.
+    *         snapshot to show.
     */
-  def updateSnapshot(gameSnapshot: GameSnapshot)
+  def update(gameSnapshot: GameSnapshot)
 
   /**
-    * Actives/Disables next and last move.
+    * Enables next and last move buttons.
     */
   def activeNextLast()
+
+  /**
+   * Disables next and last move buttons.
+   */
   def disableNextLast()
 
   /**
-    * Actives/Disables previous and first move.
+    * Enables previous and first move buttons.
     */
   def activeFirstPrevious()
+
+  /**
+   * Disables previous and first move buttons.
+   */
   def disableFirstPrevious()
 
   /**
-    * Actives/Disables undo move.
+    * Enables undo move button.
     */
   def activeUndo()
+
+  /**
+   * Disables undo move button.
+   */
   def disableUndo()
 
 }
 
+/**
+ * Represents a hnefatafl game view
+ */
 object ViewGame {
 
   def apply(gameView: ViewHnefatafl): ViewGame = ViewMatchImpl(gameView)
 
   case class ViewMatchImpl(view: ViewHnefatafl) extends ViewGame {
 
-    private val HEIGHT_DIMENSION = GameFactory.getSmallerSide * 8 / 100
-    private val SMALL_WIDTH_DIMENSION = GameFactory.getSmallerSide * 11 / 100
-    private val MEDIUM_WIDTH_DIMENSION = GameFactory.getSmallerSide * 20 / 100
-    private val BIG_WIDTH_DIMENSION = GameFactory.getSmallerSide * 30 / 100
-    private val BETWEEN_COMPONENTS_DIMENSION = GameFactory.getSmallerSide * 53 / 100
-    private val WIDTH_BETWEEN_LABELS_DIMENSION = GameFactory.getSmallerSide * 6 / 100
+    private val smallerSide = ScreenSize.getSmallerSide
+
+    private val HEIGHT_DIMENSION = smallerSide * 8 / 100
+    private val SMALL_WIDTH_DIMENSION = smallerSide * 11 / 100
+    private val MEDIUM_WIDTH_DIMENSION = smallerSide * 20 / 100
+    private val BIG_WIDTH_DIMENSION = smallerSide * 30 / 100
+    private val BETWEEN_COMPONENTS_DIMENSION = smallerSide * 53 / 100
+    private val WIDTH_BETWEEN_LABELS_DIMENSION = smallerSide * 6 / 100
 
     private var gamePanel, northPanel, subNorthPanel, southPanel, subSouthPanel, boardPanel, boardPlusColumns,
         leftPanel, rightPanel: JPanel = _
@@ -104,6 +116,9 @@ object ViewGame {
     private val winString: String = " has won"
     private val movesString: String = " moves"
 
+    /**
+     * @inheritdoc
+     */
     override def initGamePanel(): JPanel = {
       GameFactory.setVariantBoardSize(this.view.getDimension)
 
@@ -122,18 +137,23 @@ object ViewGame {
       gamePanel
     }
 
+    /**
+     * @inheritdoc
+     */
     override def restoreGame(): Unit = {
       cells.clear()
       gamePanel.removeAll()
     }
 
+    /**
+     * @inheritdoc
+     */
     override def getLabelPlayer: JLabel = playerOrWinnerLabel
 
+    /**
+     * @inheritdoc
+     */
     override def update(gameSnapshot: GameSnapshot): Unit = {
-      updateSnapshot(gameSnapshot)
-    }
-
-    override def updateSnapshot(gameSnapshot: GameSnapshot): Unit = {
       addLostPawns(gameSnapshot.getNumberCapturedBlacks, gameSnapshot.getNumberCapturedWhites)
       drawPawns(gameSnapshot.getBoard)
 
@@ -156,30 +176,48 @@ object ViewGame {
       gamePanel.validate()
     }
 
+    /**
+     * @inheritdoc
+     */
     override def activeNextLast(): Unit = {
       nextMoveButton.setEnabled(true)
       lastMoveButton.setEnabled(true)
       undoMoveButton.setEnabled(false)
     }
 
+    /**
+     * @inheritdoc
+     */
     override def disableNextLast(): Unit = {
       nextMoveButton.setEnabled(false)
       lastMoveButton.setEnabled(false)
       undoMoveButton.setEnabled(true)
     }
 
+    /**
+     * @inheritdoc
+     */
     override def activeFirstPrevious(): Unit = {
       previousMoveButton.setEnabled(true)
       firstMoveButton.setEnabled(true)
     }
 
+    /**
+     * @inheritdoc
+     */
     override def disableFirstPrevious(): Unit = {
       previousMoveButton.setEnabled(false)
       firstMoveButton.setEnabled(false)
     }
 
+    /**
+     * @inheritdoc
+     */
     override def activeUndo(): Unit = undoMoveButton.setEnabled(true)
 
+    /**
+     * @inheritdoc
+     */
     override def disableUndo(): Unit = undoMoveButton.setEnabled(false)
 
     private def setStatusGame(winner: Player, playerToMove: Player): Unit = winner match {
@@ -267,7 +305,7 @@ object ViewGame {
       GridConstraints.incrementXConstraints()
       subNorthPanel.add(playerOrWinnerLabel, GridConstraints.getLimits)
 
-      menuButton = GameFactory.createGameButton()
+      menuButton = GameFactory.createMenuButton()
       menuButton.addActionListener(_ => view.switchOverlay(gamePanel, view.getInGameMenuPanel))
 
       northPanel.addAll(Box.createRigidArea(new Dimension(SMALL_WIDTH_DIMENSION, HEIGHT_DIMENSION)))(subNorthPanel)(
@@ -370,7 +408,8 @@ object ViewGame {
     private def drawPawns(board: Board): Unit = {
       board.rows.foreach(_.foreach(c => {
         val button: JButton = cells(c.getCoordinate)
-        if (button.getComponentCount > 0) button.removeAll()
+        if (button.getComponentCount > 0)
+          button.removeAll()
         pawnChoice(c)
       }))
     }

@@ -10,84 +10,91 @@ import model.game.Level.Level
 import model.game.Player.Player
 import model.game.{GameMode, GameVariant, Level, Player}
 import view.ViewHnefatafl
-import view.factories.{GameFactory, MenuFactory}
-import view.utils.GridConstraints
+import view.factories.MenuFactory
+import view.utils.{GridConstraints, ScreenSize}
 import view.utils.JPanelAddAll._
 
+/**
+ * Represents a hnefatafl game menu view
+ */
 trait ViewMenu {
 
   /**
-    * Gets player chosen.
+    * Returns selected player.
     *
-    * @return player
+    * @return selected player
     */
   def getPlayer: Player
 
   /**
-    * Initializes the main menù.
+    * Returns the initialized main menu.
     *
-    * @return panel
+    * @return the initialized main menu
     */
   def initMenu: JPanel
 
   /**
-    * Initializes the variant menù.
+    * Returns the initialized variant selection menu.
     *
-    * @return panel
+    * @return the initialized variant selection menu
     */
   def initVariantsMenu: JPanel
 
   /**
-    * Initializes the difficult selection menù.
-    *
-    * @return panel
-    */
+   * Returns the initialized difficulty selection menu.
+   *
+   * @return the initialized difficulty selection menu
+   */
   def initDiffMenu: JPanel
 
   /**
-    * Initializes the player selection menù.
-    *
-    * @return panel
-    */
+   * Returns the initialized player selection menu.
+   *
+   * @return the initialized player selection menu
+   */
   def initPlayerChoiceMenu: JPanel
 
   /**
-    * Gets the variant chosen.
+    * Returns the selected variant.
     *
-    * @return variant
+    * @return the selected variant
     */
   def getBoardVariant: GameVariant
 
   /**
-    * Gets the game mode chosen.
-    *
-    * @return game mode
-    */
+   * Returns the selected game mode.
+   *
+   * @return the selected game mode
+   */
   def getGameMode: GameMode
 
   /**
-    * Gets the level of difficult chosen.
-    *
-    * @return level
-    */
+   * Returns the selected difficulty.
+   *
+   * @return the selected difficulty
+   */
   def getDifficulty: Level
 
   /**
-    * Initializes the game menù.
-    *
-    * @return panel
-    */
+   * Returns the initialized game menu.
+   *
+   * @return the initialized game menu
+   */
   def initInGameMenu: JPanel
 }
 
+/**
+ * Represents a hnefatafl game menu view
+ */
 object ViewMenu {
 
   def apply(gameView: ViewHnefatafl): ViewMenu = ViewMenuImpl(gameView)
 
   case class ViewMenuImpl(view: ViewHnefatafl) extends ViewMenu {
 
-    private val DIMENSION_PANEL: Dimension =
-      new Dimension(GameFactory.getSmallerSide, GameFactory.getSmallerSide * 2 / 100)
+    private val smallerSide = ScreenSize.getSmallerSide
+
+    private val DIMENSION_PANEL: Dimension = new Dimension(smallerSide, smallerSide * 2 / 100)
     private var menuPanel, variantsPanel, diffPanel, playerChoicePanel, inGameMenuPanel,
                 panelVariantHnefatafl, panelVariantTawlbwrdd, panelVariantTablut, panelVariantBrandubh,
                 panelLevelNewcomer, panelLevelStandard, panelLevelAdvanced,
@@ -100,21 +107,27 @@ object ViewMenu {
     private var levelIA: Level = _
     private var chosenPlayer: Player = _
 
-    val chooseModeString: String = "Choose Mode: "
-    val exitString: String = "Exit"
-    val chooseVariantString: String = "Choose Game Variant: "
-    val previousMenuString: String = "Previous Menu"
-    val chooseLevelString: String = "Choose Difficulty: "
-    val choosePlayerString: String = "Choose Player: "
-    val chooseOptionString: String = "Choose Option: "
-    val returnToGameString: String = "Return to Game"
-    val restartMatchString: String = "Restart Match"
-    val leaveMatchString: String = "Leave Match"
-    val quitGameString: String = "Quit Game"
-    val pawnButtonString: String = " pawns"
+    private val chooseModeString: String = "Choose Mode: "
+    private val exitString: String = "Exit"
+    private val chooseVariantString: String = "Choose Game Variant: "
+    private val previousMenuString: String = "Previous Menu"
+    private val chooseLevelString: String = "Choose Difficulty: "
+    private val choosePlayerString: String = "Choose Player: "
+    private val chooseOptionString: String = "Choose Option: "
+    private val returnToGameString: String = "Return to Game"
+    private val restartMatchString: String = "Restart Match"
+    private val leaveMatchString: String = "Leave Match"
+    private val quitGameString: String = "Quit Game"
+    private val pawnButtonString: String = " pawns"
 
+    /**
+     * @inheritdoc
+     */
     override def getPlayer: Player = chosenPlayer
 
+    /**
+     * @inheritdoc
+     */
     override def initMenu: JPanel = {
       menuPanel = MenuFactory.createMenuPanel(chooseModeString)
       pveButton = MenuFactory.createMainButton(GameMode.PVE.toString)
@@ -127,6 +140,9 @@ object ViewMenu {
       menuPanel
     }
 
+    /**
+     * @inheritdoc
+     */
     private def initMenuButton(p: JPanel, l: JLabel, b: JButton, al: ActionListener): Unit = {
       GridConstraints.setAnchor(GridBagConstraints.LINE_START)
       GridConstraints.resetXConstraints()
@@ -136,6 +152,9 @@ object ViewMenu {
       p.add(b, GridConstraints.getLimits)
     }
 
+    /**
+     * @inheritdoc
+     */
     override def initVariantsMenu: JPanel = {
       variantsPanel = MenuFactory.createMenuPanel(chooseVariantString)
 
@@ -169,6 +188,9 @@ object ViewMenu {
     private def variantButtonString(variant: GameVariant): String =
       variant.toString + " (" + variant.boardSize + "x" + variant.boardSize + ")"
 
+    /**
+     * @inheritdoc
+     */
     override def initDiffMenu: JPanel = {
       diffPanel = MenuFactory.createMenuPanel(chooseLevelString)
 
@@ -191,6 +213,9 @@ object ViewMenu {
       diffPanel
     }
 
+    /**
+     * @inheritdoc
+     */
     override def initPlayerChoiceMenu: JPanel = {
       playerChoicePanel = MenuFactory.createMenuPanel(choosePlayerString)
 
@@ -202,7 +227,7 @@ object ViewMenu {
       initMenuButton(panelChoseBlack, MenuFactory.createLabelBlackPlayer,
         MenuFactory.createPlayerButton(playerButtonString(Player.Black)), selectPlayerListener(Player.Black))
 
-      initPreviousMenuButton(playerChoicePanel, variantsPanel)
+      initPreviousMenuButton(playerChoicePanel, diffPanel)
 
       playerChoicePanel.addAll(Box.createRigidArea(DIMENSION_PANEL))(panelChoseWhite)(panelChoseBlack)(returnToMenu)(
         Box.createVerticalGlue)
@@ -220,12 +245,24 @@ object ViewMenu {
       returnToMenu.addActionListener((_: ActionEvent) => view.switchOverlay(previousPanel, nextPanel))
     }
 
+    /**
+     * @inheritdoc
+     */
     override def getBoardVariant: GameVariant = boardVariant
 
+    /**
+     * @inheritdoc
+     */
     override def getGameMode: GameMode = gameMode
 
+    /**
+     * @inheritdoc
+     */
     override def getDifficulty: Level = levelIA
 
+    /**
+     * @inheritdoc
+     */
     override def initInGameMenu: JPanel = {
       inGameMenuPanel = MenuFactory.createMenuPanel(chooseOptionString)
       returnToGame = MenuFactory.createMainButton(returnToGameString)
