@@ -2,7 +2,6 @@ package view.factories
 
 import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent}
-import java.io.File
 
 import view.utils.ScreenSize
 
@@ -201,9 +200,9 @@ trait GameFactory {
 object GameFactory extends GameFactory {
 
   private val smallerSide: Int = ScreenSize.getSmallerSide
-  private val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
+  private val font: Font = FontProvider.hnefataflFont
   private val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
-  ge.registerFont(f)
+  ge.registerFont(font)
 
   private var cellDimension = 0
   private val variantBoardSizeMultiplier: Double = 0.8
@@ -212,25 +211,25 @@ object GameFactory extends GameFactory {
   private val basicPawnSizeMultiplier: Double = 1
   private val capturedPawnSizeMultiplier: Double = 0.5
 
-  private val centerCellIconPath: String = "src/main/resources/images/iconThrone.png"
-  private val cornerCellIconPath: String = "src/main/resources/images/iconCellWin.png"
-  private val menuButtonPath: String = "src/main/resources/images/hamburgerMenu.png"
-  private val menuButtonHoverPath: String = "src/main/resources/images/hamburgerMenuHover.png"
+  private val centerCellIconPath: String = "/images/iconThrone.png"
+  private val cornerCellIconPath: String = "/images/iconCellWin.png"
+  private val menuButtonPath: String = "/images/hamburgerMenu.png"
+  private val menuButtonHoverPath: String = "/images/hamburgerMenuHover.png"
   private val menuButtonHoverText: String = "Menu"
-  private val firstMoveButtonPath: String = "src/main/resources/images/iconFirstMove.png"
-  private val firstMoveButtonHoverPath: String = "src/main/resources/images/iconFirstMoveHover.png"
+  private val firstMoveButtonPath: String = "/images/iconFirstMove.png"
+  private val firstMoveButtonHoverPath: String = "/images/iconFirstMoveHover.png"
   private val firstMoveButtonHoverText: String = "Show First Move"
-  private val previousMoveButtonPath: String = "src/main/resources/images/iconPreviousMove.png"
-  private val previousMoveButtonHoverPath: String = "src/main/resources/images/iconPreviousMoveHover.png"
+  private val previousMoveButtonPath: String = "/images/iconPreviousMove.png"
+  private val previousMoveButtonHoverPath: String = "/images/iconPreviousMoveHover.png"
   private val previousMoveButtonHoverText: String = "Show Previous Move"
-  private val nextMoveButtonPath: String = "src/main/resources/images/iconNextMove.png"
-  private val nextMoveButtonHoverPath: String = "src/main/resources/images/iconNextMoveHover.png"
+  private val nextMoveButtonPath: String = "/images/iconNextMove.png"
+  private val nextMoveButtonHoverPath: String = "/images/iconNextMoveHover.png"
   private val nextMoveButtonHoverText: String = "Show Next Move"
-  private val lastMoveButtonPath: String = "src/main/resources/images/iconLastMove.png"
-  private val lastMoveButtonHoverPath: String = "src/main/resources/images/iconLastMoveHover.png"
+  private val lastMoveButtonPath: String = "/images/iconLastMove.png"
+  private val lastMoveButtonHoverPath: String = "/images/iconLastMoveHover.png"
   private val lastMoveButtonHoverText: String = "Show Last Move"
-  private val undoMoveButtonPath: String = "src/main/resources/images/iconUndoMove.png"
-  private val undoMoveButtonHoverPath: String = "src/main/resources/images/iconUndoMoveHover.png"
+  private val undoMoveButtonPath: String = "/images/iconUndoMove.png"
+  private val undoMoveButtonHoverPath: String = "/images/iconUndoMoveHover.png"
   private val undoMoveButtonHoverText: String = "Go Back"
 
   /**
@@ -457,7 +456,7 @@ object GameFactory extends GameFactory {
   private class IconCell(private var defaultColor: Color, private var iconPath: String) extends BasicCell(defaultColor) {
     private val IMG_DIMENSION = cellDimension * 70 / 100
 
-    private var iconCell = new ImageIcon(iconPath)
+    private var iconCell = new ImageIcon(ResourceLoader.loadImage(iconPath))
     private var image = iconCell.getImage
 
     image = image.getScaledInstance(IMG_DIMENSION, IMG_DIMENSION, Image.SCALE_SMOOTH)
@@ -525,8 +524,8 @@ object GameFactory extends GameFactory {
   }
 
   private class GameButton(private val iconPath: String, private val hoverIconPath: String, private val hoverText: String, private val scale: Int) extends JButton {
-    private var imageIcon = new ImageIcon(iconPath)
-    private var hoverImageIcon = new ImageIcon(hoverIconPath)
+    private var imageIcon = new ImageIcon(ResourceLoader.loadImage(iconPath))
+    private var hoverImageIcon = new ImageIcon(ResourceLoader.loadImage(hoverIconPath))
     private var image = imageIcon.getImage
     scaleImage()
     imageIcon = new ImageIcon(image)
@@ -609,7 +608,7 @@ object GameFactory extends GameFactory {
 
   private class LabelPlayer_Winner extends JLabel {
     private val DIMENSION_FONT: Int = smallerSide * 3 / 100
-    setFont(new Font(f.getFontName, Font.BOLD, DIMENSION_FONT))
+    setFont(new Font(font.getFontName, Font.BOLD, DIMENSION_FONT))
     setForeground(ColorProvider.getPossibleMovesColor)
   }
 
