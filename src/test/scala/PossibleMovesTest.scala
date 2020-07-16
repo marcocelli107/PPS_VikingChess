@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class PossibleMovesTest extends FunSuite {
   val prolog: Prolog = new Prolog()
-  val theory: Theory = new Theory(new FileInputStream(ParserProlog.THEORY))
+  val theory: Theory = new Theory(getClass.getResourceAsStream(ParserProlog.THEORY))
   var goal: SolveInfo = _
   prolog.setTheory(theory)
 

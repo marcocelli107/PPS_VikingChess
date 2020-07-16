@@ -1,12 +1,13 @@
 package model.prolog
 
-import java.io.FileInputStream
+import java.io.{BufferedReader, FileInputStream}
 
 import alice.tuprolog.{Prolog, SolveInfo, Struct, Term, Theory}
 import model.game.Player.Player
 import model.game.BoardGame.Board.BoardImpl
 import model.game.BoardGame.{Board, BoardCell}
 import model.game.{Coordinate, Move, Piece, Player}
+import view.factories.ResourceLoader
 
 /**
  * A prolog viking chess parser
@@ -102,7 +103,7 @@ object ParserProlog extends ParserPrologTrait {
 
   import ImplicitParser._
 
-  val THEORY: String = "src/main/scala/model/prolog/gameRules.pl"
+  val THEORY: String = "/prolog/gameRules.pl"
 
   private val engine: Prolog = new Prolog()
   private var goal: SolveInfo = _
@@ -125,7 +126,7 @@ object ParserProlog extends ParserPrologTrait {
     val UndoMove: Value = Value("undoMove")
   }
 
-  engine.setTheory(new Theory(new FileInputStream(ParserProlog.THEORY)))
+  engine.setTheory(new Theory(getClass.getResourceAsStream(ParserProlog.THEORY)))
 
   /**
    * @inheritdoc
