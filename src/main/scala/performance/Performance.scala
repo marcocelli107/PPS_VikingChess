@@ -66,14 +66,11 @@ case class Performance(){
       snapshot = GameSnapshotImpl(variant, game.playerToMove, game.winner, game.board, Option.empty, 0, 0)
       system = ActorSystem()
 
-      val refIA = Option(system.actorOf(Props(ArtificialIntelligence(null, level))))
-      refIA.get ! PerformFindBestMoveMsg(snapshot, variant,level)
+      val refIA = system.actorOf(Props(ArtificialIntelligence(null, level)))
+      refIA ! PerformFindBestMoveMsg(snapshot, variant,level)
       Await.ready(system.whenTerminated, Duration(1, TimeUnit.MINUTES))
     }
   }
-
-
-
 }
 
 object StartPerformance extends App{
