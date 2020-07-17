@@ -1,6 +1,9 @@
 package model.ia.messages
 
+import model.game.GameVariant.GameVariant
+import model.game.Level.Level
 import model.game.{GameSnapshot, Move}
+
 
 /**
  * Actor messages
@@ -79,5 +82,17 @@ object Messages {
    *        computed score
    */
   case class ValueSonMsg(score: Int)
+
+  /**
+   * Message sent from Performance class for start test about IA response time
+   *
+   * @param gameSnapshot
+   *          game snapshot
+   * @param variant
+   *          game variant
+   * @param level
+   *          game level
+   */
+  case class PerformFindBestMoveMsg(gameSnapshot: GameSnapshot, variant: GameVariant, level: Level)
 
 }
