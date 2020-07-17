@@ -1,12 +1,13 @@
 package model.ia.minimax
 
 import akka.actor.{Actor, PoisonPill, Props}
-import model.ia.messages.Messages._
-import model.ia.minimax.RootActor.{MaxRootActor, MinRootActor}
+import model._
+import model.game.GameVariant.GameVariant
 import model.game.Level.Level
 import model.game.Player.Player
-import model._
 import model.game.{GameSnapshot, Move, Player}
+import model.ia.messages.Messages._
+import model.ia.minimax.RootActor.{MaxRootActor, MinRootActor}
 
 object ArtificialIntelligence {
   def apply(model: ModelHnefatafl, levelIA: Level): ArtificialIntelligence = new ArtificialIntelligence(model, levelIA)
@@ -21,10 +22,23 @@ case class ArtificialIntelligence(model: ModelHnefatafl, levelIA: Level) extends
    * @inheritdoc
    */
   override def receive: Receive = {
-    case event: FindBestMoveMsg => findBestMove(event.gameSnapshot);
+    case event: FindBestMoveMsg => findBestMove(event.gameSnapshot, activePerformMode = false);
+    case event: PerformFindBestMoveMsg => findBestMove(event.gameSnapshot, activePerformMode = true)
+                                          context.become(returnBestMovePerformance(event.variant, event.level,System.currentTimeMillis()))
     case event: ReturnBestMoveMsg => model.iaBestMove(event.bestMove); stopSender()
     case _: CloseMsg => context.become(dyingBehaviour)
   }
+
+  /**
+   * Behaviour of the IA actor which test performance on find best move.
+   */
+   def returnBestMovePerformance(variant: GameVariant, level: Level, startTime: Long): Receive = {
+     case _: ReturnBestMoveMsg =>
+       println("Variant: " + variant.toString +
+                " Level :" + level.toString +
+                " Compute Time: " + ( System.currentTimeMillis() - startTime ))
+       context.system.terminate()
+   }
 
   /**
     * Terminal behaviour of the IA actor
@@ -64,7 +78,7 @@ case class ArtificialIntelligence(model: ModelHnefatafl, levelIA: Level) extends
 
   private def stopSender(): Unit = if (!context.sender().equals(self)) context.stop(sender())
 
-  private def findBestMove(gameSnapshot: GameSnapshot): Unit = {
+  private def findBestMove(gameSnapshot: GameSnapshot, activePerformMode: Boolean ): Unit = {
     var sonActor: Props = Props.empty
     if (iaIsBlack(gameSnapshot.getPlayerToMove))
       sonActor = Props(MinRootActor(levelIA))
@@ -73,8 +87,11 @@ case class ArtificialIntelligence(model: ModelHnefatafl, levelIA: Level) extends
     val refSonActor = context.actorOf(sonActor)
     refSonActor ! InitMsg(gameSnapshot.getCopy, levelIA.depth, Option.empty)
 
-    context.become(waitingBehaviour)
-    context.actorOf(Props(TimeActor())) ! StartMsg()
+    if(!activePerformMode) {
+      context.become(waitingBehaviour)
+      context.actorOf(Props(TimeActor())) ! StartMsg()
+    }
+
   }
 
   private def iaIsBlack(iaPlayer: Player): Boolean = iaPlayer.equals(Player.Black)
