@@ -3,9 +3,7 @@ package view.factories
 import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.image.BufferedImage
-import java.io.File
 
-import javax.imageio.ImageIO
 import javax.swing._
 import view.utils.ScreenSize
 
@@ -159,22 +157,22 @@ object MenuFactory extends MenuFactory {
   private val FRAME_TITLE = "Viking Chess - Hnefatafl"
   private val HEIGHT_MENU_COMPONENT_DIMENSION: Int = smallerSide * 8 / 100
 
-  private val f: Font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/NorseBold-2Kge.otf"))
+  private val font: Font = FontProvider.hnefataflFont
   private val ge: GraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
-  ge.registerFont(f)
+  ge.registerFont(font)
 
-  private val iconAppPath: String = "src/main/resources/images/iconApp.png"
-  private val panelBackgroundPath: String = "src/main/resources/images/Cornice.png"
-  private val logoPath: String = "src/main/resources/images/logo.png"
-  private val boardHnefataflIconPath: String = "src/main/resources/images/iconBoardHnefatafl.png"
-  private val boardTawlbwrddIconPath: String = "src/main/resources/images/iconBoardTawlbwrdd.png"
-  private val boardTablutIconPath: String = "src/main/resources/images/iconBoardTablut.png"
-  private val boardBrandubhIconPath: String = "src/main/resources/images/iconBoardBrandubh.png"
-  private val newcomerIconPath: String = "src/main/resources/images/iconNewcomer.png"
-  private val standardIconPath: String = "src/main/resources/images/iconStandard.png"
-  private val advancedIconPath: String = "src/main/resources/images/iconAdvanced.png"
-  private val whitePlayerIconPath: String = "src/main/resources/images/iconWhitePlayer.png"
-  private val blackPlayerIconPath: String = "src/main/resources/images/iconBlackPlayer.png"
+  private val iconAppPath: String = "/images/iconApp.png"
+  private val panelBackgroundPath: String = "/images/Cornice.png"
+  private val logoPath: String = "/images/logo.png"
+  private val boardHnefataflIconPath: String = "/images/iconBoardHnefatafl.png"
+  private val boardTawlbwrddIconPath: String = "/images/iconBoardTawlbwrdd.png"
+  private val boardTablutIconPath: String = "/images/iconBoardTablut.png"
+  private val boardBrandubhIconPath: String = "/images/iconBoardBrandubh.png"
+  private val newcomerIconPath: String = "/images/iconNewcomer.png"
+  private val standardIconPath: String = "/images/iconStandard.png"
+  private val advancedIconPath: String = "/images/iconAdvanced.png"
+  private val whitePlayerIconPath: String = "/images/iconWhitePlayer.png"
+  private val blackPlayerIconPath: String = "/images/iconBlackPlayer.png"
 
   /**
    * @inheritdoc
@@ -267,7 +265,7 @@ object MenuFactory extends MenuFactory {
   override def createLabelBlackPlayer: JLabel = new IconLabel(blackPlayerIconPath)
 
   private class Frame extends JFrame {
-    private val iconApp = new ImageIcon(iconAppPath)
+    private val iconApp = new ImageIcon(ResourceLoader.loadImage(iconAppPath))
 
     setTitle(FRAME_TITLE)
     setIconImage(iconApp.getImage)
@@ -280,9 +278,9 @@ object MenuFactory extends MenuFactory {
   private class MenuPanel(string: String) extends JPanel {
     private val menuLabel = new JLabel()
     private val chooseLabel = new JLabel()
-    private val image = ImageIO.read(new File(panelBackgroundPath))
+    private val image = ResourceLoader.loadImage(panelBackgroundPath)
     private val imageScaled = image.getScaledInstance(smallerSide, smallerSide * 98 / 100, Image.SCALE_DEFAULT)
-    private val img = new ImageIcon(logoPath)
+    private val img = new ImageIcon(ResourceLoader.loadImage(logoPath))
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
     menuLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 30 / 100))
@@ -290,7 +288,7 @@ object MenuFactory extends MenuFactory {
     menuLabel.setIcon(img)
     chooseLabel.setPreferredSize(new Dimension(smallerSide, smallerSide * 6 / 100))
     chooseLabel.setAlignmentX(Component.CENTER_ALIGNMENT)
-    chooseLabel.setFont(new Font(f.getFontName, Font.BOLD, smallerSide * 6 / 100))
+    chooseLabel.setFont(new Font(font.getFontName, Font.BOLD, smallerSide * 6 / 100))
     chooseLabel.setText(string)
     chooseLabel.setForeground(ColorProvider.getWhiteColor)
     add(Box.createRigidArea(new Dimension(smallerSide, smallerSide * 10 / 100)))
@@ -323,7 +321,7 @@ object MenuFactory extends MenuFactory {
     setContentAreaFilled(false)
     setBorderPainted(false)
 
-    setFont(new Font(f.getFontName, Font.BOLD, FONT_DIMENSION))
+    setFont(new Font(font.getFontName, Font.BOLD, FONT_DIMENSION))
     setForeground(ColorProvider.getWhiteColor)
     setBorderPainted(false)
 
@@ -350,7 +348,7 @@ object MenuFactory extends MenuFactory {
     private val ICON_DIMENSION: Int = smallerSide * 6 / 100
     this.setPreferredSize(new Dimension(ICON_DIMENSION, ICON_DIMENSION))
     this.setMaximumSize(getPreferredSize)
-    val img: BufferedImage = ImageIO.read(new File(pathIcon))
+    val img: BufferedImage = ResourceLoader.loadImage(pathIcon)
     val dimg: Image = img.getScaledInstance(ICON_DIMENSION, ICON_DIMENSION, Image.SCALE_SMOOTH)
     val imageIcon = new ImageIcon(dimg)
     this.setIcon(imageIcon)
