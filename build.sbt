@@ -13,10 +13,10 @@ lazy val root = (project in file("."))
       "com.novocode" % "junit-interface" % "0.11" % Test,
       "org.scalamock" %% "scalamock" % "4.4.0" % Test,
       "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-      "org.seleniumhq.selenium" % "selenium-java" % "2.35.0" % Test,
       "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
       "it.unibo.alice.tuprolog" % "tuprolog" % "3.1" ,
-      "com.typesafe.akka" %% "akka-actor" % "2.6.6"
+      "com.typesafe.akka" %% "akka-actor" % "2.6.6",
+      "org.scala-lang.modules" %% "scala-async" % "0.10.0"
 
     ),
     crossPaths := false,
