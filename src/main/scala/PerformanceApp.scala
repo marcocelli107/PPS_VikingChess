@@ -1,5 +1,3 @@
-package performance
-
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ActorSystem, Props}
@@ -15,8 +13,7 @@ import model.prolog.{ParserProlog, PrologSnapshot}
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-
-case class Performance(){
+object PerformanceApp extends App {
 
   val newcomer: Level = Level.Newcomer
   val standard: Level = Level.Standard
@@ -35,11 +32,11 @@ case class Performance(){
   var game: PrologSnapshot = _
   var snapshot: GameSnapshot = _
 
-  /**
+   /**
    * IA performance sequential test
    *
    * */
-  def sequentialMiniMaxPerformance(): Unit = {
+    println("Sequential")
     for (variant <- variantList;
          level <- levelList) {
 
@@ -51,14 +48,15 @@ case class Performance(){
       miniMaxImpl.findBestMove(snapshot)
       val finalTime: Long = System.currentTimeMillis() - startTime
 
-      println("Variant: " + variant.toString + " Level :" + level.toString + " Compute Time: " + finalTime)
+      println("Variant: " + variant.toString + " Level: " + level.toString + " Compute Time: " + finalTime)
     }
-  }
-  /**
-   * IA performance parallel test
-   *
-   * */
-  def parallelMiniMaxPerformance(): Unit =  {
+
+    /**
+     * IA performance parallel test
+     *
+     * */
+    println("")
+    println("Parallel")
     for (variant <- variantList;
          level <- levelList) {
 
@@ -70,22 +68,6 @@ case class Performance(){
       refIA ! PerformFindBestMoveMsg(snapshot, variant,level)
       Await.ready(system.whenTerminated, Duration(1, TimeUnit.MINUTES))
     }
-  }
-}
 
-object StartPerformance extends App{
-
-  val performance: Performance = Performance()
-
-  println("Sequential")
-  performance.sequentialMiniMaxPerformance()
-  println("")
-  println("")
-  println("Parallel")
-  performance.parallelMiniMaxPerformance()
 
 }
-
-
-
-
