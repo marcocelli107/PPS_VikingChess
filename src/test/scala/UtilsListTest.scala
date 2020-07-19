@@ -1,7 +1,7 @@
 import java.io.FileInputStream
 
 import alice.tuprolog.{Prolog, SolveInfo, Theory}
-import model.prolog.ParserProlog
+import model.prolog.{GameRules, ParserProlog}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class UtilsListTest extends FunSuite {
   val prolog: Prolog = new Prolog()
-  val theory: Theory = new Theory(getClass.getResourceAsStream(ParserProlog.THEORY))
+  val theory: Theory = new Theory(GameRules.theory())
   var goal: SolveInfo = _
   prolog.setTheory(theory)
 
