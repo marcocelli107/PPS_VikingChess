@@ -103,8 +103,6 @@ object ParserProlog extends ParserPrologTrait {
 
   import ImplicitParser._
 
-  val THEORY: String = "/prolog/gameRules.pl"
-
   private val engine: Prolog = new Prolog()
   private var goal: SolveInfo = _
   private var list: Term = new Struct()
@@ -126,7 +124,7 @@ object ParserProlog extends ParserPrologTrait {
     val UndoMove: Value = Value("undoMove")
   }
 
-  engine.setTheory(new Theory(getClass.getResourceAsStream(ParserProlog.THEORY)))
+  engine.setTheory(new Theory(GameRules.theory()))
 
   /**
    * @inheritdoc
