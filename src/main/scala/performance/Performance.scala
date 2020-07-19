@@ -72,8 +72,6 @@ case class Performance(){
     }
   }
 
-
-
 }
 
 object StartPerformance extends App{
